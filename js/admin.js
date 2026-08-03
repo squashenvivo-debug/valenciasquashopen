@@ -264,6 +264,76 @@ function downloadAdminBackup() {
     setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
+async function buildErrorReportPayload() {
+    const origin = window.location.origin;
+    const basePath = window.location.pathname.includes("/valenciasquashopen/") ? "/valenciasquashopen" : "";
+    const resourceChecks = [
+        "data/config.json",
+        "data/schedule.json",
+        "data/draw-bracket.json",
+        "data/translations/players.json",
+        "data/translations/news.json",
+        "config.js",
+        "js/runtime-optimizations.js?v=20260803-1",
+        "js/app.js?v=20260726-11"
+    ];
+
+    const checks = [];
+    for (const path of resourceChecks) {
+        const normalized = path.replace(/^\/+/, "");
+        const url = `${origin}${basePath}/${normalized}`;
+        try {
+            const response = await fetch(url, { cache: "no-store" });
+            checks.push({
+                path: normalized,
+                url,
+                status: response.status,
+                contentType: response.headers.get("content-type") || ""
+            });
+        } catch (error) {
+            checks.push({
+                path: normalized,
+                url,
+                status: null,
+                error: String(error?.message || error || "network-error")
+            });
+        }
+    }
+
+    return {
+        exportedAt: new Date().toISOString(),
+        location: {
+            href: window.location.href,
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            userAgent: navigator.userAgent
+        },
+        adminErrors: getAdminErrorLog(),
+        runtimeErrors: getRuntimeErrorLog(),
+        resourceChecks: checks
+    };
+}
+
+async function downloadAdminErrorReport() {
+    const payload = await buildErrorReportPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const fileName = `psa-error-log-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
+
+    if (window.PSAOptimizations?.downloadBlob) {
+        window.PSAOptimizations.downloadBlob(fileName, blob);
+        return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
 function clearOptimizationCaches() {
     const clearedFetchEntries = window.PSAOptimizations?.clearFetchCache?.() || 0;
     try {
@@ -682,6 +752,25 @@ async function initAdminDashboard() {
             downloadAdminBackup();
         });
         downloadBackupBtn.dataset.bound = "1";
+    }
+
+    const downloadErrorLogBtn = document.getElementById("dashboardDownloadErrorLog");
+    if (downloadErrorLogBtn && !downloadErrorLogBtn.dataset.bound) {
+        downloadErrorLogBtn.addEventListener("click", async () => {
+            const statsSummary = document.getElementById("dashboardStatsSummary");
+            try {
+                await downloadAdminErrorReport();
+                if (statsSummary) {
+                    statsSummary.textContent = "Registro de errores descargado correctamente.";
+                }
+            } catch (error) {
+                recordAdminError(error?.message || "No se pudo descargar el registro de errores", "dashboard");
+                if (statsSummary) {
+                    statsSummary.textContent = "Error descargando registro. Revisa consola o vuelve a intentar.";
+                }
+            }
+        });
+        downloadErrorLogBtn.dataset.bound = "1";
     }
 
     const clearCachesBtn = document.getElementById("dashboardClearCaches");
