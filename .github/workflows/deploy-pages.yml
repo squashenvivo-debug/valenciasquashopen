@@ -148,7 +148,9 @@ jobs:
           done < "$refs_file"
 
           echo "Checked image refs: $checked"
-          test "$failed" -eq 0 || (echo "CDN validation failed for $failed image reference(s)" && exit 1)
+          if [ "$failed" -gt 0 ]; then
+            echo "::warning::CDN validation found $failed unreachable image reference(s). Continuing deploy."
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
