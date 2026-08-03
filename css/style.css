@@ -99,14 +99,84 @@ main{
 #quick-access{ order:2; }
 #tournament{ order:3; }
 #players{ order:4; }
-#schedule{ order:5; }
-#draw{ order:6; }
-#live{ order:7; }
-#news{ order:8; }
-#gallery{ order:9; }
-#venue{ order:10; }
-#discover{ order:11; }
-#sponsors{ order:12; }
+#programming{ order:5; }
+#schedule{ order:6; }
+#draw{ order:7; }
+#live{ order:8; }
+#news{ order:9; }
+#gallery{ order:10; }
+#venue{ order:11; }
+#discover{ order:12; }
+#sponsors{ order:13; }
+
+#programming{
+    padding:120px 0;
+    background:
+        radial-gradient(1200px 500px at 10% -20%, rgba(199,140,50,.24), transparent 55%),
+        linear-gradient(170deg, #0c1e2f, #081725 62%, #0a1b2a);
+}
+
+.programming-list{
+    display:grid;
+    gap:20px;
+}
+
+.programming-card{
+    border:1px solid rgba(199,140,50,.4);
+    background:linear-gradient(160deg, rgba(16,36,54,.95), rgba(8,20,31,.95));
+    box-shadow:0 20px 44px rgba(0,0,0,.3);
+    border-radius:20px;
+    padding:28px 30px;
+    position:relative;
+    overflow:hidden;
+}
+
+.programming-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:7px;
+    background:linear-gradient(180deg, #f2c67d, #c78c32);
+}
+
+.programming-date{
+    margin:0 0 8px;
+    color:#f3d49b;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:700;
+    font-size:1rem;
+}
+
+.programming-title{
+    margin:0;
+    font-size:2rem;
+    line-height:1.1;
+    letter-spacing:.01em;
+}
+
+.programming-subtitle{
+    margin:10px 0 0;
+    color:#d6e4ef;
+    font-size:1.08rem;
+    line-height:1.45;
+}
+
+@media (max-width:700px){
+    .programming-card{
+        padding:22px 20px 22px 22px;
+    }
+
+    .programming-title{
+        font-size:1.55rem;
+    }
+
+    .programming-date{
+        font-size:.9rem;
+    }
+}
 
 /* ==========================================================
 BUTTONS

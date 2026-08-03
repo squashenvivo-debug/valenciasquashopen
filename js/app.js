@@ -15,6 +15,7 @@ const GALLERY_COLLECTION_KEY = "galleryCollections";
 const NEWS_COLLECTION_KEY = "newsCollection";
 const SPONSORS_COLLECTION_KEY = "sponsorsCollection";
 const PLAYERS_COLLECTION_KEY = "playersCollection";
+const PROGRAMMING_COLLECTION_KEY = "eventProgrammingCollection";
 const HERO_SETTINGS_KEY = "heroSettings";
 const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
@@ -29,6 +30,7 @@ const CLOUD_PUBLIC_KEYS = [
     NEWS_COLLECTION_KEY,
     SPONSORS_COLLECTION_KEY,
     PLAYERS_COLLECTION_KEY,
+    PROGRAMMING_COLLECTION_KEY,
     HERO_SETTINGS_KEY,
     TOURNAMENT_MODE_KEY,
     TOURNAMENT_API_URL_KEY,
@@ -81,6 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadPlayers(),
         loadNews(),
         loadSchedule(),
+        loadProgramming(),
         loadDraws()
     ]);
     loadTournamentCenter();
@@ -92,6 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initLiveStream();
         loadHomeGallery();
         loadNews();
+        loadProgramming();
     });
 });
 
@@ -598,6 +602,101 @@ async function loadSchedule() {
         list.innerHTML = "";
     }
 
+}
+
+function getProgrammingDefaultCollection() {
+    return [
+        {
+            id: "program_demo_1",
+            dateTime: "Lunes 11 agosto · 20:00",
+            title: {
+                es: "Presentación oficial",
+                va: "Presentació oficial",
+                en: "Official presentation",
+                fr: "Présentation officielle"
+            },
+            subtitle: {
+                es: "Bienvenida del PSA Valencia Open",
+                va: "Benvinguda del PSA Valencia Open",
+                en: "Welcome to PSA Valencia Open",
+                fr: "Bienvenue au PSA Valencia Open"
+            },
+            order: 1
+        },
+        {
+            id: "program_demo_2",
+            dateTime: "Martes 12 agosto · 11:00",
+            title: {
+                es: "Inicio primeras rondas",
+                va: "Inici primeres rondes",
+                en: "Start of first rounds",
+                fr: "Début des premiers tours"
+            },
+            subtitle: {
+                es: "Apertura de pistas y primeros enfrentamientos",
+                va: "Obertura de pistes i primers enfrontaments",
+                en: "Courts open and first matchups",
+                fr: "Ouverture des courts et premiers affrontements"
+            },
+            order: 2
+        }
+    ];
+}
+
+function normalizeProgrammingItem(item, index = 0) {
+    return {
+        id: String(item?.id || `program_${index}`).trim(),
+        dateTime: String(item?.dateTime || item?.date || "").trim(),
+        title: normalizeLocalizedText(item?.title || ""),
+        subtitle: normalizeLocalizedText(item?.subtitle || ""),
+        order: Number(item?.order) || index + 1
+    };
+}
+
+function readProgrammingCollection() {
+    try {
+        const raw = localStorage.getItem(PROGRAMMING_COLLECTION_KEY);
+        if (!raw) return getProgrammingDefaultCollection();
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+            return getProgrammingDefaultCollection();
+        }
+
+        return parsed
+            .map((item, index) => normalizeProgrammingItem(item, index))
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+    } catch (error) {
+        return getProgrammingDefaultCollection();
+    }
+}
+
+async function loadProgramming() {
+    const list = document.getElementById("programmingList");
+    if (!list) return;
+
+    try {
+        const lang = getCurrentLanguage();
+        const collection = readProgrammingCollection();
+
+        list.innerHTML = collection.map((item) => {
+            const title = getLocalizedText(item.title, lang);
+            const subtitle = getLocalizedText(item.subtitle, lang);
+            const dateTime = escapeHtml(item.dateTime || "");
+
+            return `
+                <article class="programming-card">
+                    <p class="programming-date">${dateTime}</p>
+                    <h3 class="programming-title">${escapeHtml(title)}</h3>
+                    ${subtitle ? `<p class="programming-subtitle">${escapeHtml(subtitle)}</p>` : ""}
+                </article>
+            `;
+        }).join("");
+    } catch (error) {
+        console.error("Error cargando programación:", error);
+        reportPublicError("programming", error);
+        list.innerHTML = "";
+    }
 }
 /* ==========================================================
 DRAWS

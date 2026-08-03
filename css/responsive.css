@@ -181,6 +181,10 @@
         transform-origin: center top;
     }
 
+    #programming {
+        padding: 84px 0;
+    }
+
     .hero-title {
         font-size: 1.8rem;
     }
@@ -298,6 +302,10 @@
         padding-top: 0;
         transform: translateY(60px) scale(.8);
         transform-origin: center top;
+    }
+
+    #programming {
+        padding: 74px 0;
     }
 
     .hero-title {

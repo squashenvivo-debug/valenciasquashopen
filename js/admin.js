@@ -11,6 +11,7 @@ const GALLERY_COLLECTION_KEY = "galleryCollections";
 const NEWS_COLLECTION_KEY = "newsCollection";
 const SPONSORS_COLLECTION_KEY = "sponsorsCollection";
 const PLAYERS_COLLECTION_KEY = "playersCollection";
+const PROGRAMMING_COLLECTION_KEY = "eventProgrammingCollection";
 const TOURNAMENT_MANUAL_CONTENT_KEY = "tournamentManualContent";
 const HERO_SETTINGS_KEY = "heroSettings";
 const VISITS_TABLE_NAME = "site_visits";
@@ -29,6 +30,7 @@ const CLOUD_SYNC_KEYS = [
     NEWS_COLLECTION_KEY,
     SPONSORS_COLLECTION_KEY,
     PLAYERS_COLLECTION_KEY,
+    PROGRAMMING_COLLECTION_KEY,
     TOURNAMENT_MANUAL_CONTENT_KEY,
     HERO_SETTINGS_KEY
 ];
@@ -67,6 +69,7 @@ const ADMIN_SECTION_IDS = [
     "live-settings-panel",
     "news-admin-panel",
     "gallery-admin-panel",
+    "programming-admin-panel",
     "draw-schedule-panel",
     "draw-builder-panel",
     "draw-results-panel"
@@ -81,6 +84,7 @@ const ADMIN_SECTION_TO_PAGE = {
     "tournament-mode-panel": "admin-tournament.html",
     "tournament-text-panel": "admin-tournament-text.html",
     "players-admin-panel": "admin-players.html",
+    "programming-admin-panel": "admin-dashboard.html",
     "draw-schedule-panel": "admin-draw-schedule.html",
     "draw-builder-panel": "admin-draw-builder.html",
     "draw-results-panel": "admin-draw-results.html"
@@ -120,11 +124,73 @@ function configureAdminMenuLinks() {
         const targetPage = ADMIN_SECTION_TO_PAGE[section] || "admin-dashboard.html";
 
         if (ADMIN_MULTI_PAGE_MODE) {
-            link.setAttribute("href", targetPage);
+            const hash = section === "dashboard" ? "" : `#${section}`;
+            link.setAttribute("href", `${targetPage}${hash}`);
         } else {
             link.setAttribute("href", section === "dashboard" ? "#dashboard" : `#${section}`);
         }
     });
+}
+
+function ensureProgrammingAdminMenuLink() {
+    const nav = document.querySelector(".sidebar nav");
+    if (!nav) return;
+
+    const existing = nav.querySelector('a[data-section="programming-admin-panel"]');
+    if (existing) return;
+
+    const link = document.createElement("a");
+    link.setAttribute("href", "#programming-admin-panel");
+    link.setAttribute("data-section", "programming-admin-panel");
+    link.textContent = "Programación";
+
+    const drawScheduleLink = nav.querySelector('a[data-section="draw-schedule-panel"]');
+    if (drawScheduleLink && drawScheduleLink.nextSibling) {
+        nav.insertBefore(link, drawScheduleLink.nextSibling);
+    } else if (drawScheduleLink) {
+        nav.appendChild(link);
+    } else {
+        nav.insertBefore(link, nav.firstChild);
+    }
+}
+
+function ensureProgrammingAdminPanel() {
+    if (document.getElementById("programming-admin-panel")) return;
+
+    const drawSchedulePanel = document.getElementById("draw-schedule-panel");
+    if (!drawSchedulePanel) return;
+
+    drawSchedulePanel.insertAdjacentHTML("afterend", `
+        <section class="admin-card" id="programming-admin-panel">
+            <h2>Programación del Evento</h2>
+            <p class="admin-muted">Crea agenda visual de actos (presentación, inauguración, etc.). Es independiente del horario de partidos.</p>
+
+            <label for="programmingDateTime" class="field-label">Fecha y hora visible</label>
+            <input id="programmingDateTime" type="text" placeholder="Lunes 11 agosto · 20:00">
+
+            <label for="programmingTitle_es" class="field-label">Título ES</label>
+            <input id="programmingTitle_es" type="text" placeholder="Presentación oficial del torneo">
+
+            <label for="programmingSubtitle_es" class="field-label">Subtítulo ES (opcional)</label>
+            <input id="programmingSubtitle_es" type="text" placeholder="Apertura y bienvenida institucional">
+
+            <div class="results-actions">
+                <button id="saveNewProgrammingItem" type="button">Añadir acto</button>
+                <button id="saveProgrammingCollection" type="button" class="btn-secondary-admin">Guardar cambios</button>
+                <button id="resetProgrammingCollection" type="button" class="btn-secondary-admin">Restaurar ejemplo</button>
+            </div>
+
+            <p id="programmingAdminStatus" class="admin-status" aria-live="polite"></p>
+
+            <h3 class="gallery-admin-subtitle">Actos programados</h3>
+            <div id="programmingAdminList" class="gallery-admin-list"></div>
+        </section>
+    `);
+}
+
+function ensureProgrammingAdminUi() {
+    ensureProgrammingAdminMenuLink();
+    ensureProgrammingAdminPanel();
 }
 
 function parseStorageJson(key, fallbackValue) {
@@ -955,6 +1021,7 @@ async function startAdminModulesOnce() {
 
     adminStartPromise = (async () => {
         bindAdminErrorLogging();
+        ensureProgrammingAdminUi();
         bindAdminSectionView();
 
         if (!isLocalDevMode()) {
@@ -984,6 +1051,7 @@ async function startAdminModulesOnce() {
         await safeRun(async () => initSponsorsAdmin());
         await safeRun(async () => initNewsAdmin());
         await safeRun(async () => initGalleryAdmin());
+        await safeRun(async () => initProgrammingAdmin());
         await safeRun(async () => initDrawAdmin());
     })();
 
@@ -4558,6 +4626,291 @@ function saveMatchSchedule() {
 
     saveDrawState();
     updateScheduleStatus("Horario guardado correctamente.");
+}
+
+function updateProgrammingStatus(message) {
+    const el = document.getElementById("programmingAdminStatus");
+    if (!el) return;
+    el.textContent = message;
+}
+
+function getProgrammingDefaultCollection() {
+    return [
+        {
+            id: createId("program"),
+            dateTime: "Lunes 11 agosto · 20:00",
+            title: {
+                es: "Presentación oficial",
+                va: "Presentació oficial",
+                en: "Official presentation",
+                fr: "Présentation officielle"
+            },
+            subtitle: {
+                es: "Bienvenida del PSA Valencia Open",
+                va: "Benvinguda del PSA Valencia Open",
+                en: "Welcome to PSA Valencia Open",
+                fr: "Bienvenue au PSA Valencia Open"
+            },
+            order: 1
+        },
+        {
+            id: createId("program"),
+            dateTime: "Martes 12 agosto · 11:00",
+            title: {
+                es: "Inicio primeras rondas",
+                va: "Inici primeres rondes",
+                en: "Start of first rounds",
+                fr: "Début des premiers tours"
+            },
+            subtitle: {
+                es: "Apertura de pistas y primeros enfrentamientos",
+                va: "Obertura de pistes i primers enfrontaments",
+                en: "Courts open and first matchups",
+                fr: "Ouverture des courts et premiers affrontements"
+            },
+            order: 2
+        }
+    ];
+}
+
+function normalizeProgrammingItem(item, index = 0) {
+    const title = normalizeLocalizedText(item?.title || "");
+    const subtitle = normalizeLocalizedText(item?.subtitle || "");
+    return {
+        id: String(item?.id || createId("program")).trim(),
+        dateTime: String(item?.dateTime || item?.date || "").trim(),
+        title,
+        subtitle,
+        order: Number(item?.order) || index + 1
+    };
+}
+
+function readProgrammingCollection() {
+    const parsed = parseStorageJson(PROGRAMMING_COLLECTION_KEY, null);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+        return getProgrammingDefaultCollection();
+    }
+
+    return parsed
+        .map((item, index) => normalizeProgrammingItem(item, index))
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+}
+
+function saveProgrammingCollection(collection) {
+    const normalized = (Array.isArray(collection) ? collection : [])
+        .map((item, index) => normalizeProgrammingItem(item, index))
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    localStorage.setItem(PROGRAMMING_COLLECTION_KEY, JSON.stringify(normalized));
+    return normalized;
+}
+
+function getProgrammingRowLocalizedInput(itemId, field, lang) {
+    return (document.getElementById(`programming_${field}_${lang}_${itemId}`)?.value || "").trim();
+}
+
+function getProgrammingRowLocalized(field, itemId, fallbackMap = {}) {
+    return {
+        es: getProgrammingRowLocalizedInput(itemId, field, "es") || String(fallbackMap?.es || ""),
+        va: getProgrammingRowLocalizedInput(itemId, field, "va") || String(fallbackMap?.va || ""),
+        en: getProgrammingRowLocalizedInput(itemId, field, "en") || String(fallbackMap?.en || ""),
+        fr: getProgrammingRowLocalizedInput(itemId, field, "fr") || String(fallbackMap?.fr || "")
+    };
+}
+
+function renderProgrammingAdminList(collection) {
+    const host = document.getElementById("programmingAdminList");
+    if (!host) return;
+
+    const rows = [...collection].sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (!rows.length) {
+        host.innerHTML = "<p class=\"admin-muted\">No hay actos todavía.</p>";
+        return;
+    }
+
+    host.innerHTML = rows.map((item, index) => `
+        <article class="gallery-admin-card" data-programming-id="${escapeHtml(item.id)}">
+            <label class="field-label" for="programming_order_${item.id}">Orden</label>
+            <input id="programming_order_${item.id}" type="number" min="1" value="${Number(item.order || index + 1)}">
+
+            <label class="field-label" for="programming_date_${item.id}">Fecha y hora visible</label>
+            <input id="programming_date_${item.id}" type="text" value="${escapeHtml(item.dateTime || "")}" placeholder="Lunes 11 agosto · 20:00">
+
+            <label class="field-label" for="programming_title_es_${item.id}">Título ES</label>
+            <input id="programming_title_es_${item.id}" type="text" value="${escapeHtml(item.title?.es || "")}">
+
+            <label class="field-label" for="programming_subtitle_es_${item.id}">Subtítulo ES</label>
+            <input id="programming_subtitle_es_${item.id}" type="text" value="${escapeHtml(item.subtitle?.es || "")}">
+
+            <div class="gallery-admin-actions">
+                <button type="button" class="btn-gallery-save" data-programming-action="translate" data-programming-id="${escapeHtml(item.id)}">Traducir ES</button>
+                <button type="button" class="btn-gallery-danger" data-programming-action="delete" data-programming-id="${escapeHtml(item.id)}">Eliminar</button>
+            </div>
+        </article>
+    `).join("");
+}
+
+async function translateProgrammingRowFromSpanish(collection, itemId) {
+    const item = collection.find((entry) => entry.id === itemId);
+    if (!item) return collection;
+
+    const titleEs = getProgrammingRowLocalizedInput(itemId, "title", "es");
+    const subtitleEs = getProgrammingRowLocalizedInput(itemId, "subtitle", "es");
+
+    if (!titleEs) {
+        updateProgrammingStatus("Escribe al menos el título en español para traducir.");
+        return collection;
+    }
+
+    updateProgrammingStatus("Traduciendo acto...");
+
+    const [titleLoc, subtitleLoc] = await Promise.all([
+        buildLocalizedFromSpanish(titleEs),
+        subtitleEs ? buildLocalizedFromSpanish(subtitleEs) : Promise.resolve({ es: "", va: "", en: "", fr: "" })
+    ]);
+
+    const next = collection.map((entry) => {
+        if (entry.id !== itemId) return entry;
+        return {
+            ...entry,
+            title: titleLoc,
+            subtitle: subtitleLoc
+        };
+    });
+
+    saveProgrammingCollection(next);
+    renderProgrammingAdminList(next);
+    bindProgrammingRowActions();
+    updateProgrammingStatus("Traducciones actualizadas.");
+    return next;
+}
+
+function collectProgrammingFromEditor(currentCollection) {
+    return currentCollection.map((item, index) => {
+        const dateTime = (document.getElementById(`programming_date_${item.id}`)?.value || "").trim();
+        const orderValue = Number(document.getElementById(`programming_order_${item.id}`)?.value || index + 1);
+        const title = getProgrammingRowLocalized("title", item.id, item.title);
+        const subtitle = getProgrammingRowLocalized("subtitle", item.id, item.subtitle);
+
+        return normalizeProgrammingItem({
+            ...item,
+            dateTime,
+            title,
+            subtitle,
+            order: Number.isFinite(orderValue) ? orderValue : index + 1
+        }, index);
+    });
+}
+
+function bindProgrammingRowActions() {
+    const host = document.getElementById("programmingAdminList");
+    if (!host) return;
+
+    host.querySelectorAll("[data-programming-action]").forEach((btn) => {
+        if (btn.dataset.bound === "1") return;
+        btn.dataset.bound = "1";
+
+        btn.addEventListener("click", async () => {
+            let collection = readProgrammingCollection();
+            collection = collectProgrammingFromEditor(collection);
+
+            const action = String(btn.getAttribute("data-programming-action") || "").trim();
+            const itemId = String(btn.getAttribute("data-programming-id") || "").trim();
+
+            if (action === "delete") {
+                const next = collection.filter((entry) => entry.id !== itemId)
+                    .map((entry, index) => ({ ...entry, order: index + 1 }));
+                saveProgrammingCollection(next);
+                renderProgrammingAdminList(next);
+                bindProgrammingRowActions();
+                updateProgrammingStatus("Acto eliminado.");
+                return;
+            }
+
+            if (action === "translate") {
+                await translateProgrammingRowFromSpanish(collection, itemId);
+            }
+        });
+    });
+}
+
+async function initProgrammingAdmin() {
+    const panel = document.getElementById("programming-admin-panel");
+    if (!panel) return;
+
+    let collection = readProgrammingCollection();
+    saveProgrammingCollection(collection);
+    renderProgrammingAdminList(collection);
+    bindProgrammingRowActions();
+
+    const saveNewBtn = document.getElementById("saveNewProgrammingItem");
+    const saveCollectionBtn = document.getElementById("saveProgrammingCollection");
+    const resetBtn = document.getElementById("resetProgrammingCollection");
+
+    if (saveNewBtn && !saveNewBtn.dataset.bound) {
+        saveNewBtn.addEventListener("click", async () => {
+            const dateTime = (document.getElementById("programmingDateTime")?.value || "").trim();
+            const titleEs = (document.getElementById("programmingTitle_es")?.value || "").trim();
+            const subtitleEs = (document.getElementById("programmingSubtitle_es")?.value || "").trim();
+
+            if (!dateTime || !titleEs) {
+                updateProgrammingStatus("Fecha/hora y título en español son obligatorios.");
+                return;
+            }
+
+            updateProgrammingStatus("Traduciendo y añadiendo acto...");
+            const [titleLoc, subtitleLoc] = await Promise.all([
+                buildLocalizedFromSpanish(titleEs),
+                subtitleEs ? buildLocalizedFromSpanish(subtitleEs) : Promise.resolve({ es: "", va: "", en: "", fr: "" })
+            ]);
+
+            collection = collectProgrammingFromEditor(collection);
+            collection.push(normalizeProgrammingItem({
+                id: createId("program"),
+                dateTime,
+                title: titleLoc,
+                subtitle: subtitleLoc,
+                order: collection.length + 1
+            }, collection.length));
+
+            collection = saveProgrammingCollection(collection);
+            renderProgrammingAdminList(collection);
+            bindProgrammingRowActions();
+
+            const dateInput = document.getElementById("programmingDateTime");
+            const titleInput = document.getElementById("programmingTitle_es");
+            const subtitleInput = document.getElementById("programmingSubtitle_es");
+            if (dateInput) dateInput.value = "";
+            if (titleInput) titleInput.value = "";
+            if (subtitleInput) subtitleInput.value = "";
+
+            updateProgrammingStatus("Acto añadido correctamente.");
+        });
+        saveNewBtn.dataset.bound = "1";
+    }
+
+    if (saveCollectionBtn && !saveCollectionBtn.dataset.bound) {
+        saveCollectionBtn.addEventListener("click", () => {
+            collection = collectProgrammingFromEditor(collection)
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map((item, index) => ({ ...item, order: index + 1 }));
+            collection = saveProgrammingCollection(collection);
+            renderProgrammingAdminList(collection);
+            bindProgrammingRowActions();
+            updateProgrammingStatus("Programación guardada.");
+        });
+        saveCollectionBtn.dataset.bound = "1";
+    }
+
+    if (resetBtn && !resetBtn.dataset.bound) {
+        resetBtn.addEventListener("click", () => {
+            collection = saveProgrammingCollection(getProgrammingDefaultCollection());
+            renderProgrammingAdminList(collection);
+            bindProgrammingRowActions();
+            updateProgrammingStatus("Programación de ejemplo restaurada.");
+        });
+        resetBtn.dataset.bound = "1";
+    }
 }
 
 function resetDrawState() {

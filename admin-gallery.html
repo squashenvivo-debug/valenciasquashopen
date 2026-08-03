@@ -334,7 +334,9 @@
 
             <label for="newGalleryFolder" class="field-label">O subir una carpeta de fotos</label>
             <input id="newGalleryFolder" type="file" accept="image/*" multiple webkitdirectory directory>
-
+            <div class="results-actions">
+                <button id="saveNewGallery" type="button">Guardar galería</button>
+            </div>
             <div id="galleryUploadSummary" class="gallery-upload-summary" hidden>
                 <div class="gallery-upload-progress" role="progressbar" aria-label="Progreso de subida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <span id="galleryUploadProgressBar"></span>
@@ -344,9 +346,7 @@
 
             <div id="newGalleryPhotosEditor" class="gallery-admin-photo-list"></div>
 
-            <div class="results-actions">
-                <button id="saveNewGallery" type="button">Guardar galería</button>
-            </div>
+            
 
             <p id="galleryAdminStatus" class="admin-status" aria-live="polite"></p>
 
@@ -457,11 +457,13 @@
 window.ADMIN_DEFAULT_SECTION = "gallery-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260803-8"></script>
+<script src="js/admin.js?v=20260803-9"></script>
 
 </body>
 
 </html>
+
+
 
 
 
