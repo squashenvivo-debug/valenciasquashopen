@@ -2663,7 +2663,7 @@ function renderGalleryAdminList() {
                 <input id="replace_${photo.id}" type="file" accept="image/*">
                 <div class="gallery-photo-actions">
                     <button type="button" class="btn-gallery-save" data-action="save-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Guardar foto</button>
-                    <button type="button" class="btn-gallery-ai" data-action="process-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}" ${resolvePhotoSourcePath(photo) ? "" : "disabled"}>Procesar con IA</button>
+                    <button type="button" class="btn-gallery-ai" data-action="process-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}" title="${resolvePhotoSourcePath(photo) ? "Procesar esta foto con IA" : "Primero sube esta foto a Supabase Storage para poder procesarla"}">Procesar con IA</button>
                     <button type="button" class="btn-gallery-danger" data-action="delete-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Borrar foto</button>
                 </div>
             </div>
@@ -2886,15 +2886,30 @@ function renderGalleryAdminList() {
             const galleriesInner = readGalleryCollection();
             const gallery = getGalleryById(galleriesInner, galleryId);
             const photo = gallery?.photos?.find((item) => item.id === photoId);
+            const sourcePath = resolvePhotoSourcePath(photo);
+
+            if (!window.AdminSupabase?.isConfigured?.() || !window.AdminSupabase?.getClient?.()) {
+                updateGalleryStatus("Configura Supabase e inicia sesión para usar IA.");
+                return;
+            }
+
+            if (!photo || !sourcePath) {
+                updateGalleryStatus("Esta foto no está en Supabase Storage. Súbela o reemplázala y vuelve a intentar IA.");
+                return;
+            }
 
             button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = "Procesando...";
+            updateGalleryStatus("Procesando foto con IA...");
             try {
                 await processGalleryPhotoWithAI(photo, galleriesInner);
-                updateGalleryStatus("Foto procesada y validada; el resultado se guardó en processed.");
+                updateGalleryStatus("Foto procesada y validada; resultado guardado en photos/processed.");
                 renderGalleryAdminList();
             } catch (error) {
                 updateGalleryStatus(`No se procesó la foto: ${error?.message || "error de IA"}`);
             } finally {
+                button.textContent = originalText || "Procesar con IA";
                 button.disabled = false;
             }
         });
