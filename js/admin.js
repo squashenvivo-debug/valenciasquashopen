@@ -2642,7 +2642,17 @@ function renderGalleryAdminList() {
         return;
     }
 
-    host.innerHTML = galleries.map((gallery) => {
+    const selectedGalleryId = document.getElementById("galleryDeleteSelect")?.value || "";
+    const galleriesToRender = selectedGalleryId
+        ? galleries.filter((item) => item.id === selectedGalleryId)
+        : galleries;
+
+    if (galleriesToRender.length === 0) {
+        host.innerHTML = '<p class="admin-muted">Selecciona una galería para editar.</p>';
+        return;
+    }
+
+    host.innerHTML = galleriesToRender.map((gallery) => {
         const meta = normalizeGalleryMeta(gallery.meta);
         const photos = Array.isArray(gallery.photos) ? gallery.photos : [];
         const photosMarkup = photos.map((photo, photoIndex) => `
@@ -2969,9 +2979,15 @@ function renderGalleryDeleteSelect() {
         return;
     }
 
+    const previousValue = select.value;
+
     select.innerHTML = galleries
         .map((gallery) => `<option value="${gallery.id}">${escapeHtml(gallery.title?.es || "Galería")}</option>`)
         .join("");
+
+    if (previousValue && galleries.some((gallery) => gallery.id === previousValue)) {
+        select.value = previousValue;
+    }
 }
 
 function deleteSelectedGallery() {
@@ -3433,6 +3449,7 @@ function initGalleryAdmin() {
     const saveButton = document.getElementById("saveNewGallery");
     const toggleEditorButton = document.getElementById("toggleGalleryEditMode");
     const deleteGalleryButton = document.getElementById("deleteSelectedGallery");
+    const gallerySelect = document.getElementById("galleryDeleteSelect");
 
     if (filesInput) {
         filesInput.addEventListener("change", onNewGalleryFilesChange);
@@ -3461,6 +3478,12 @@ function initGalleryAdmin() {
 
     if (deleteGalleryButton) {
         deleteGalleryButton.addEventListener("click", deleteSelectedGallery);
+    }
+
+    if (gallerySelect) {
+        gallerySelect.addEventListener("change", () => {
+            renderGalleryAdminList();
+        });
     }
 
     renderPendingGalleryPhotos();
