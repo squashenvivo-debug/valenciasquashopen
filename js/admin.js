@@ -2217,6 +2217,45 @@ function getGalleryPublicUrl(path) {
     return client?.storage?.from("photos").getPublicUrl(path)?.data?.publicUrl || "";
 }
 
+function extractPhotosStoragePathFromUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("gallery/") || raw.startsWith("processed/")) {
+        return raw;
+    }
+
+    const markers = [
+        "/storage/v1/object/public/photos/",
+        "/storage/v1/object/sign/photos/",
+        "/storage/v1/object/authenticated/photos/"
+    ];
+
+    for (const marker of markers) {
+        const index = raw.indexOf(marker);
+        if (index === -1) continue;
+        const sliced = raw.slice(index + marker.length);
+        const clean = sliced.split("?")[0].split("#")[0];
+        if (!clean) continue;
+        try {
+            return decodeURIComponent(clean);
+        } catch (_error) {
+            return clean;
+        }
+    }
+
+    return "";
+}
+
+function resolvePhotoSourcePath(photo) {
+    return String(
+        photo?.sourceStoragePath
+        || photo?.storagePath
+        || extractPhotosStoragePathFromUrl(photo?.sourceSrc)
+        || extractPhotosStoragePathFromUrl(photo?.src)
+        || ""
+    ).trim();
+}
+
 async function getTusHeaders(extra = {}) {
     const token = await window.AdminSupabase?.getAccessToken?.();
     const apiKey = String(window.PSA_CONFIG?.supabaseAnonKey || window.PSA_CONFIG?.SUPABASE_ANON_KEY || "").trim();
@@ -2396,7 +2435,7 @@ async function uploadGalleryQueue(galleryId, photos = pendingGalleryPhotos) {
 
 async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMessage = "Analizando y mejorando la foto con IA…") {
     const client = window.AdminSupabase?.getClient?.();
-    const sourcePath = photo?.sourceStoragePath || photo?.storagePath;
+    const sourcePath = resolvePhotoSourcePath(photo);
     if (!photo || !sourcePath || !client) {
         throw new Error("Esta foto no tiene una ruta válida en Supabase Storage.");
     }
@@ -2409,6 +2448,7 @@ async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMes
     }
 
     photo.sourceSrc = photo.sourceSrc || photo.src;
+    photo.storagePath = photo.storagePath || sourcePath;
     photo.sourceStoragePath = sourcePath;
     photo.processedSrc = data.processedUrl;
     photo.processedStoragePath = data.processedPath;
@@ -2555,7 +2595,7 @@ function renderGalleryAdminList() {
                 <input id="replace_${photo.id}" type="file" accept="image/*">
                 <div class="gallery-photo-actions">
                     <button type="button" class="btn-gallery-save" data-action="save-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Guardar foto</button>
-                    <button type="button" class="btn-gallery-ai" data-action="process-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}" ${photo.storagePath ? "" : "disabled"}>Procesar con IA</button>
+                    <button type="button" class="btn-gallery-ai" data-action="process-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}" ${resolvePhotoSourcePath(photo) ? "" : "disabled"}>Procesar con IA</button>
                     <button type="button" class="btn-gallery-danger" data-action="delete-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Borrar foto</button>
                 </div>
             </div>

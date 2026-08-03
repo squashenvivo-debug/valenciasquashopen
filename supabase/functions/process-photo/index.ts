@@ -22,6 +22,8 @@ type EnhancementCandidate = {
   signedUrl: string;
 };
 
+const PHOTO_BUCKET = "photos";
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -136,17 +138,17 @@ async function enhanceAndUpload(
   const encoded = editPayload.data?.[0]?.b64_json;
   if (!encoded) throw new Error("La IA no devolvió una imagen procesada.");
 
-  const processedPath = `gallery/${crypto.randomUUID()}.webp`;
+  const processedPath = `processed/${crypto.randomUUID()}.webp`;
   const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
-  const { error: uploadError } = await admin.storage.from("processed").upload(processedPath, bytes, {
+  const { error: uploadError } = await admin.storage.from(PHOTO_BUCKET).upload(processedPath, bytes, {
     contentType: "image/webp",
     upsert: false,
   });
   if (uploadError) throw new Error("No se pudo guardar el resultado procesado.");
 
-  const { data: signed, error: signedError } = await admin.storage.from("processed").createSignedUrl(processedPath, 600);
+  const { data: signed, error: signedError } = await admin.storage.from(PHOTO_BUCKET).createSignedUrl(processedPath, 600);
   if (signedError || !signed?.signedUrl) {
-    await admin.storage.from("processed").remove([processedPath]);
+    await admin.storage.from(PHOTO_BUCKET).remove([processedPath]);
     throw new Error("No se pudo verificar el resultado.");
   }
   return { processedPath, signedUrl: signed.signedUrl };
@@ -185,11 +187,11 @@ Deno.serve(async (req) => {
       return json({ error: "Ruta de fotografía no válida." }, 400);
     }
 
-    const { data: original, error: downloadError } = await admin.storage.from("photos").download(sourcePath);
+    const { data: original, error: downloadError } = await admin.storage.from(PHOTO_BUCKET).download(sourcePath);
     if (downloadError || !original) throw new Error("No se pudo leer la foto original.");
     if (original.size > 25 * 1024 * 1024) return json({ error: "La IA admite fotos de hasta 25 MiB." }, 413);
 
-    const { data: signedOriginal, error: signedError } = await admin.storage.from("photos").createSignedUrl(sourcePath, 600);
+    const { data: signedOriginal, error: signedError } = await admin.storage.from(PHOTO_BUCKET).createSignedUrl(sourcePath, 600);
     if (signedError || !signedOriginal?.signedUrl) throw new Error("No se pudo preparar la foto para IA.");
     const before = await openAiJson(
       openAiKey,
@@ -212,13 +214,13 @@ Deno.serve(async (req) => {
       latestQuality = after;
 
       if (approvedByQuality(before, after)) {
-        const { data: publicUrl } = admin.storage.from("processed").getPublicUrl(candidate.processedPath);
+        const { data: publicUrl } = admin.storage.from(PHOTO_BUCKET).getPublicUrl(candidate.processedPath);
         selectedPath = candidate.processedPath;
         selectedUrl = publicUrl.publicUrl;
         break;
       }
 
-      await admin.storage.from("processed").remove([candidate.processedPath]);
+      await admin.storage.from(PHOTO_BUCKET).remove([candidate.processedPath]);
     }
 
     if (!selectedPath || !latestQuality) {
