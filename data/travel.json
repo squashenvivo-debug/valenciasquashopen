@@ -1,0 +1,53 @@
+{
+  "cards": [
+
+    {
+      "title":"Official Hotel",
+      "image":"assets/images/olympia/hotel.webp",
+      "icon":"🏨",
+      "description":"Olympia Hotel, Events & Spa",
+      "button":"More information"
+    },
+
+    {
+      "title":"Restaurants",
+      "image":"assets/images/valencia/paella.webp",
+      "icon":"🍽",
+      "description":"The best places to enjoy Valencian cuisine.",
+      "button":"View restaurants"
+    },
+
+    {
+      "title":"Beaches",
+      "image":"assets/images/valencia/malvarrosa.webp",
+      "icon":"🏖",
+      "description":"Malvarrosa & Patacona Beach",
+      "button":"Discover"
+    },
+
+    {
+      "title":"City of Arts",
+      "image":"assets/images/valencia/city-of-arts.webp",
+      "icon":"🏛",
+      "description":"The most iconic place in Valencia.",
+      "button":"Visit"
+    },
+
+    {
+      "title":"Historic Centre",
+      "image":"assets/images/valencia/historic-centre.webp",
+      "icon":"🏰",
+      "description":"History, culture and gastronomy.",
+      "button":"Explore"
+    },
+
+    {
+      "title":"Transport",
+      "image":"assets/images/valencia/metro.webp",
+      "icon":"🚇",
+      "description":"Metro, bus, taxi and airport.",
+      "button":"How to arrive"
+    }
+
+  ]
+}
