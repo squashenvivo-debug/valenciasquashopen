@@ -168,15 +168,32 @@ window.PSAOptimizations = (() => {
             return cached.data;
         }
 
-        const response = await fetch(resolveAssetUrl(url), {
-            cache: options.requestCache || "default",
-            headers: options.headers || undefined
-        });
-        if (!response.ok) {
-            throw new Error(`No se pudo cargar ${url} (${response.status})`);
+        const candidateUrls = [url];
+        if (String(url || "").startsWith("data/")) {
+            candidateUrls.push(String(url).slice(5));
         }
 
-        const data = await response.json();
+        let lastStatus = null;
+        let data = null;
+
+        for (const candidateUrl of candidateUrls) {
+            const response = await fetch(resolveAssetUrl(candidateUrl), {
+                cache: options.requestCache || "default",
+                headers: options.headers || undefined
+            });
+            if (!response.ok) {
+                lastStatus = response.status;
+                continue;
+            }
+
+            data = await response.json();
+            break;
+        }
+
+        if (data === null) {
+            throw new Error(`No se pudo cargar ${url} (${lastStatus || 404})`);
+        }
+
         writeJsonStorage(cacheKey, {
             url,
             storedAt: now,

@@ -38,6 +38,11 @@ jobs:
           cp CNAME dist/
           cp sw.js dist/
           cp supabase.js dist/
+          cp data/config.json dist/config.json
+          cp data/schedule.json dist/schedule.json
+          cp data/draw-bracket.json dist/draw-bracket.json
+          cp data/players.json dist/players.json
+          cp data/translations/news.json dist/news.json
 
       - name: Validate production secrets
         env:
