@@ -15,11 +15,3 @@ supabase/.temp/
 !.env.example
 .supabase/
 
-# Strict code-only mode: binary media must live in external storage/CDN.
-assets/**/*.jpg
-assets/**/*.jpeg
-assets/**/*.png
-assets/**/*.webp
-assets/**/*.gif
-assets/**/*.svg
-assets/**/*.ico
