@@ -1980,6 +1980,7 @@ function normalizeNewsItem(item) {
         id: item?.id || createId("news"),
         imageSrc: item?.imageSrc || item?.image || "",
         imageStoragePath: item?.imageStoragePath || "",
+        player: String(item?.player || item?.meta?.player || "").trim(),
         title,
         article,
         createdAt: item?.createdAt || new Date().toISOString(),
@@ -3193,6 +3194,9 @@ function renderNewsAdminList() {
             <label class="field-label" for="newsCategory_${item.id}">Categoría</label>
             <input id="newsCategory_${item.id}" type="text" value="${escapeHtml(item.category || "")}">
 
+            <label class="field-label" for="newsPlayer_${item.id}">Jugador</label>
+            <input id="newsPlayer_${item.id}" type="text" value="${escapeHtml(item.player || "")}" placeholder="Nombre del jugador (opcional)">
+
             <label class="field-label" for="newsTags_${item.id}">Etiquetas</label>
             <input id="newsTags_${item.id}" type="text" value="${escapeHtml(formatTagsInput(item.tags))}">
 
@@ -3226,6 +3230,7 @@ function renderNewsAdminList() {
                 const publishAtValue = document.getElementById(`newsPublishAt_${newsId}`)?.value || "";
                 const slugValue = (document.getElementById(`newsSlug_${newsId}`)?.value || "").trim();
                 const categoryValue = (document.getElementById(`newsCategory_${newsId}`)?.value || "").trim();
+                const playerValue = (document.getElementById(`newsPlayer_${newsId}`)?.value || "").trim();
                 const tagsValue = document.getElementById(`newsTags_${newsId}`)?.value || "";
                 const seoTitleEs = (document.getElementById(`newsSeoTitle_${newsId}_es`)?.value || "").trim();
                 const seoDescriptionEs = (document.getElementById(`newsSeoDescription_${newsId}_es`)?.value || "").trim();
@@ -3266,6 +3271,7 @@ function renderNewsAdminList() {
                 item.publishAt = publication.publishAt;
                 item.updatedAt = new Date().toISOString();
                 item.category = categoryValue;
+                item.player = playerValue;
                 item.tags = normalizeStringArray(tagsValue);
                 item.seo = {
                     slug,
@@ -3307,6 +3313,7 @@ async function saveNewNews() {
         const publishAtValue = document.getElementById("newNewsPublishAt")?.value || "";
         const slugInput = (document.getElementById("newNewsSlug")?.value || "").trim();
         const categoryValue = (document.getElementById("newNewsCategory")?.value || "").trim();
+        const playerValue = (document.getElementById("newNewsPlayer")?.value || "").trim();
         const tagsValue = document.getElementById("newNewsTags")?.value || "";
         const seoTitleEs = (document.getElementById("newNewsSeoTitle_es")?.value || "").trim();
         const seoDescriptionEs = (document.getElementById("newNewsSeoDescription_es")?.value || "").trim();
@@ -3357,6 +3364,7 @@ async function saveNewNews() {
             publishAt: publication.publishAt,
             status: publication.status,
             category: categoryValue,
+            player: playerValue,
             tags: normalizeStringArray(tagsValue),
             seo: {
                 slug,
@@ -3378,6 +3386,7 @@ async function saveNewNews() {
         const publishInput = document.getElementById("newNewsPublishAt");
         const slugField = document.getElementById("newNewsSlug");
         const categoryField = document.getElementById("newNewsCategory");
+        const playerField = document.getElementById("newNewsPlayer");
         const tagsField = document.getElementById("newNewsTags");
         const seoTitleField = document.getElementById("newNewsSeoTitle_es");
         const seoDescriptionField = document.getElementById("newNewsSeoDescription_es");
@@ -3385,6 +3394,7 @@ async function saveNewNews() {
         if (publishInput) publishInput.value = "";
         if (slugField) slugField.value = "";
         if (categoryField) categoryField.value = "";
+        if (playerField) playerField.value = "";
         if (tagsField) tagsField.value = "";
         if (seoTitleField) seoTitleField.value = "";
         if (seoDescriptionField) seoDescriptionField.value = "";
@@ -3408,6 +3418,25 @@ function initNewsAdmin() {
     const deleteButton = document.getElementById("deleteSelectedNews");
     const titleInput = document.getElementById("newNewsTitle_es");
     const slugInput = document.getElementById("newNewsSlug");
+
+    // Add the player field dynamically so all admin pages get it without editing each HTML file.
+    if (!document.getElementById("newNewsPlayer")) {
+        const categoryInput = document.getElementById("newNewsCategory");
+        if (categoryInput && categoryInput.parentElement) {
+            const label = document.createElement("label");
+            label.setAttribute("for", "newNewsPlayer");
+            label.className = "field-label";
+            label.textContent = "Jugador";
+
+            const input = document.createElement("input");
+            input.id = "newNewsPlayer";
+            input.type = "text";
+            input.placeholder = "Nombre del jugador (opcional)";
+
+            categoryInput.parentElement.insertBefore(label, categoryInput.nextSibling);
+            categoryInput.parentElement.insertBefore(input, label.nextSibling);
+        }
+    }
 
     if (saveButton) {
         saveButton.addEventListener("click", saveNewNews);

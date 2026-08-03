@@ -520,6 +520,7 @@ async function loadNews() {
             const newsUrl = getNewsPublicUrl(item);
             const displayDate = item.publishAt || item.createdAt;
             const category = String(item.category || "").trim();
+            const player = String(item.player || item.meta?.player || "").trim();
 
             grid.innerHTML += `
                 <article class="news-card">
@@ -527,6 +528,7 @@ async function loadNews() {
                     <div class="news-content">
                         <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
                         ${category ? `<span class="news-date">${category}</span>` : ""}
+                        ${player ? `<span class="news-date">Jugador: ${escapeHtml(player)}</span>` : ""}
                         <h3>${title}</h3>
                         <p>${summary}</p>
                         <a href="${newsUrl}" class="btn btn-primary">

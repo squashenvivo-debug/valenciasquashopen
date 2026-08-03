@@ -99,6 +99,7 @@ function normalizeNewsItem(item) {
         id: item?.id || "",
         imageSrc: item?.imageSrc || item?.image || "",
         imageStoragePath: item?.imageStoragePath || "",
+        player: String(item?.player || item?.meta?.player || "").trim(),
         title,
         article: body,
         createdAt: item?.createdAt || "",
@@ -189,6 +190,7 @@ async function renderNewsDetail() {
     const image = document.getElementById("newsPageImage");
     const dateEl = document.getElementById("newsPageDate");
     const category = document.getElementById("newsPageCategory");
+    const player = document.getElementById("newsPagePlayer");
     const heading = document.getElementById("newsPageHeading");
     const body = document.getElementById("newsPageBody");
     const tags = document.getElementById("newsPageTags");
@@ -224,6 +226,7 @@ async function renderNewsDetail() {
     image.alt = title || "Noticia";
     dateEl.textContent = formatNewsDate(displayDate, lang);
     if (category) category.textContent = item.category || "";
+    if (player) player.textContent = item.player ? `Jugador: ${item.player}` : "";
     if (tags) tags.textContent = normalizeStringArray(item.tags).map((tag) => `#${tag}`).join(" · ");
     applyNewsSeo(item, lang, title, article);
 }
