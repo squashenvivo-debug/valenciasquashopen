@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro Completo | PSA Valencia Open</title>
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/draw.css?v=20260726-2">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #071826;
+    color: #fff;
+}
+.draw-page {
+    min-height: 100vh;
+    padding: 20px;
+}
+.draw-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.draw-page-header h1 {
+    margin: 0;
+    font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+}
+.draw-page-actions {
+    display: flex;
+    gap: 8px;
+}
+.draw-page-btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-weight: 700;
+    text-decoration: none;
+    background: #C78C32;
+    color: #081826;
+    cursor: pointer;
+}
+.draw-page-btn.alt {
+    background: #29445d;
+    color: #fff;
+}
+.draw-page-note {
+    margin: 0 0 14px;
+    color: #B7C4D1;
+    font-size: 0.92rem;
+}
+.draw-page-wrapper {
+    max-height: calc(100vh - 150px);
+    cursor: grab;
+}
+.draw-page-wrapper:active {
+    cursor: grabbing;
+}
+</style>
+</head>
+<body>
+<main class="draw-page">
+    <header class="draw-page-header">
+        <h1>Cuadro Completo</h1>
+        <div class="draw-page-actions">
+            <a class="draw-page-btn alt" href="index.html#draw">Volver</a>
+            <button id="refreshDrawPage" class="draw-page-btn" type="button">Actualizar</button>
+        </div>
+    </header>
+    <p class="draw-page-note">Vista ampliada del cuadro. Se actualiza con el estado guardado en local.</p>
+
+    <div class="draw-bracket-wrapper draw-page-wrapper" id="drawPageWrapper">
+        <div class="draw-bracket" id="drawPageBracket" aria-live="polite"></div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/draw-viewer.js?v=20260726-1"></script>
+</body>
+</html>

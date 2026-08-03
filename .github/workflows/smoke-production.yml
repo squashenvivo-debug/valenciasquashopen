@@ -1,0 +1,69 @@
+name: Smoke Test Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Production base URL"
+        required: true
+        default: "https://psavalenciaopen.com"
+  workflow_run:
+    workflows: ["Deploy GitHub Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve production URL
+        id: url
+        env:
+          INPUT_BASE_URL: ${{ github.event.inputs.base_url }}
+        run: |
+          set -euo pipefail
+          base_url="${INPUT_BASE_URL:-}"
+          if [ -z "$base_url" ]; then
+            cname=$(tr -d '\r\n' < CNAME)
+            base_url="https://${cname}"
+          fi
+          echo "base_url=${base_url}" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke check core routes
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
+        run: |
+          set -euo pipefail
+
+          check_route() {
+            route="$1"
+            url="${BASE_URL}${route}"
+            echo "Checking ${url}"
+            code=$(curl -sS -L -o /tmp/response.html -w "%{http_code}" "$url")
+            if [ "$code" != "200" ]; then
+              echo "Unexpected HTTP status ${code} for ${url}"
+              exit 1
+            fi
+            grep -qi "<html" /tmp/response.html || (echo "No HTML body in ${url}" && exit 1)
+          }
+
+          check_route "/index.html"
+          check_route "/gallery.html"
+          check_route "/news.html"
+          check_route "/draw.html"
+          check_route "/admin-dashboard.html"
+
+      - name: Smoke check security headers (best effort)
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          headers=$(curl -sS -I "${BASE_URL}/index.html")
+          echo "$headers"
+          echo "$headers" | grep -qi "strict-transport-security\|content-security-policy\|x-content-type-options" || echo "Warning: no common security headers found"

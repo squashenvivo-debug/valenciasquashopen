@@ -1,0 +1,13 @@
+services:
+  psavalencia-web:
+    container_name: psavalencia-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      ASSET_CDN_BASE: ${ASSET_CDN_BASE:-}
+    ports:
+      - "8080:80"
+    restart: unless-stopped

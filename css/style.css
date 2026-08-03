@@ -1,0 +1,203 @@
+/* ==========================================================
+   GLOBAL
+========================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
+body{
+
+    font-family:Arial,Helvetica,sans-serif;
+
+    background:#071826;
+
+    color:white;
+
+    overflow-x:hidden;
+
+}
+
+img{
+
+    max-width:100%;
+
+    display:block;
+
+}
+
+a{
+
+    text-decoration:none;
+
+    color:inherit;
+
+}
+
+ul{
+
+    list-style:none;
+
+}
+
+.container{
+
+    width:min(1400px,92%);
+
+    margin:auto;
+
+}
+
+section{
+
+    position:relative;
+
+}
+
+/* Separacion visual sutil entre bloques principales. */
+main > section{
+    isolation:isolate;
+}
+
+main > section:not(#hero)::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    box-shadow:inset 0 1px rgba(255,255,255,.05), inset 0 -1px rgba(0,0,0,.22);
+}
+
+main > section:nth-of-type(odd):not(#hero)::after{
+    background:rgba(255,255,255,.015);
+}
+
+main > section:nth-of-type(even):not(#hero)::after{
+    background:rgba(0,0,0,.055);
+}
+
+main > section > .container{
+    position:relative;
+    z-index:1;
+}
+
+/* Orden de las secciones de la página principal. */
+main{
+    display:flex;
+    flex-direction:column;
+}
+
+#hero{ order:1; }
+#quick-access{ order:2; }
+#tournament{ order:3; }
+#players{ order:4; }
+#schedule{ order:5; }
+#draw{ order:6; }
+#live{ order:7; }
+#news{ order:8; }
+#gallery{ order:9; }
+#venue{ order:10; }
+#discover{ order:11; }
+#sponsors{ order:12; }
+
+/* ==========================================================
+BUTTONS
+========================================================== */
+
+.btn{
+
+    display:inline-flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:15px 34px;
+
+    border-radius:50px;
+
+    font-weight:700;
+
+    transition:.30s;
+
+}
+
+.btn-primary{
+
+    background:#c78c32;
+
+    color:white;
+
+}
+
+.btn-primary:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.btn-secondary{
+
+    border:2px solid white;
+
+}
+
+.btn-secondary:hover{
+
+    background:white;
+
+    color:#071826;
+
+}
+
+/* ==========================================================
+TITLE
+========================================================== */
+
+.section-title{
+
+    font-size:3rem;
+
+    font-weight:700;
+
+    text-align:center;
+
+    margin-bottom:70px;
+
+}
+
+.section-header{
+    max-width:900px;
+    margin:0 auto 56px;
+    text-align:center;
+}
+
+.section-subtitle,
+.section-kicker{
+    display:inline-block;
+    margin-bottom:12px;
+    color:#C78C32;
+    font-size:.78rem;
+    font-weight:700;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+}
+
+.section-header .section-title{
+    margin-bottom:14px;
+}
+
+.section-header p{
+    max-width:760px;
+    margin:0 auto;
+    color:#B7C4D1;
+    line-height:1.6;
+}

@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+supabase
+node_modules
+backups
+README.md
+.env
+.env.*

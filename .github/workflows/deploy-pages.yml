@@ -1,0 +1,145 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build static artifact
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp -R components dist/
+          cp -R css dist/
+          cp -R data dist/
+          cp -R js dist/
+          cp *.html dist/
+          cp CNAME dist/
+          cp sw.js dist/
+          cp supabase.js dist/
+
+      - name: Validate production secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ASSET_CDN_BASE: ${{ secrets.ASSET_CDN_BASE }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_URL" || (echo "Missing secret SUPABASE_URL" && exit 1)
+          test -n "$SUPABASE_ANON_KEY" || (echo "Missing secret SUPABASE_ANON_KEY" && exit 1)
+          test -n "$ASSET_CDN_BASE" || (echo "Missing secret ASSET_CDN_BASE" && exit 1)
+          printf '%s' "$ASSET_CDN_BASE" | grep -Eq '^https://[^[:space:]]+$' || (echo "ASSET_CDN_BASE must be an absolute https URL" && exit 1)
+          if printf '%s' "$ASSET_CDN_BASE" | grep -Eq '/$'; then
+            echo "ASSET_CDN_BASE must not end with /"
+            exit 1
+          fi
+
+      - name: Inject production config
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ASSET_CDN_BASE: ${{ secrets.ASSET_CDN_BASE }}
+        run: |
+          cat > dist/config.js <<EOF
+          /*
+           * Runtime configuration injected by CI for GitHub Pages deployment.
+           * Do not add a service_role key here.
+           */
+            window.PSA_CONFIG = Object.assign({
+              supabaseUrl: "",
+              supabaseAnonKey: "",
+              assetCdnBase: ""
+            }, window.PSA_CONFIG || {}, {
+              supabaseUrl: "${SUPABASE_URL}",
+              supabaseAnonKey: "${SUPABASE_ANON_KEY}",
+              assetCdnBase: "${ASSET_CDN_BASE}"
+            });
+          EOF
+
+      - name: Verify artifact integrity
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          test -f dist/gallery.html
+          test -f dist/news.html
+          test -f dist/admin-dashboard.html
+          test -f dist/config.js
+          test -f dist/sw.js
+          test -d dist/js
+          test -d dist/css
+          test ! -d dist/assets
+          grep -q "supabaseUrl" dist/config.js
+          grep -q "supabaseAnonKey" dist/config.js
+          grep -q "assetCdnBase" dist/config.js
+          test ! -d dist/.github
+          test ! -d dist/.vscode
+          test ! -d dist/supabase
+          test ! -f dist/.env
+
+      - name: Validate CDN image reachability
+        env:
+          ASSET_CDN_BASE: ${{ secrets.ASSET_CDN_BASE }}
+        run: |
+          set -euo pipefail
+          refs_file="$(mktemp)"
+
+          grep -RhoE 'assets/[A-Za-z0-9_./-]+\.(png|jpg|jpeg|webp|avif|svg|gif)' dist \
+            | sed 's#^\./##' \
+            | sort -u > "$refs_file"
+
+          total_refs="$(wc -l < "$refs_file" | tr -d ' ')"
+          test "$total_refs" -gt 0 || (echo "No image references were found in dist for CDN validation" && exit 1)
+
+          checked=0
+          failed=0
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            checked=$((checked + 1))
+            url="${ASSET_CDN_BASE}/${path}"
+
+            if curl -fsSIL --max-time 15 "$url" >/dev/null 2>&1; then
+              continue
+            fi
+
+            if curl -fsSL --range 0-0 --max-time 15 "$url" -o /dev/null >/dev/null 2>&1; then
+              continue
+            fi
+
+            echo "CDN asset not reachable: $url"
+            failed=$((failed + 1))
+          done < "$refs_file"
+
+          echo "Checked image refs: $checked"
+          test "$failed" -eq 0 || (echo "CDN validation failed for $failed image reference(s)" && exit 1)
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

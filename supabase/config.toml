@@ -1,0 +1,16 @@
+project_id = "psa-valencia"
+
+[auth]
+enabled = true
+site_url = "https://your-domain.example"
+additional_redirect_urls = ["http://localhost:5500", "http://127.0.0.1:5500"]
+
+# Phase 1 uses administrator-provisioned email/password accounts. Keep public
+# sign-up disabled in the Supabase Dashboard: Authentication > Providers > Email.
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = true
+
+[functions.process-photo]
+verify_jwt = true

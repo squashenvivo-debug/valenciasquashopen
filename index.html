@@ -1,0 +1,678 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSA Valencia Open 2026</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/header.css?v=20260725-4">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/quick-access.css?v=20260723-2">
+<link rel="stylesheet" href="css/live.css?v=20260724-4">
+<link rel="stylesheet" href="css/players.css">
+<link rel="stylesheet" href="css/news.css">
+<link rel="stylesheet" href="css/gallery.css">
+<link rel="stylesheet" href="css/venue.css">
+<link rel="stylesheet" href="css/draw.css?v=20260726-2">
+<link rel="stylesheet" href="css/tournament-center.css">
+<link rel="stylesheet" href="css/sponsors.css?v=20260725-2">
+<link rel="stylesheet" href="css/discover.css">
+<link rel="stylesheet" href="css/tournament.css?v=20260725-3">
+<!-- Siempre al final: los ajustes de móvil deben ganar a los estilos base. -->
+<link rel="stylesheet" href="css/responsive.css?v=20260725-1">
+</head>
+<body>
+    
+<header id="header">
+
+    <div class="container navbar">
+
+        <div class="logo-group">
+
+            <a href="#hero" class="logo">
+                <img src="assets/images/logos/psa.png" alt="PSA">
+            </a>
+
+            <a href="#hero" class="logo">
+                <img src="assets/images/logos/copper.png" alt="Copper">
+            </a>
+
+        </div>
+
+        <nav>
+
+            <ul id="main-menu" class="main-menu">
+
+                <li><a href="#hero" data-i18n="menu.home">Inicio</a></li>
+                <li><a href="#tournament" data-i18n="menu.tournament">Torneo</a></li>
+                <li><a href="#players" data-i18n="menu.players">Jugadores</a></li>
+                <li><a href="#schedule" data-i18n="menu.schedule">Horarios</a></li>
+                <li><a href="#draw" data-i18n="menu.draw">Cuadros</a></li>
+                <li><a href="#live" data-i18n="menu.live">Directo</a></li>
+                <li><a href="#news" data-i18n="menu.news">Noticias</a></li>
+                <li><a href="#gallery" data-i18n="menu.gallery">Galería</a></li>
+                <li><a href="#venue" data-i18n="menu.venue">Sede</a></li>
+                <li><a href="#discover" data-i18n="menu.discover">Experience Valencia</a></li>
+                <li><a href="#sponsors" data-i18n="menu.sponsors">Patrocinadores</a></li>
+
+            </ul>
+
+        </nav>
+
+        <div class="header-right">
+    <div class="language-selector">
+
+    <button id="languageToggle" class="language-toggle">
+        Español ▼
+    </button>
+
+    <div id="languageMenu" class="language-menu">
+
+        <button data-lang="es">Español</button>
+
+        <button data-lang="va">Valencià</button>
+
+        <button data-lang="en">English</button>
+
+        <button data-lang="fr">Français</button>
+
+    </div>
+
+</div>
+
+<a href="admin-dashboard.html?v=20260726-1" class="admin-link" aria-label="Admin" title="Admin"></a>
+
+            <button id="menu-button" class="mobile-toggle">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+<main>
+<section id="hero">
+
+    <div class="hero-background">
+        <img src="assets/images/hero/banner.png"
+             alt="PSA Valencia Open">
+    </div>
+
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+
+  
+
+        
+
+    <div class="hero-logo">
+
+    <img src="assets/images/hero/psa-valencia-logo.png"
+         alt="PSA Valencia Open 2026">
+
+</div>
+<div class="hero-event">
+
+    <span class="event-label" data-i18n="event.label">MEMORIAL</span>
+
+    <h1 class="event-title" data-i18n="event.title">
+        CHIMO MARMANEAU
+    </h1>
+
+    <div class="event-location" data-i18n="event.location">
+        Alboraya · Valencia
+    </div>
+
+    <div class="countdown">
+
+        <div class="count-box">
+
+            <span id="days">00</span>
+
+            <small data-i18n="hero.days">DÍAS</small>
+
+        </div>
+
+        <div class="count-box">
+
+            <span id="hours">00</span>
+
+           <small data-i18n="hero.hours">HORAS</small>
+
+        </div>
+
+        <div class="count-box">
+
+            <span id="minutes">00</span>
+
+            <small data-i18n="hero.minutes">MIN</small>
+
+        </div>
+
+        <div class="count-box">
+
+            <span id="seconds">00</span>
+
+            <small data-i18n="hero.seconds">SEG</small>
+
+        </div>
+
+    </div>
+
+</div>
+    </div>
+
+ 
+</section>
+<!-- =======================================================
+QUICK ACCESS
+======================================================= -->
+<section id="quick-access">
+
+    <div class="container">
+
+        <div class="quick-grid">
+
+            <a class="quick-card" href="#players">
+                <div class="quick-icon">👤</div>
+                <h3 data-i18n="quick.players.title">JUGADORES</h3>
+
+<p data-i18n="quick.players.text">
+    Conoce a todos los participantes
+</p>
+            </a>
+
+            <a class="quick-card" href="#schedule">
+                <div class="quick-icon">🗓</div>
+                <h3 data-i18n="quick.schedule.title">HORARIOS</h3>
+
+<p data-i18n="quick.schedule.text">
+    Orden de juego del torneo
+</p>
+            </a>
+
+            <a class="quick-card" href="#draw">
+                <div class="quick-icon">🏆</div>
+                <h3 data-i18n="quick.draw.title">CUADRO</h3>
+
+<p data-i18n="quick.draw.text">
+    Resultados y enfrentamientos
+</p>
+            </a>
+
+            <a class="quick-card" href="#live">
+                <div class="quick-icon">📺</div>
+                <h3 data-i18n="quick.live.title">DIRECTO</h3>
+
+<p data-i18n="quick.live.text">
+    Ver los partidos en vivo
+</p>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+<section id="tournament" class="section">
+
+    <div class="container">
+
+        <div class="section-header">
+
+            <span class="section-subtitle" data-i18n="sectionHeaders.tournament.label">PSA WORLD TOUR COPPER</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.tournament.title">TORNEO</h2>
+            <p data-i18n="sectionHeaders.tournament.intro">Toda la información oficial del PSA Valencia Open 2026.</p>
+
+        </div>
+
+        <div class="tournament-main-sponsor" aria-label="Sponsor principal Comunitat de l'Esport">
+            <img src="assets/images/sponsors/comunitat-esport.png" alt="Comunitat de l'Esport">
+        </div>
+
+        <div id="tournament-intro">
+
+            <!-- Aquí cargaremos la presentación según el idioma -->
+
+        </div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+LIVE
+======================================================= -->
+<section id="live">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.live.label">LIVE</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.live.title">EN DIRECTO</h2>
+            <p data-i18n="sectionHeaders.live.intro">Sigue los partidos en tiempo real desde la pista principal.</p>
+        </div>
+
+        <div class="live-grid">
+
+            <div class="live-player">
+
+                <div class="live-video">
+
+                    <div class="video-placeholder">
+
+                        📺
+
+                        <h3 data-i18n="live.videoTitle">Streaming PSA Valencia Open</h3>
+
+                        <p data-i18n="live.videoIntro">
+                            Aquí aparecerá el reproductor de YouTube.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="live-side">
+
+                <div class="live-archive-panel" id="liveArchivePanel" hidden>
+                    <h3 class="live-archive-title" data-i18n="live.previousTitle">Directos anteriores</h3>
+                    <div class="live-archive-grid" id="liveArchiveGrid"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+PLAYERS
+======================================================= -->
+<section id="players">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.players.label">PLAYERS</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.players.title">JUGADORES</h2>
+            <p data-i18n="sectionHeaders.players.intro">Conoce a los protagonistas del cuadro y su trayectoria.</p>
+        </div>
+
+        <div class="players-grid"></div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+SCHEDULE
+======================================================= -->
+<section id="schedule">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.schedule.label">SCHEDULE</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.schedule.title">HORARIOS</h2>
+            <p data-i18n="sectionHeaders.schedule.intro">Consulta el orden de juego y no te pierdas ningún partido.</p>
+        </div>
+
+        <div class="schedule-list"></div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+DRAW
+======================================================= -->
+<section id="draw">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.draw.label">DRAW</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.draw.title">CUADROS</h2>
+            <p data-i18n="sectionHeaders.draw.intro">Resultados, cruces y evolución completa del torneo.</p>
+        </div>
+
+        <div class="draw-bracket-wrapper">
+            <div class="draw-bracket" aria-live="polite"></div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =======================================================
+NEWS
+======================================================= -->
+<section id="news">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.news.label">NEWS</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.news.title">NOTICIAS</h2>
+            <p data-i18n="sectionHeaders.news.intro">Actualidad del evento, entrevistas y momentos destacados.</p>
+        </div>
+
+        <div class="news-grid"></div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+GALLERY
+======================================================= -->
+<section id="gallery">
+
+    <div class="container">
+
+        <div class="section-header">
+            <span class="section-subtitle" data-i18n="sectionHeaders.gallery.label">GALLERY</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.gallery.title">GALERÍA</h2>
+            <p data-i18n="sectionHeaders.gallery.intro">Revive los mejores instantes del PSA Valencia Open.</p>
+        </div>
+
+        <div class="gallery-home-grid" id="galleryHomeGrid"></div>
+
+    </div>
+
+</section>
+<!-- =======================================================
+VENUE
+======================================================= -->
+<section id="venue">
+
+    <div class="container">
+
+        <div class="section-header venue-header">
+
+            <span class="section-subtitle" data-i18n="sectionHeaders.venue.label">VENUE</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.venue.title">SEDE DEL TORNEO</h2>
+
+            <p data-i18n="sectionHeaders.venue.intro">
+                Olympia Hotel, Events & Spa será la sede oficial del PSA Valencia Open · Memorial Chimo Marmaneu.
+            </p>
+
+        </div>
+
+        <div class="venue-grid">
+
+            <div class="venue-info">
+
+                <h3>Olympia Hotel, Events & Spa</h3>
+
+                <div class="venue-item">
+
+                    📍
+
+                    <div>
+
+                        <strong data-i18n="venue.address">Dirección</strong>
+
+                        <p>
+                            C/ Maestro Serrano, 3<br>
+                            46120 Alboraya (Valencia)
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="venue-item">
+
+                    ☎️
+
+                    <div>
+
+                        <strong data-i18n="venue.phone">Teléfono</strong>
+
+                        <p>
+                            +34 963 03 33 92
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="venue-buttons">
+
+                    <a class="btn" data-i18n="venue.directions"
+                       href="https://www.google.com/maps/search/?api=1&query=Olympia+Hotel+Events+Spa+C%2F+Maestro+Serrano+3+Alboraya+Valencia"
+                       target="_blank">
+
+                        Cómo llegar
+
+                    </a>
+
+                    <a class="btn btn-outline"
+                       href="https://www.olympiahotel.com/"
+                       target="_blank">
+
+                        Web Olympia
+
+                    </a>
+
+                </div>
+
+                <div class="venue-services">
+
+                    <span data-i18n="venue.parking">🅿 Parking</span>
+
+                    <span data-i18n="venue.cafe">☕ Cafetería</span>
+
+                    <span data-i18n="venue.restaurant">🍴 Restaurante</span>
+
+                    <span data-i18n="venue.accessible">♿ Accesible</span>
+
+                    <span data-i18n="venue.changing">🚿 Vestuarios</span>
+
+                    <span>📶 WiFi</span>
+
+                </div>
+
+            </div>
+
+            <div class="venue-map">
+
+                <iframe
+                    src="https://www.google.com/maps?q=Olympia%20Hotel%20Events%20%26%20Spa%2C%20C%2F%20Maestro%20Serrano%2C%203%2C%20Alboraya%2C%20Valencia&output=embed"
+                    loading="lazy"
+                    allowfullscreen>
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section id="discover">
+
+    <div class="container">
+
+        <div class="section-header">
+
+            <span class="section-subtitle" data-i18n="discover.label">VALENCIA</span>
+
+            <h2 class="section-title" data-i18n="discover.title">EXPERIENCE VALENCIA</h2>
+
+            <p data-i18n="discover.intro">
+                Mucho más que squash. Descubre una de las ciudades más
+                atractivas del Mediterráneo durante tu estancia.
+            </p>
+
+        </div>
+
+        <div class="discover-grid">
+
+            <article class="discover-card">
+
+                <img src="assets/images/valencia/city-of-arts.webp" alt="City of Arts">
+
+                <div class="discover-overlay">
+
+                    <h3 data-i18n="discover.arts">City of Arts &amp; Sciences</h3>
+
+                    <p data-i18n="discover.artsText">Valencia's most iconic landmark. Discover the Oceanogràfic, Science Museum, Hemisfèric and one of Europe's most spectacular architectural complexes.</p>
+
+                    <a class="discover-cta" href="https://www.cac.es/" target="_blank" rel="noopener noreferrer" data-i18n="discover.explore">Explore &rarr;</a>
+
+                </div>
+
+            </article>
+
+            <article class="discover-card">
+
+                <img src="assets/images/valencia/malvarrosa.webp" alt="Malvarrosa">
+
+                <div class="discover-overlay">
+
+                    <h3 data-i18n="discover.beach">Malvarrosa Beach</h3>
+
+                    <p data-i18n="discover.beachText">Relax by the Mediterranean Sea, enjoy local restaurants, beach bars and one of Valencia's most famous beaches.</p>
+
+                    <a class="discover-cta" href="https://www.visitvalencia.com/en/what-to-see-valencia/beaches-in-valencia" target="_blank" rel="noopener noreferrer" data-i18n="discover.explore">Explore &rarr;</a>
+
+                </div>
+
+            </article>
+
+            <article class="discover-card">
+
+                <img src="assets/images/valencia/historic-centre.webp" alt="Historic Centre">
+
+                <div class="discover-overlay">
+
+                    <h3 data-i18n="discover.centre">Historic Centre</h3>
+
+                    <p data-i18n="discover.centreText">Explore Valencia Cathedral, Plaza de la Virgen, the Central Market and the UNESCO World Heritage Silk Exchange.</p>
+
+                    <a class="discover-cta" href="https://www.visitvalencia.com/en/what-to-do-valencia/valencian-culture" target="_blank" rel="noopener noreferrer" data-i18n="discover.explore">Explore &rarr;</a>
+
+                </div>
+
+            </article>
+
+            <article class="discover-card">
+
+                <img src="assets/images/valencia/paella.webp" alt="Paella">
+
+                <div class="discover-overlay">
+
+                    <h3 data-i18n="discover.food">Valencian Gastronomy</h3>
+
+                    <p data-i18n="discover.foodText">Taste authentic Paella Valenciana, Horchata, Fideuà and Mediterranean cuisine in the city where they were born.</p>
+
+                    <a class="discover-cta" href="https://www.visitvalencia.com/en/what-to-do-valencia/gastronomy" target="_blank" rel="noopener noreferrer" data-i18n="discover.explore">Explore &rarr;</a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </div>
+
+</section>
+<section id="sponsors">
+
+    <div class="container">
+
+        <div class="section-header sponsors-header">
+
+            <span class="section-subtitle" data-i18n="sectionHeaders.sponsors.label">SPONSORS</span>
+            <h2 class="section-title" data-i18n="sectionHeaders.sponsors.title">PATROCINADORES</h2>
+
+            <p data-i18n="sectionHeaders.sponsors.intro">
+                Gracias a nuestros patrocinadores por hacer posible el PSA Valencia Open 2026.
+            </p>
+
+        </div>
+
+        <div class="main-sponsor">
+
+            <a href="#" target="_blank">
+
+                <img src="assets/images/logos/copper.png" alt="Copper">
+
+            </a>
+
+        </div>
+
+        <div class="sponsors-grid">
+
+            <a class="sponsor-card sponsor-card-olympia" href="https://www.olympiahotel.com/" target="_blank" rel="noopener noreferrer"><img src="assets/images/sponsors/olympia.png" alt="Olympia"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-01.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-02.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-03.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-04.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-05.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-06.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-07.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-08.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-09.jpg"></a>
+
+            <a class="sponsor-card" href="#"><img src="assets/images/sponsors/sponsor-10.jpg"></a>
+
+        </div>
+
+    </div>
+
+</section>
+</main>
+<!-- =======================================================
+FOOTER
+======================================================= -->
+<footer>
+
+    <div class="container">
+
+        <p data-i18n="footer.copyright">
+
+            © 2026 PSA Valencia Open · Memorial Chimo Marmaneu
+
+        </p>
+
+    </div>
+
+</footer> 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/runtime-optimizations.js?v=20260803-1"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
+<script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/language.js?v=20260726-2"></script>
+<script src="js/navigation.js"></script>
+<script src="js/countdown.js"></script>
+<script src="js/router.js"></script>
+<script src="js/travel.js"></script>
+<script src="js/app.js?v=20260803-14"></script>
+
+</body>
+</html>
+
+

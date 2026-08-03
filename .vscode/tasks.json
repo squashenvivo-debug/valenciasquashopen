@@ -1,0 +1,185 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "git-status-check",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "git-commit-local-stable",
+			"type": "shell",
+			"command": "git add index.html admin.html js/app.js js/travel.js; git commit -m \"fix: restore local rendering and accents baseline\""
+		},
+		{
+			"label": "git-commit-local-stable-2",
+			"type": "shell",
+			"command": "git add index.html admin.html js/app.js js/travel.js; git commit -m 'fix: restore local rendering and accents baseline'"
+		},
+		{
+			"label": "git-status-after-commit",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "git-last-commit-summary",
+			"type": "shell",
+			"command": "git log -1 --oneline --name-only"
+		},
+		{
+			"label": "fix-admin-encoding",
+			"type": "shell",
+			"command": "$files = Get-ChildItem -Path . -Filter 'admin*.html' -File; foreach ($f in $files) { $raw = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8); $bytes = [System.Text.Encoding]::GetEncoding(1252).GetBytes($raw); $fixed = [System.Text.Encoding]::UTF8.GetString($bytes); [System.IO.File]::WriteAllText($f.FullName, $fixed, [System.Text.UTF8Encoding]::new($false)); } ; Write-Output \"fixed $($files.Count) files\""
+		},
+		{
+			"label": "inspect-admin-braces",
+			"type": "shell",
+			"command": "$i=1; Get-Content js/admin.js | ForEach-Object { if ($i -ge 840 -and $i -le 1080) { '{0,5}: {1}' -f $i, $_ }; $i++ }"
+		},
+		{
+			"label": "inspect-admin-prelude",
+			"type": "shell",
+			"command": "$i=1; Get-Content js/admin.js | ForEach-Object { if ($i -ge 740 -and $i -le 840) { '{0,5}: {1}' -f $i, $_ }; $i++ }"
+		},
+		{
+			"label": "bump-local-script-versions",
+			"type": "shell",
+			"command": "$adminFiles = Get-ChildItem -Path . -Filter 'admin*.html' -File; foreach($f in $adminFiles){ $c = Get-Content -Raw $f.FullName; $c = $c -replace 'js/admin\\.js\\?v=20260726-6','js/admin.js?v=20260726-7'; Set-Content -Path $f.FullName -Value $c -Encoding utf8; }; $index='index.html'; $ci = Get-Content -Raw $index; $ci = $ci -replace 'js/app\\.js\\?v=20260726-10','js/app.js?v=20260726-11'; Set-Content -Path $index -Value $ci -Encoding utf8; Write-Output 'version bump done';"
+		},
+		{
+			"label": "fix-two-admin-encodings",
+			"type": "shell",
+			"command": "$targets = @('admin-draw-results.html','admin-draw-schedule.html'); foreach($name in $targets){ $full = Join-Path (Get-Location) $name; $raw = [System.IO.File]::ReadAllText($full, [System.Text.Encoding]::UTF8); $bytes = [System.Text.Encoding]::GetEncoding(1252).GetBytes($raw); $fixed = [System.Text.Encoding]::UTF8.GetString($bytes); [System.IO.File]::WriteAllText($full, $fixed, [System.Text.UTF8Encoding]::new($false)); }; Write-Output 'fixed two files';"
+		},
+		{
+			"label": "repair-all-admin-encoding-again",
+			"type": "shell",
+			"command": "$files = Get-ChildItem -Path . -Filter 'admin*.html' -File; foreach ($f in $files) { $raw = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8); $bytes = [System.Text.Encoding]::GetEncoding(1252).GetBytes($raw); $fixed = [System.Text.Encoding]::UTF8.GetString($bytes); [System.IO.File]::WriteAllText($f.FullName, $fixed, [System.Text.UTF8Encoding]::new($false)); } ; Write-Output \"repaired $($files.Count) admin files\""
+		},
+		{
+			"label": "git-status-local-work",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "fix-admin-mojibake-replacement-char",
+			"type": "shell",
+			"command": "$map = [ordered]@{\n'sesi�n'='sesión';\n'Contrase�a'='Contraseña';\n'Galer�a'='Galería';\n'Configuraci�n'='Configuración';\n'Administraci�n'='Administración';\n'pr�ximo a�o'='próximo año';\n'T�tulo'='Título';\n'Ubicaci�n'='Ubicación';\n'Alboraya � Valencia'='Alboraya · Valencia';\n'espa�ol'='español';\n'traducir�'='traducirá';\n'A�ade'='Añade';\n'a�ade'='añade';\n'Pa�s'='País';\n'c�digo'='código';\n'Posici�n'='Posición';\n'A�adir'='Añadir';\n'patr�n'='patrón';\n'autom�tico'='automático';\n'Art�culo'='Artículo';\n'Gesti�n'='Gestión';\n'galer�as'='galerías';\n'galer�a'='galería';\n'edici�n'='edición';\n'sesi�n LIVE'='sección LIVE';\n'seccion LIVE'='sección LIVE';\n'directo (autom�tico)'='directo (automático)';\n'detecta autom�ticamente'='detecta automáticamente';\n'pr�ximos'='próximos';\n'configuraci�n'='configuración';\n'reseteado'='reseteado';\n'pasar�'='pasará';\n'v�lida'='válida';\n'v�deo'='vídeo';\n'd�a'='día';\n'd�as'='días';\n'campe�n'='campeón';\n'categor�a'='categoría';\n'descripci�n'='descripción';\n'No hay galer�as'='No hay galerías';\n'Editor de galer�as'='Editor de galerías';\n'Cafeter�a'='Cafetería';\n'Tel�fono'='Teléfono';\n'Direcci�n'='Dirección';\n};\nGet-ChildItem -Filter 'admin*.html' -File | ForEach-Object {\n  $c = Get-Content -Raw $_.FullName;\n  foreach($k in $map.Keys){ $c = $c.Replace($k, $map[$k]); }\n  Set-Content -Path $_.FullName -Value $c -Encoding utf8;\n}\nWrite-Output 'admin replacement map applied';"
+		},
+		{
+			"label": "fix-admin-mojibake-replacement-char-2",
+			"type": "shell",
+			"command": "$pairs = @(\n  @('sesi�n','sesión'),\n  @('Contrase�a','Contraseña'),\n  @('Galer�a','Galería'),\n  @('Configuraci�n','Configuración'),\n  @('Administraci�n','Administración'),\n  @('pr�ximo a�o','próximo año'),\n  @('T�tulo','Título'),\n  @('Ubicaci�n','Ubicación'),\n  @('Alboraya � Valencia','Alboraya · Valencia'),\n  @('espa�ol','español'),\n  @('traducir�','traducirá'),\n  @('A�ade','Añade'),\n  @('a�ade','añade'),\n  @('Pa�s','País'),\n  @('c�digo','código'),\n  @('Posici�n','Posición'),\n  @('A�adir','Añadir'),\n  @('patr�n','patrón'),\n  @('autom�tico','automático'),\n  @('Art�culo','Artículo'),\n  @('Gesti�n','Gestión'),\n  @('galer�as','galerías'),\n  @('galer�a','galería'),\n  @('edici�n','edición'),\n  @('seccion LIVE','sección LIVE'),\n  @('directo (autom�tico)','directo (automático)'),\n  @('detecta autom�ticamente','detecta automáticamente'),\n  @('pr�ximos','próximos'),\n  @('configuraci�n','configuración'),\n  @('pasar�','pasará'),\n  @('v�lida','válida'),\n  @('v�deo','vídeo'),\n  @('d�a','día'),\n  @('d�as','días'),\n  @('campe�n','campeón'),\n  @('categor�a','categoría'),\n  @('descripci�n','descripción'),\n  @('No hay galer�as','No hay galerías'),\n  @('Editor de galer�as','Editor de galerías'),\n  @('Cafeter�a','Cafetería'),\n  @('Tel�fono','Teléfono'),\n  @('Direcci�n','Dirección')\n);\nGet-ChildItem -Filter 'admin*.html' -File | ForEach-Object {\n  $c = Get-Content -Raw $_.FullName;\n  foreach($p in $pairs){ $c = $c.Replace($p[0], $p[1]); }\n  Set-Content -Path $_.FullName -Value $c -Encoding utf8;\n}\nWrite-Output 'admin replacement map applied';"
+		},
+		{
+			"label": "decode-admin-1252-to-utf8",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $raw = Get-Content -Raw $_.FullName; $bytes = [System.Text.Encoding]::GetEncoding(1252).GetBytes($raw); $fixed = [System.Text.Encoding]::UTF8.GetString($bytes); Set-Content -Path $_.FullName -Value $fixed -Encoding utf8; }; Write-Output 'decoded admin files';"
+		},
+		{
+			"label": "fix-admin-replacement-char-words",
+			"type": "shell",
+			"command": "$pairs = @(\n  @('sesi�n','sesión'),\n  @('Contrase�a','Contraseña'),\n  @('Galer�a','Galería'),\n  @('Configuraci�n','Configuración'),\n  @('Administraci�n','Administración'),\n  @('pr�ximo a�o','próximo año'),\n  @('T�tulo','Título'),\n  @('Ubicaci�n','Ubicación'),\n  @('Alboraya � Valencia','Alboraya · Valencia'),\n  @('espa�ol','español'),\n  @('traducir�','traducirá'),\n  @('A�ade','Añade'),\n  @('Pa�s','País'),\n  @('c�digo','código'),\n  @('Posici�n','Posición'),\n  @('A�adir','Añadir'),\n  @('patr�n','patrón'),\n  @('autom�tico','automático'),\n  @('Art�culo','Artículo'),\n  @('Gesti�n','Gestión'),\n  @('galer�as','galerías'),\n  @('galer�a','galería'),\n  @('edici�n','edición'),\n  @('secci�n','sección')\n);\nGet-ChildItem -Filter 'admin*.html' -File | ForEach-Object {\n  $c = Get-Content -Raw $_.FullName;\n  foreach($p in $pairs){ $c = $c.Replace($p[0], $p[1]); }\n  Set-Content -Path $_.FullName -Value $c -Encoding utf8;\n}\nWrite-Output 'fixed replacement-char words';"
+		},
+		{
+			"label": "git-status-after-local-tests",
+			"type": "shell",
+			"command": "git status --short"
+		},
+		{
+			"label": "bump-admin-js-version",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $c = $c -replace 'js/admin\\.js\\?v=20260726-7','js/admin.js?v=20260726-8'; Set-Content -Path $_.FullName -Value $c -Encoding utf8; }; Write-Output 'admin version bump done';"
+		},
+		{
+			"label": "bump-admin-version-v9",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $c = $c -replace 'js/admin\\.js\\?v=20260726-8','js/admin.js?v=20260726-9'; Set-Content -Path $_.FullName -Value $c -Encoding utf8; }; Write-Output 'admin version now v9';"
+		},
+		{
+			"label": "admin-menu-cuadro-no-idiomas",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $c = $c.Replace('<a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Resultados</a>','<a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Cuadro</a>'); $c = [regex]::Replace($c,'\\r?\\n\\s*<a href=\"#news-admin-panel\" data-section=\"news-admin-panel\">Idiomas</a>',''); Set-Content -Path $_.FullName -Value $c -Encoding utf8 }; Write-Output 'admin menu updated';"
+		},
+		{
+			"label": "admin-menu-add-cruces",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $old = '<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>`r`n`r`n            <a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Resultados</a>'; $new = '<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>`r`n`r`n            <a href=\"#draw-builder-panel\" data-section=\"draw-builder-panel\">Cruces</a>`r`n`r`n            <a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Resultados</a>'; $c = $c.Replace($old, $new); Set-Content -Path $_.FullName -Value $c -Encoding utf8 }; Write-Output 'inserted Cruces menu in admin pages';"
+		},
+		{
+			"label": "copy-admin-draw-builder",
+			"type": "shell",
+			"command": "Copy-Item \"admin-draw-schedule.html\" \"admin-draw-builder.html\" -Force; Write-Output \"copied\""
+		},
+		{
+			"label": "insert-cruces-menu-regex",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $c = [regex]::Replace($c,'<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>\\s*<a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Resultados</a>','<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>`r`n`r`n            <a href=\"#draw-builder-panel\" data-section=\"draw-builder-panel\">Cruces</a>`r`n`r`n            <a href=\"#draw-results-panel\" data-section=\"draw-results-panel\">Resultados</a>'); Set-Content -Path $_.FullName -Value $c -Encoding utf8 }; Write-Output 'cruces inserted regex';"
+		},
+		{
+			"label": "insert-cruces-after-cuadro",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; if ($c -notmatch 'draw-builder-panel') { $c = [regex]::Replace($c,'<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>','<a href=\"#draw-schedule-panel\" data-section=\"draw-schedule-panel\">Cuadro</a>`r`n`r`n            <a href=\"#draw-builder-panel\" data-section=\"draw-builder-panel\">Cruces</a>',1); Set-Content -Path $_.FullName -Value $c -Encoding utf8 } }; Write-Output 'cruces inserted after cuadro';"
+		},
+		{
+			"label": "bump-admin-js-v10",
+			"type": "shell",
+			"command": "Get-ChildItem -Filter 'admin*.html' -File | ForEach-Object { $c = Get-Content -Raw $_.FullName; $c = $c -replace 'js/admin\\.js\\?v=20260726-9','js/admin.js?v=20260726-10'; Set-Content -Path $_.FullName -Value $c -Encoding utf8 }; Write-Output 'admin js bumped to v10';"
+		},
+		{
+			"label": "git-prepush-check",
+			"type": "shell",
+			"command": "git status --short; git branch --show-current; git remote -v"
+		},
+		{
+			"label": "git-commit-release",
+			"type": "shell",
+			"command": "git add -A; git reset -- .vscode/tasks.json; git commit -m \"feat(admin): add draw builder, visits metrics and local analytics tracking\""
+		},
+		{
+			"label": "git-commit-release-2",
+			"type": "shell",
+			"command": "git status --short; git commit -m 'feat: add draw builder, visit metrics and local analytics tracking'"
+		},
+		{
+			"label": "git-push-main",
+			"type": "shell",
+			"command": "git push origin main"
+		},
+		{
+			"label": "check-git-availability",
+			"type": "shell",
+			"command": "$ErrorActionPreference='SilentlyContinue'; where.exe git; if (Get-Command winget -ErrorAction SilentlyContinue) { winget --version } else { Write-Output 'winget-not-found' }"
+		},
+		{
+			"label": "install-git-winget",
+			"type": "shell",
+			"command": "winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements --silent"
+		},
+		{
+			"label": "locate-git-and-status",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; if (!(Test-Path $git)) { Write-Error 'git.exe not found after install'; exit 1 }; & $git --version; & $git status --short"
+		},
+		{
+			"label": "check-gh-cli",
+			"type": "shell",
+			"command": "$gh=(Get-Command gh -ErrorAction SilentlyContinue); if ($gh) { gh --version } else { Write-Output 'gh-not-found' }"
+		},
+		{
+			"label": "create-safe-backup-copy",
+			"type": "shell",
+			"command": "$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'; $src = '..\\psavalencia-main'; $dst = \"..\\psavalencia-main-backup-$stamp\"; Copy-Item -Path $src -Destination $dst -Recurse -Force; Write-Output \"BACKUP_CREATED $dst\""
+		},
+		{
+			"label": "create-safe-backup-copy-2",
+			"type": "shell",
+			"command": "$dst = ('..\\\\psavalencia-main-backup-' + (Get-Date -Format yyyyMMdd-HHmmss)); Copy-Item -Path . -Destination $dst -Recurse -Force; Write-Output \"BACKUP_CREATED $dst\""
+		},
+		{
+			"label": "init-new-local-repo",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; & $git init -b main; $name = (& $git config --global user.name); $email = (& $git config --global user.email); if (-not $name) { & $git config user.name 'PSA Valencia'; }; if (-not $email) { & $git config user.email 'noreply@local.dev'; }; & $git add -A; & $git commit -m 'chore: initial safe migration snapshot'; & $git status --short; & $git branch --show-current"
+		}
+	]
+}

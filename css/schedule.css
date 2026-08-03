@@ -1,0 +1,67 @@
+#schedule{
+
+    padding:120px 0;
+
+}
+
+.schedule-days{
+
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:40px;
+
+}
+
+.schedule-tab{
+
+    background:#11283A;
+
+    color:white;
+
+    border:none;
+
+    padding:12px 24px;
+
+    border-radius:30px;
+
+    cursor:pointer;
+
+    transition:.30s;
+
+}
+
+.schedule-tab.active{
+
+    background:#C78C32;
+
+}
+
+.schedule-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+.schedule-match{
+
+    display:grid;
+
+    grid-template-columns:120px 140px 1fr;
+
+    gap:20px;
+
+    background:#102233;
+
+    padding:22px;
+
+    border-radius:18px;
+
+}

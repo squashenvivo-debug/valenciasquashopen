@@ -1,0 +1,349 @@
+/*==================================================
+TOURNAMENT
+==================================================*/
+
+#tournament{
+
+    padding:120px 0;
+
+    background:#081826;
+
+}
+
+#tournament-intro{
+
+    margin-top:50px;
+
+}
+
+.tournament-main-sponsor{
+    max-width:320px;
+    margin:18px auto 0;
+    padding:16px 18px;
+    border-radius:16px;
+    background:#ffffff;
+    border:1px solid rgba(11,34,51,.16);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.tournament-main-sponsor img{
+    width:100%;
+    max-width:240px;
+    height:auto;
+    object-fit:contain;
+}
+
+.tournament-article{
+
+    max-width:900px;
+
+    margin:0 auto;
+
+}
+
+.tournament-card{
+
+    background:#ffffff;
+
+    color:#1f2a37;
+
+    border-radius:16px;
+
+    padding:2rem;
+
+    box-shadow:0 16px 40px rgba(0,0,0,.22);
+
+}
+
+.tournament-header{
+
+    margin-bottom:1.6rem;
+
+    padding-bottom:1rem;
+
+    border-bottom:2px solid #eef1f5;
+
+}
+
+.tournament-header h3{
+
+    color:#0b2240;
+
+    font-size:clamp(1.55rem, 2.5vw, 2.15rem);
+
+    line-height:1.2;
+
+    margin:0 0 .5rem;
+
+}
+
+.tournament-header p{
+
+    margin:0;
+
+    font-size:1.02rem;
+
+    color:#556070;
+
+    font-style:italic;
+
+}
+
+.tournament-content{
+
+    font-size:1rem;
+
+    line-height:1.72;
+
+}
+
+.tournament-content p{
+
+    margin:0 0 1rem;
+
+}
+
+.tournament-history{
+
+    background:#f4f8fc;
+
+    border-left:4px solid #0f5fa8;
+
+    border-radius:0 10px 10px 0;
+
+    padding:1.2rem 1.1rem;
+
+    margin:1.4rem 0;
+
+}
+
+.tournament-history h4{
+
+    margin:0 0 .65rem;
+
+    color:#0f5fa8;
+
+    font-size:1.25rem;
+
+}
+
+.tournament-history ul{
+
+    margin:.5rem 0 0;
+
+    padding-left:1.2rem;
+
+}
+
+.tournament-history li{
+
+    margin-bottom:.7rem;
+
+}
+
+.tournament-footer{
+
+    text-align:center;
+
+    background:#edf3f8;
+
+    border-radius:10px;
+
+    padding:1rem;
+
+    margin-top:1.2rem;
+
+}
+
+.tournament-footer p{
+
+    margin:.2rem 0;
+
+}
+
+.tournament-footer .lead{
+
+    font-size:1.08rem;
+
+    font-weight:700;
+
+    color:#0b2240;
+
+}
+
+.tournament-footer a{
+
+    color:#0f5fa8;
+
+    font-weight:700;
+
+    text-decoration:underline;
+
+}
+
+@media (max-width:768px){
+
+    .tournament-card{
+
+        padding:1.3rem;
+
+        border-radius:12px;
+
+    }
+
+    .tournament-content{
+
+        font-size:.96rem;
+
+        line-height:1.65;
+
+    }
+
+    .tournament-history{
+
+        padding:1rem .9rem;
+
+    }
+
+    .tournament-footer .lead{
+
+        font-size:1rem;
+
+    }
+
+}
+
+@media (max-width:576px){
+
+    #tournament .section-header{
+        margin-bottom:16px;
+    }
+
+    #tournament{
+
+        padding:80px 0;
+
+    }
+
+    #tournament-intro{
+
+        margin-top:10px;
+
+    }
+
+    .tournament-main-sponsor{
+        max-width:130px;
+        margin-top:2px;
+        padding:6px;
+    }
+
+    .tournament-main-sponsor img{
+        max-width:120px;
+    }
+
+    .tournament-card{
+
+        padding:1rem .9rem;
+
+        border-radius:10px;
+
+    }
+
+    .tournament-header{
+
+        margin-bottom:1rem;
+
+        padding-bottom:.7rem;
+
+    }
+
+    .tournament-header h3{
+
+        font-size:1.2rem;
+
+        margin-bottom:.35rem;
+
+    }
+
+    .tournament-header p{
+
+        font-size:.88rem;
+
+    }
+
+    .tournament-content{
+
+        font-size:.88rem;
+
+        line-height:1.5;
+
+    }
+
+    .tournament-content p{
+
+        margin-bottom:.75rem;
+
+    }
+
+    .tournament-history{
+
+        margin:1rem 0;
+
+        padding:.85rem .75rem;
+
+    }
+
+    .tournament-history h4{
+
+        font-size:1rem;
+
+        margin-bottom:.45rem;
+
+    }
+
+    .tournament-history li{
+
+        margin-bottom:.45rem;
+
+    }
+
+    .tournament-footer{
+
+        padding:.75rem;
+
+        margin-top:.9rem;
+
+    }
+
+    .tournament-footer .lead{
+
+        font-size:.92rem;
+
+    }
+
+    .tournament-footer p{
+
+        font-size:.85rem;
+
+    }
+
+}
+
+.section-kicker{
+
+    display:inline-block;
+
+    margin-bottom:12px;
+
+    color:#C78C32;
+
+    font-size:.9rem;
+
+    letter-spacing:3px;
+
+    font-weight:700;
+
+}
