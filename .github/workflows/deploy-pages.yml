@@ -103,8 +103,20 @@ jobs:
         run: |
           set -euo pipefail
           refs_file="$(mktemp)"
+          scan_files=()
+          for file in \
+            dist/index.html \
+            dist/gallery.html \
+            dist/news.html \
+            dist/player.html \
+            dist/draw.html \
+            dist/live.html; do
+            [ -f "$file" ] && scan_files+=("$file")
+          done
 
-          grep -RhoE 'assets/[A-Za-z0-9_./-]+\.(png|jpg|jpeg|webp|avif|svg|gif)' dist \
+          test "${#scan_files[@]}" -gt 0 || (echo "No public HTML files found for CDN validation" && exit 1)
+
+          grep -hoE 'assets/[A-Za-z0-9_./-]+\.(png|jpg|jpeg|webp|avif|svg|gif)' "${scan_files[@]}" \
             | sed 's#^\./##' \
             | sort -u > "$refs_file"
 
