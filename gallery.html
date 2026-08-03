@@ -15,44 +15,9 @@
     <div class="container">
         <header class="gallery-page-header">
             <h1 class="gallery-page-title" id="galleryPageTitle">Galeria</h1>
-            <a class="gallery-back-link" href="index.html#gallery">Volver</a>
         </header>
 
-        <section class="gallery-filter-panel" aria-label="Filtros de galeria">
-            <div class="gallery-filter-grid">
-                <div>
-                    <label class="field-label" for="gallerySearchInput">Buscar</label>
-                    <input id="gallerySearchInput" type="search" placeholder="Jugador, torneo, club, categoria...">
-                </div>
-                <div>
-                    <label class="field-label" for="galleryTournamentFilter">Torneo</label>
-                    <select id="galleryTournamentFilter"></select>
-                </div>
-                <div>
-                    <label class="field-label" for="galleryClubFilter">Club</label>
-                    <select id="galleryClubFilter"></select>
-                </div>
-                <div>
-                    <label class="field-label" for="galleryDateFilter">Fecha</label>
-                    <select id="galleryDateFilter"></select>
-                </div>
-                <div>
-                    <label class="field-label" for="galleryPlayerFilter">Jugador</label>
-                    <select id="galleryPlayerFilter"></select>
-                </div>
-                <div>
-                    <label class="field-label" for="galleryCategoryFilter">Categoria</label>
-                    <select id="galleryCategoryFilter"></select>
-                </div>
-            </div>
-            <div class="gallery-filter-actions">
-                <p id="galleryResultsSummary" class="gallery-filter-summary"></p>
-                <div class="gallery-filter-buttons">
-                    <button id="galleryDownloadZip" class="gallery-filter-reset" type="button">Descargar ZIP</button>
-                    <button id="galleryResetFilters" class="gallery-filter-reset" type="button">Limpiar filtros</button>
-                </div>
-            </div>
-        </section>
+        <p id="galleryResultsSummary" class="gallery-filter-summary"></p>
 
         <div id="galleryDetailGrid" class="gallery-detail-grid"></div>
         <p id="galleryDetailEmpty" class="gallery-empty" style="display:none;">No hay fotos en esta galeria.</p>

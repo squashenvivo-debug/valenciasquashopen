@@ -180,6 +180,34 @@
 			"label": "init-new-local-repo",
 			"type": "shell",
 			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; & $git init -b main; $name = (& $git config --global user.name); $email = (& $git config --global user.email); if (-not $name) { & $git config user.name 'PSA Valencia'; }; if (-not $email) { & $git config user.email 'noreply@local.dev'; }; & $git add -A; & $git commit -m 'chore: initial safe migration snapshot'; & $git status --short; & $git branch --show-current"
+		},
+		{
+			"label": "extract-live-config-values",
+			"type": "shell",
+			"command": "$ProgressPreference='SilentlyContinue'; $cfg = Invoke-WebRequest -UseBasicParsing -Uri 'https://psavalenciaopen.com/config.js' -TimeoutSec 20 | Select-Object -ExpandProperty Content; $url = [regex]::Match($cfg, 'supabaseUrl:\\s*\"([^\"]*)\"').Groups[1].Value; $anon = [regex]::Match($cfg, 'supabaseAnonKey:\\s*\"([^\"]*)\"').Groups[1].Value; $cdn = [regex]::Match($cfg, 'assetCdnBase:\\s*\"([^\"]*)\"').Groups[1].Value; Write-Output \"SUPABASE_URL=$url\"; Write-Output \"SUPABASE_ANON_KEY_LEN=$($anon.Length)\"; Write-Output \"ASSET_CDN_BASE=$cdn\";"
+		},
+		{
+			"label": "read-live-config-js",
+			"type": "shell",
+			"command": "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing -Uri 'https://psavalenciaopen.com/config.js' -TimeoutSec 20 | Select-Object -ExpandProperty Content"
+		},
+		{
+			"label": "commit-fix-build-optional-data",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; & $git add .github/workflows/deploy-pages.yml; & $git commit -m 'fix(ci): allow deploy build when data directory is absent'; & $git push origin main"
+		},
+		{
+			"label": "commit-fix-cdn-check-public-only",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; & $git add .github/workflows/deploy-pages.yml; & $git commit -m 'fix(ci): validate CDN only for public pages'; & $git push origin main"
+		},
+		{
+			"label": "git-commit-push-explicit",
+			"type": "shell",
+			"command": "$git='C:\\Program Files\\Git\\cmd\\git.exe'; if (!(Test-Path $git)) { $git='C:\\Program Files\\Git\\bin\\git.exe' }; & $git add -A; & $git commit -m 'feat(admin): harden gallery upload and public view'; & $git push origin main",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

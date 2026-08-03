@@ -38,6 +38,13 @@ let pendingGalleryPhotos = [];
 const GALLERY_UPLOAD_RESUME_KEY = "psa_gallery_tus_resumes";
 const GALLERY_UPLOAD_CHUNK_SIZE = 6 * 1024 * 1024;
 const GALLERY_UPLOAD_CONCURRENCY = 3;
+let galleryUploadTelemetry = {
+    totalBytes: 0,
+    startedAt: 0,
+    lastTs: 0,
+    lastCompletedBytes: 0,
+    smoothedBytesPerSecond: 0
+};
 let galleryUploadRetryPending = false;
 let galleryUploadOnlineListenerBound = false;
 let galleryEditMode = false;
@@ -295,6 +302,24 @@ function formatBytes(bytes) {
         index += 1;
     }
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+function formatDuration(seconds) {
+    const value = Number(seconds || 0);
+    if (!Number.isFinite(value) || value <= 0) return "0s";
+    const rounded = Math.max(1, Math.round(value));
+    const h = Math.floor(rounded / 3600);
+    const m = Math.floor((rounded % 3600) / 60);
+    const s = rounded % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+}
+
+function formatUploadRate(bytesPerSecond) {
+    const value = Number(bytesPerSecond || 0);
+    if (!Number.isFinite(value) || value <= 0) return "0 B/s";
+    return `${formatBytes(value)}/s`;
 }
 
 function estimateDataUrlBytes(dataUrl) {
@@ -1734,6 +1759,31 @@ function readNewGalleryMetaInputs() {
     });
 }
 
+function formatGalleryTitleDate(value) {
+    const normalized = normalizeGalleryDateValue(value);
+    if (!normalized) return "";
+    const dt = new Date(`${normalized}T00:00:00`);
+    if (Number.isNaN(dt.getTime())) return normalized;
+    return dt.toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+function buildFallbackGalleryTitle(galleryMeta = {}) {
+    const parts = [];
+    const dateLabel = formatGalleryTitleDate(galleryMeta?.date);
+    const tournament = String(galleryMeta?.tournament || "").trim();
+    const club = String(galleryMeta?.club || "").trim();
+
+    if (dateLabel) parts.push(dateLabel);
+    if (tournament) parts.push(tournament);
+    if (club) parts.push(club);
+
+    return parts.length > 0 ? parts.join(" · ") : "Galería";
+}
+
 function normalizeGallery(gallery) {
     const meta = normalizeGalleryMeta(gallery?.meta);
     const photos = Array.isArray(gallery?.photos) ? gallery.photos : [];
@@ -1914,6 +1964,14 @@ function readGalleryCollection() {
 function saveGalleryCollection(collection) {
     try {
         localStorage.setItem(GALLERY_COLLECTION_KEY, JSON.stringify(collection));
+
+        const cloud = window.PSACloudStore;
+        if (cloud?.isReady?.()) {
+            cloud.saveLocalStorageKeyToCloud(GALLERY_COLLECTION_KEY).catch(() => {
+                // Si la nube falla, mantenemos al menos la copia local.
+            });
+        }
+
         return true;
     } catch (error) {
         return false;
@@ -2124,6 +2182,39 @@ function updateGalleryUploadProgress(photos = pendingGalleryPhotos) {
     const total = photos.reduce((sum, photo) => sum + Number(photo.file?.size || 0), 0);
     const completed = photos.reduce((sum, photo) => sum + Math.min(Number(photo.uploadedBytes || 0), Number(photo.file?.size || 0)), 0);
     const percent = total ? Math.round((completed / total) * 100) : 0;
+    const now = Date.now();
+    if (total === 0) {
+        galleryUploadTelemetry = {
+            totalBytes: 0,
+            startedAt: 0,
+            lastTs: 0,
+            lastCompletedBytes: 0,
+            smoothedBytesPerSecond: 0
+        };
+    } else if (!galleryUploadTelemetry.startedAt || galleryUploadTelemetry.totalBytes !== total) {
+        galleryUploadTelemetry = {
+            totalBytes: total,
+            startedAt: now,
+            lastTs: now,
+            lastCompletedBytes: completed,
+            smoothedBytesPerSecond: 0
+        };
+    } else {
+        const deltaTimeSeconds = Math.max((now - galleryUploadTelemetry.lastTs) / 1000, 0.001);
+        const deltaBytes = Math.max(0, completed - galleryUploadTelemetry.lastCompletedBytes);
+        const instantRate = deltaBytes / deltaTimeSeconds;
+        if (instantRate > 0) {
+            galleryUploadTelemetry.smoothedBytesPerSecond = galleryUploadTelemetry.smoothedBytesPerSecond
+                ? (galleryUploadTelemetry.smoothedBytesPerSecond * 0.75) + (instantRate * 0.25)
+                : instantRate;
+        }
+        galleryUploadTelemetry.lastTs = now;
+        galleryUploadTelemetry.lastCompletedBytes = completed;
+    }
+
+    const remaining = Math.max(total - completed, 0);
+    const speed = galleryUploadTelemetry.smoothedBytesPerSecond;
+    const etaSeconds = speed > 0 ? (remaining / speed) : 0;
     const summary = document.getElementById("galleryUploadSummary");
     const bar = document.getElementById("galleryUploadProgressBar");
     const progress = summary?.querySelector("[role='progressbar']");
@@ -2133,7 +2224,9 @@ function updateGalleryUploadProgress(photos = pendingGalleryPhotos) {
     if (progress) progress.setAttribute("aria-valuenow", String(percent));
     if (text) {
         const done = photos.filter((photo) => photo.uploadedUrl).length;
-        text.textContent = `${done}/${photos.length} fotos listas · ${percent}%`;
+        const speedText = formatUploadRate(speed);
+        const etaText = remaining > 0 ? formatDuration(etaSeconds) : "0s";
+        text.textContent = `${done}/${photos.length} fotos listas · ${percent}% · ${formatBytes(completed)}/${formatBytes(total)} · Restan ${formatBytes(remaining)} · ${speedText} · ETA ${etaText}`;
     }
 }
 
@@ -2210,6 +2303,42 @@ async function uploadGalleryQueue(galleryId, photos = pendingGalleryPhotos) {
         }
     });
     await Promise.all(workers);
+}
+
+async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMessage = "Analizando y mejorando la foto con IA…") {
+    const client = window.AdminSupabase?.getClient?.();
+    const sourcePath = photo?.sourceStoragePath || photo?.storagePath;
+    if (!photo || !sourcePath || !client) {
+        throw new Error("Esta foto no tiene una ruta válida en Supabase Storage.");
+    }
+
+    updateGalleryStatus(galleryStatusMessage);
+    const { data, error } = await client.functions.invoke("process-photo", { body: { sourcePath } });
+    if (error) throw error;
+    if (!data?.processedUrl || !data?.processedPath) {
+        throw new Error(data?.error || "La IA no devolvió un resultado válido.");
+    }
+
+    photo.sourceSrc = photo.sourceSrc || photo.src;
+    photo.sourceStoragePath = sourcePath;
+    photo.processedSrc = data.processedUrl;
+    photo.processedStoragePath = data.processedPath;
+    photo.ai = { detection: data.detection || null, quality: data.quality || null, processedAt: new Date().toISOString() };
+
+    if (galleriesInner && !saveGalleryCollection(galleriesInner)) {
+        throw new Error("No se pudo guardar el resultado IA.");
+    }
+
+    return photo;
+}
+
+async function processGalleryPhotosWithAI(photos, galleriesInner) {
+    for (const photo of photos) {
+        if (!photo?.uploadedUrl) continue;
+        if (photo.processedSrc && photo.processedStoragePath) continue;
+        photo.status = "Procesando con IA…";
+        await processGalleryPhotoWithAI(photo, galleriesInner, `Procesando ${photo.name || "foto"} con IA para mejorar el contraluz…`);
+    }
 }
 
 function createGalleryUploadPhoto(file) {
@@ -2448,6 +2577,13 @@ function renderGalleryAdminList() {
             }
 
             gallery.photos = gallery.photos.concat(newPhotos);
+
+            try {
+                await processGalleryPhotosWithAI(newPhotos, galleriesInner);
+            } catch (error) {
+                updateGalleryStatus(`Las fotos se subieron, pero el procesado IA falló en alguna imagen: ${error?.message || "error de IA"}`);
+            }
+
             const saved = saveGalleryCollection(galleriesInner);
             if (!saved) {
                 updateGalleryStatus("No se pudo guardar: almacenamiento lleno. Reduce el número o tamaño de fotos.");
@@ -2553,25 +2689,10 @@ function renderGalleryAdminList() {
             const galleriesInner = readGalleryCollection();
             const gallery = getGalleryById(galleriesInner, galleryId);
             const photo = gallery?.photos?.find((item) => item.id === photoId);
-            const sourcePath = photo?.sourceStoragePath || photo?.storagePath;
-            const client = window.AdminSupabase?.getClient?.();
-            if (!photo || !sourcePath || !client) {
-                updateGalleryStatus("Esta foto no tiene una ruta válida en Supabase Storage.");
-                return;
-            }
 
             button.disabled = true;
-            updateGalleryStatus("Analizando y mejorando la foto con IA…");
             try {
-                const { data, error } = await client.functions.invoke("process-photo", { body: { sourcePath } });
-                if (error) throw error;
-                if (!data?.processedUrl || !data?.processedPath) throw new Error(data?.error || "La IA no devolvió un resultado válido.");
-                photo.sourceSrc = photo.sourceSrc || photo.src;
-                photo.sourceStoragePath = sourcePath;
-                photo.processedSrc = data.processedUrl;
-                photo.processedStoragePath = data.processedPath;
-                photo.ai = { detection: data.detection || null, quality: data.quality || null, processedAt: new Date().toISOString() };
-                if (!saveGalleryCollection(galleriesInner)) throw new Error("No se pudo guardar el resultado IA.");
+                await processGalleryPhotoWithAI(photo, galleriesInner);
                 updateGalleryStatus("Foto procesada y validada; el resultado se guardó en processed.");
                 renderGalleryAdminList();
             } catch (error) {
@@ -2675,11 +2796,11 @@ function toggleGalleryEditMode() {
 async function saveNewGallery() {
     const title = getLocalizedFromInputs("newGalleryTitle");
     const galleryMeta = readNewGalleryMetaInputs();
-
-    if (!String(title.es || "").trim()) {
-        updateGalleryStatus("Escribe el título de galería en español.");
-        return;
-    }
+    const fallbackTitle = buildFallbackGalleryTitle(galleryMeta);
+    const hasCustomTitle = String(title.es || "").trim().length > 0;
+    const localizedTitle = hasCustomTitle
+        ? await buildLocalizedFromSpanish(title.es)
+        : normalizeLocalizedText(fallbackTitle);
 
     if (pendingGalleryPhotos.length === 0) {
         updateGalleryStatus("Sube al menos una foto.");
@@ -2708,15 +2829,25 @@ async function saveNewGallery() {
     }
 
     const galleries = readGalleryCollection();
-    const localizedTitle = await buildLocalizedFromSpanish(title.es);
 
     const localizedPhotos = await Promise.all(pendingGalleryPhotos.map(async (photo) => ({
         id: photo.id,
         src: photo.uploadedUrl,
         storagePath: photo.objectPath,
+        sourceSrc: photo.uploadedUrl,
+        sourceStoragePath: photo.objectPath,
+        processedSrc: "",
+        processedStoragePath: "",
         caption: await buildLocalizedFromSpanish(photo.caption?.es || ""),
-        meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta)
+        meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta),
+        ai: null
     })));
+
+    try {
+        await processGalleryPhotosWithAI(localizedPhotos, galleries);
+    } catch (error) {
+        updateGalleryStatus(`La galería se subió, pero el procesado IA falló en alguna imagen: ${error?.message || "error de IA"}`);
+    }
 
     galleries.push({
         id: galleryId,

@@ -356,37 +356,6 @@ function renderGalleryArchive() {
     window.PSAOptimizations?.applyLazyMedia?.(grid);
 }
 
-async function downloadCurrentGalleryZip() {
-    if (lastRenderedGalleryEntries.length === 0) return;
-
-    const button = document.getElementById("galleryDownloadZip");
-    const title = document.getElementById("galleryPageTitle")?.textContent || "galeria";
-    if (button) button.disabled = true;
-
-    try {
-        const JSZip = await window.PSAOptimizations?.loadScriptOnce?.("https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js", "JSZip");
-        if (!JSZip) throw new Error("No se pudo cargar el compresor ZIP.");
-
-        const zip = new JSZip();
-        const folder = zip.folder("galeria") || zip;
-        await Promise.all(lastRenderedGalleryEntries.map(async (photo, index) => {
-            const response = await fetch(resolveOptimizedAssetUrl(photo.imageSrc), { cache: "force-cache" });
-            if (!response.ok) throw new Error(`No se pudo descargar ${photo.imageSrc}`);
-            const blob = await response.blob();
-            const extension = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
-            const player = String(photo.meta?.player || `foto-${index + 1}`).replace(/[^a-z0-9_-]+/gi, "-");
-            folder.file(`${String(index + 1).padStart(2, "0")}-${player}.${extension}`, blob);
-        }));
-
-        const content = await zip.generateAsync({ type: "blob" });
-        window.PSAOptimizations?.downloadBlob?.(`${title.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase() || "galeria"}.zip`, content);
-    } catch (error) {
-        reportGalleryError("gallery-zip", error);
-    } finally {
-        if (button) button.disabled = false;
-    }
-}
-
 function bindGalleryFilterEvents() {
     const searchInput = document.getElementById("gallerySearchInput");
     const tournamentFilter = document.getElementById("galleryTournamentFilter");
@@ -395,7 +364,6 @@ function bindGalleryFilterEvents() {
     const playerFilter = document.getElementById("galleryPlayerFilter");
     const categoryFilter = document.getElementById("galleryCategoryFilter");
     const resetButton = document.getElementById("galleryResetFilters");
-    const zipButton = document.getElementById("galleryDownloadZip");
 
     [searchInput, tournamentFilter, clubFilter, dateFilter, playerFilter, categoryFilter].forEach((control) => {
         if (!control) return;
@@ -419,12 +387,6 @@ function bindGalleryFilterEvents() {
             if (playerFilter) playerFilter.value = "";
             if (categoryFilter) categoryFilter.value = "";
             renderGalleryArchive();
-        });
-    }
-
-    if (zipButton) {
-        zipButton.addEventListener("click", () => {
-            downloadCurrentGalleryZip();
         });
     }
 }
