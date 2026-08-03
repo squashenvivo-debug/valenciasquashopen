@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          for dir in components css data js; do
+          for dir in components css data js assets; do
             if [ -d "$dir" ]; then
               cp -R "$dir" dist/
             fi
@@ -93,7 +93,7 @@ jobs:
           test -f dist/sw.js
           test -d dist/js
           test -d dist/css
-          test ! -d dist/assets
+          test -d dist/assets
           grep -q "supabaseUrl" dist/config.js
           grep -q "supabaseAnonKey" dist/config.js
           grep -q "assetCdnBase" dist/config.js
