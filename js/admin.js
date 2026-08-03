@@ -2682,7 +2682,7 @@ function renderGalleryAdminList() {
         return `
             <article class="gallery-admin-card" data-gallery-id="${gallery.id}">
                 <div class="gallery-admin-head">
-                    ${LANGS.map((lang) => `<input type="text" id="galleryTitle_${gallery.id}_${lang}" value="${escapeHtml(gallery.title?.[lang] || "")}" placeholder="Título ${lang.toUpperCase()}">`).join("")}
+                    <input type="text" id="galleryTitle_${gallery.id}_es" value="${escapeHtml(gallery.title?.es || "")}" placeholder="Título ES">
                     <button type="button" class="btn-gallery-save" data-action="save-title" data-gallery-id="${gallery.id}">Guardar título</button>
                 </div>
                 <div class="results-grid">
@@ -3450,6 +3450,9 @@ function initGalleryAdmin() {
     const toggleEditorButton = document.getElementById("toggleGalleryEditMode");
     const deleteGalleryButton = document.getElementById("deleteSelectedGallery");
     const gallerySelect = document.getElementById("galleryDeleteSelect");
+    const newGalleryTitleVa = document.getElementById("newGalleryTitle_va");
+    const newGalleryTitleEn = document.getElementById("newGalleryTitle_en");
+    const newGalleryTitleFr = document.getElementById("newGalleryTitle_fr");
 
     if (filesInput) {
         filesInput.addEventListener("change", onNewGalleryFilesChange);
@@ -3485,6 +3488,17 @@ function initGalleryAdmin() {
             renderGalleryAdminList();
         });
     }
+
+    [newGalleryTitleVa, newGalleryTitleEn, newGalleryTitleFr].forEach((input) => {
+        if (!input) return;
+        input.value = "";
+        input.disabled = true;
+        input.placeholder = "Automático desde ES";
+        const container = input.closest("div");
+        if (container) {
+            container.style.display = "none";
+        }
+    });
 
     renderPendingGalleryPhotos();
     renderGalleryDeleteSelect();
