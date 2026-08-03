@@ -72,7 +72,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         anchor.addEventListener("click", function (e) {
 
-            const target = document.querySelector(this.getAttribute("href"));
+            const rawHash = (this.getAttribute("href") || "").trim();
+
+            // Ignore empty hashes like "#" and malformed selectors.
+            if (!rawHash || rawHash === "#") return;
+
+            let target = null;
+            try {
+                target = document.querySelector(rawHash);
+            } catch (_err) {
+                return;
+            }
 
             if (!target) return;
 

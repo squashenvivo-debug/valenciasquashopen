@@ -2,6 +2,7 @@
 backups/
 assets/uploads/
 supabase/.temp/
+.tmp-psavalencia-import/
 
 # Static site data required by the public pages and Pages build.
 !data/
