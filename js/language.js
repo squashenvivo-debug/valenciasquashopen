@@ -46,9 +46,9 @@ quick: {
         text: "Resultados y enfrentamientos"
     },
 
-    schedule: {
-        title: "HORARIOS",
-        text: "Orden de juego del torneo"
+    programming: {
+        title: "PROGRAMACIÓN",
+        text: "Agenda oficial del evento"
     },
 
     players: {
@@ -100,9 +100,9 @@ quick: {
         text: "Resultats i enfrontaments"
     },
 
-    schedule: {
-        title: "HORARIS",
-        text: "Ordre de joc del torneig"
+    programming: {
+        title: "PROGRAMACIÓ",
+        text: "Agenda oficial de l'esdeveniment"
     },
 
     players: {
@@ -153,9 +153,9 @@ quick: {
         text: "Results and matchups"
     },
 
-    schedule: {
+    programming: {
         title: "SCHEDULE",
-        text: "Order of play"
+        text: "Official event agenda"
     },
 
     players: {
@@ -206,9 +206,9 @@ quick: {
         text: "Résultats et confrontations"
     },
 
-    schedule: {
+    programming: {
         title: "PROGRAMME",
-        text: "Ordre des matchs"
+        text: "Agenda officiel de l'événement"
     },
 
     players: {

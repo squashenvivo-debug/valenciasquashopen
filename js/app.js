@@ -82,7 +82,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     await Promise.all([
         loadPlayers(),
         loadNews(),
-        loadSchedule(),
         loadProgramming(),
         loadDraws()
     ]);
