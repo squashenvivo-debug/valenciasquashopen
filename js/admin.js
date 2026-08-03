@@ -2573,10 +2573,8 @@ function renderPendingGalleryPhotos() {
             <span class="gallery-upload-file-status">${escapeHtml(photo.status || "En cola")}</span>
             <label class="field-label" for="pendingPlayer_${i}">Jugador</label>
             <input id="pendingPlayer_${i}" type="text" value="${escapeHtml(photo.meta?.player || "")}" placeholder="Nombre del jugador">
-            ${LANGS.map((lang) => `
-                <label class="field-label" for="pendingCaption_${i}_${lang}">Pie ${lang.toUpperCase()}</label>
-                <input id="pendingCaption_${i}_${lang}" type="text" value="${escapeHtml(photo.caption?.[lang] || "")}" placeholder="Texto ${lang.toUpperCase()}">
-            `).join("")}
+            <label class="field-label" for="pendingCaption_${i}_es">Pie ES</label>
+            <input id="pendingCaption_${i}_es" type="text" value="${escapeHtml(photo.caption?.es || "")}" placeholder="Texto ES (se traduce automático)">
             <label class="gallery-cover-check" for="pendingCover_${i}">
                 <input id="pendingCover_${i}" type="radio" name="pendingCover" value="${i}" ${i === 0 ? "checked" : ""}>
                 Imagen de portada
@@ -2591,13 +2589,12 @@ function renderPendingGalleryPhotos() {
                 pendingGalleryPhotos[i].meta.player = playerInput.value;
             });
         }
-        LANGS.forEach((lang) => {
-            const input = document.getElementById(`pendingCaption_${i}_${lang}`);
-            if (!input) return;
-            input.addEventListener("input", () => {
-                pendingGalleryPhotos[i].caption[lang] = input.value;
+        const captionInput = document.getElementById(`pendingCaption_${i}_es`);
+        if (captionInput) {
+            captionInput.addEventListener("input", () => {
+                pendingGalleryPhotos[i].caption.es = captionInput.value;
             });
-        });
+        }
     });
 
     host.querySelectorAll("input[name='pendingCover']").forEach((input) => {
@@ -2661,10 +2658,8 @@ function renderGalleryAdminList() {
                 <p class="gallery-ai-state">${photo.processedSrc ? "IA procesada y validada" : "Original sin procesar"}</p>
                 <label class="field-label" for="player_${photo.id}">Jugador</label>
                 <input id="player_${photo.id}" type="text" value="${escapeHtml(photo.meta?.player || "")}" placeholder="Nombre del jugador">
-                ${LANGS.map((lang) => `
-                    <label class="field-label" for="caption_${photo.id}_${lang}">Pie ${lang.toUpperCase()}</label>
-                    <input id="caption_${photo.id}_${lang}" type="text" value="${escapeHtml(photo.caption?.[lang] || "")}">
-                `).join("")}
+                <label class="field-label" for="caption_${photo.id}_es">Pie ES</label>
+                <input id="caption_${photo.id}_es" type="text" value="${escapeHtml(photo.caption?.es || "")}" placeholder="Texto ES (se traduce automático)">
                 <label class="gallery-cover-check" for="cover_${gallery.id}_${photo.id}">
                     <input id="cover_${gallery.id}_${photo.id}" type="radio" name="cover_${gallery.id}" value="${photo.id}" ${photoIndex === 0 ? "checked" : ""} data-action="set-cover" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">
                     Imagen de portada
