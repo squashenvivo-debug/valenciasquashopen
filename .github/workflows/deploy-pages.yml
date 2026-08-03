@@ -29,10 +29,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp -R components dist/
-          cp -R css dist/
-          cp -R data dist/
-          cp -R js dist/
+          for dir in components css data js; do
+            if [ -d "$dir" ]; then
+              cp -R "$dir" dist/
+            fi
+          done
           cp *.html dist/
           cp CNAME dist/
           cp sw.js dist/
