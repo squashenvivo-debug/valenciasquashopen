@@ -2547,7 +2547,7 @@ function createGalleryUploadPhoto(file) {
         previewUrl: URL.createObjectURL(file),
         uploadedBytes: 0,
         status: "En cola",
-        caption: normalizeLocalizedText(file.name.replace(/\.[^.]+$/, "")),
+        caption: normalizeLocalizedText(""),
         meta: {
             tournament: "",
             club: "",
@@ -2812,11 +2812,9 @@ function renderGalleryAdminList() {
             const captionInputEs = document.getElementById(`caption_${photoId}_es`);
             const captionEs = (captionInputEs?.value || "").trim();
             const playerInput = document.getElementById(`player_${photoId}`);
-            if (!captionEs) {
-                updateGalleryStatus("Escribe el pie de foto en español para traducir automáticamente.");
-                return;
-            }
-            photo.caption = await buildLocalizedFromSpanish(captionEs);
+            photo.caption = captionEs
+                ? await buildLocalizedFromSpanish(captionEs)
+                : normalizeLocalizedText("");
             photo.meta = normalizeGalleryPhotoMeta({
                 ...photo.meta,
                 player: playerInput?.value || ""

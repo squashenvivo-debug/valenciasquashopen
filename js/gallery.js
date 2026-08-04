@@ -85,6 +85,28 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
+function isLikelyFileNameCaption(value) {
+    const text = String(value || "").trim();
+    if (!text) return false;
+
+    const compact = text.toLowerCase();
+    if (/\.(jpe?g|png|gif|webp|heic|bmp)$/i.test(compact)) return true;
+    if (/^(img|dsc|pxl|whatsapp|image)[\s_-]*\d{3,}$/i.test(compact)) return true;
+    if (/^[a-z]{2,10}[\s_-]?\d{5,}$/i.test(compact)) return true;
+
+    const hasSpace = /\s/.test(text);
+    const hasManyDigits = (text.match(/\d/g) || []).length >= 4;
+    const hasSeparator = /[_-]/.test(text);
+    return !hasSpace && hasManyDigits && hasSeparator;
+}
+
+function getVisiblePhotoCaption(photo) {
+    const caption = String(photo?.caption || "").trim();
+    if (!caption) return "";
+    if (isLikelyFileNameCaption(caption)) return "";
+    return caption;
+}
+
 function normalizeGalleryItem(item) {
     const meta = normalizeGalleryMeta(item?.meta);
     const photos = Array.isArray(item?.photos) ? item.photos : [];
@@ -195,7 +217,7 @@ function flattenGalleryPhotos(galleries, lang) {
         const galleryTitle = getLocalizedText(gallery.title, lang) || "Galeria";
         return (Array.isArray(gallery.photos) ? gallery.photos : []).map((photo, index) => {
             const meta = normalizeGalleryPhotoMeta(photo.meta, gallery.meta);
-            const caption = getLocalizedText(photo.caption, lang);
+            const caption = getVisiblePhotoCaption(getLocalizedText(photo.caption, lang));
             const imageSrc = resolveOptimizedAssetUrl(photo.processedSrc || photo.src);
             const searchBlob = [
                 galleryTitle,
@@ -332,14 +354,11 @@ function renderGalleryArchive() {
     grid.innerHTML = "";
 
     filteredEntries.forEach((photo) => {
-        const metaParts = [photo.meta.tournament, photo.meta.club, formatGalleryDate(photo.meta.date, lang), photo.meta.player, photo.meta.category]
-            .filter(Boolean);
         const card = document.createElement("figure");
         card.className = "gallery-detail-card";
         card.innerHTML = `
-            <img class="gallery-detail-image" src="${photo.imageSrc}" alt="${escapeHtml(photo.caption || photo.galleryTitle || "Foto")}">
-            <figcaption class="gallery-detail-caption">${escapeHtml(photo.caption || photo.galleryTitle || "Sin pie de foto")}</figcaption>
-            <div class="gallery-detail-meta">${metaParts.map((part) => `<span class="gallery-detail-chip">${escapeHtml(part)}</span>`).join("")}</div>
+            <img class="gallery-detail-image" src="${photo.imageSrc}" alt="${escapeHtml(photo.caption || "Foto")}">
+            ${photo.caption ? `<figcaption class="gallery-detail-caption">${escapeHtml(photo.caption)}</figcaption>` : ""}
         `;
 
         const image = card.querySelector(".gallery-detail-image");
@@ -347,7 +366,7 @@ function renderGalleryArchive() {
             image.loading = "lazy";
             image.decoding = "async";
             image.addEventListener("click", () => {
-                openLightbox(photo.imageSrc, photo.caption || photo.galleryTitle || "");
+                openLightbox(photo.imageSrc, photo.caption || "");
             });
         }
         grid.appendChild(card);
