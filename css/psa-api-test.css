@@ -134,7 +134,10 @@ a {
 .psa-test-main,
 .psa-test-sidebar,
 .psa-cards-3,
-.psa-divisions {
+.psa-divisions,
+.psa-live-board,
+.psa-players-grid,
+.psa-draw-board {
     display: grid;
     gap: 20px;
 }
@@ -295,6 +298,98 @@ a {
     padding-left: 18px;
     display: grid;
     gap: 8px;
+}
+
+.psa-live-item,
+.psa-player-card,
+.psa-draw-match,
+.psa-draw-round {
+    border: 1px solid var(--psa-panel-soft);
+    border-radius: 16px;
+    background: rgba(6, 18, 30, 0.7);
+}
+
+.psa-live-item,
+.psa-draw-round {
+    padding: 14px;
+}
+
+.psa-live-item.is-live {
+    border-color: rgba(91, 214, 146, 0.42);
+    box-shadow: 0 0 0 1px rgba(91, 214, 146, 0.22) inset;
+}
+
+.psa-live-score {
+    margin-top: 8px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--psa-accent-strong);
+}
+
+.psa-players-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.psa-player-card {
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.psa-player-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--psa-panel-soft);
+    background: rgba(255, 255, 255, 0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--psa-accent-strong);
+    font-weight: 700;
+}
+
+.psa-player-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.psa-player-meta h3 {
+    margin: 0 0 2px;
+    font-size: 0.98rem;
+}
+
+.psa-player-meta p {
+    margin: 3px 0;
+}
+
+.psa-draw-board {
+    gap: 12px;
+}
+
+.psa-draw-round h3 {
+    margin: 0 0 10px;
+    font-size: 1.02rem;
+}
+
+.psa-draw-round-list {
+    display: grid;
+    gap: 10px;
+}
+
+.psa-draw-match {
+    padding: 12px;
+}
+
+.psa-draw-names {
+    margin: 6px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--psa-text);
 }
 
 .psa-raw {

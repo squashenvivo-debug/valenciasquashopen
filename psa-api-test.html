@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSA API Test | PSA Valencia Open</title>
 <link rel="stylesheet" href="css/variables.css">
-<link rel="stylesheet" href="css/psa-api-test.css?v=20260804-1">
+<link rel="stylesheet" href="css/psa-api-test.css?v=20260804-3">
 </head>
 <body>
 <main class="psa-test-page">
@@ -97,6 +97,30 @@
 
                     <section class="psa-panel">
                         <div class="psa-panel-head">
+                            <h2>Livescore en vivo</h2>
+                            <span id="psaLiveBoardCount" class="psa-badge">0</span>
+                        </div>
+                        <div id="psaLiveBoard" class="psa-live-board"></div>
+                    </section>
+
+                    <section class="psa-panel">
+                        <div class="psa-panel-head">
+                            <h2>Jugadores (foto y ranking)</h2>
+                            <span id="psaPlayersCount" class="psa-badge">0</span>
+                        </div>
+                        <div id="psaPlayersList" class="psa-players-grid"></div>
+                    </section>
+
+                    <section class="psa-panel">
+                        <div class="psa-panel-head">
+                            <h2>Cuadro del torneo</h2>
+                            <span id="psaDrawCount" class="psa-badge">0</span>
+                        </div>
+                        <div id="psaDrawBoard" class="psa-draw-board"></div>
+                    </section>
+
+                    <section class="psa-panel">
+                        <div class="psa-panel-head">
                             <h2>Respuesta tecnica</h2>
                         </div>
                         <pre id="psaRawPayload" class="psa-raw"></pre>
@@ -108,6 +132,6 @@
 </main>
 
 <script src="config.js"></script>
-<script src="js/psa-api-test.js?v=20260804-2"></script>
+<script src="js/psa-api-test.js?v=20260804-3"></script>
 </body>
 </html>

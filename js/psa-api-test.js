@@ -681,6 +681,210 @@
         `).join("");
     }
 
+    function getDivisionPlayers(division) {
+        if (Array.isArray(division?.players) && division.players.length) {
+            return division.players;
+        }
+        if (Array.isArray(division?.players_sample) && division.players_sample.length) {
+            return division.players_sample;
+        }
+        return [];
+    }
+
+    function resolvePlayerPhoto(player) {
+        return String(
+            player?.player_image_url ||
+            player?.image_url ||
+            player?.photo_url ||
+            player?.image ||
+            player?.avatar ||
+            ""
+        ).trim();
+    }
+
+    function renderPlayersRoster(divisions) {
+        const host = $("psaPlayersList");
+        const count = $("psaPlayersCount");
+        if (!host) return;
+
+        const allPlayers = [];
+        (Array.isArray(divisions) ? divisions : []).forEach((division) => {
+            getDivisionPlayers(division).forEach((player) => {
+                const id = String(player?.id || "").trim();
+                const key = id || String(player?.name || "").trim().toLowerCase();
+                if (!key) return;
+                allPlayers.push({
+                    key,
+                    id: player?.id ?? null,
+                    name: player?.name || "Jugador",
+                    country: player?.country || null,
+                    ranking: player?.ranking ?? null,
+                    seed: player?.entry?.seed_number ?? player?.seed_number ?? null,
+                    photo: resolvePlayerPhoto(player),
+                });
+            });
+        });
+
+        const unique = [];
+        const seen = new Set();
+        allPlayers.forEach((player) => {
+            if (seen.has(player.key)) return;
+            seen.add(player.key);
+            unique.push(player);
+        });
+
+        unique.sort((a, b) => {
+            const ar = Number.isFinite(Number(a.ranking)) ? Number(a.ranking) : Number.POSITIVE_INFINITY;
+            const br = Number.isFinite(Number(b.ranking)) ? Number(b.ranking) : Number.POSITIVE_INFINITY;
+            if (ar !== br) return ar - br;
+            return String(a.name || "").localeCompare(String(b.name || ""), "es", { sensitivity: "base" });
+        });
+
+        if (count) count.textContent = String(unique.length);
+
+        if (!unique.length) {
+            host.innerHTML = '<p class="psa-empty">Sin jugadores en la respuesta actual.</p>';
+            return;
+        }
+
+        host.innerHTML = unique.map((player) => {
+            const photo = player.photo
+                ? `<img src="${escapeHtml(player.photo)}" alt="${escapeHtml(player.name)}" loading="lazy">`
+                : `<span>${escapeHtml(String(player.name || "?").slice(0, 1).toUpperCase())}</span>`;
+
+            return `
+                <article class="psa-player-card">
+                    <div class="psa-player-avatar">${photo}</div>
+                    <div class="psa-player-meta">
+                        <h3>${escapeHtml(player.name)}</h3>
+                        <p>${player.country ? escapeHtml(player.country) : "Pais N/D"}</p>
+                        <p>Ranking: ${player.ranking ?? "N/D"}${player.seed ? ` · Seed ${escapeHtml(String(player.seed))}` : ""}</p>
+                    </div>
+                </article>
+            `;
+        }).join("");
+    }
+
+    function normalizeDrawMatches(divisions) {
+        const rows = [];
+        (Array.isArray(divisions) ? divisions : []).forEach((division) => {
+            const brackets = Array.isArray(division?.brackets) ? division.brackets : [];
+            brackets.forEach((bracket) => {
+                const matches = Array.isArray(bracket?.matches) ? bracket.matches : [];
+                matches.forEach((match) => {
+                    const players = Array.isArray(match?.match_players)
+                        ? match.match_players
+                        : Array.isArray(match?.players)
+                            ? match.players
+                            : [];
+
+                    rows.push({
+                        division: division?.name || "Division",
+                        bracket: bracket?.name || match?.bracket || "Bracket",
+                        round: match?.round || "Round",
+                        round_num: Number(match?.round_num ?? 999),
+                        match_num: Number(match?.match_num ?? 999),
+                        status: match?.status || null,
+                        date: match?.date || null,
+                        time: match?.time || null,
+                        court: match?.court || null,
+                        players,
+                        scoreline: match?.scoreline || (players.length === 2 ? `${players[0]?.games_won ?? 0}-${players[1]?.games_won ?? 0}` : "-"),
+                    });
+                });
+            });
+        });
+        return rows;
+    }
+
+    function renderDrawBoard(divisions) {
+        const host = $("psaDrawBoard");
+        const count = $("psaDrawCount");
+        if (!host) return;
+
+        const matches = normalizeDrawMatches(divisions).sort((a, b) => {
+            if (a.round_num !== b.round_num) return a.round_num - b.round_num;
+            return a.match_num - b.match_num;
+        });
+
+        if (count) count.textContent = String(matches.length);
+
+        if (!matches.length) {
+            host.innerHTML = '<p class="psa-empty">Sin cruces disponibles en este torneo.</p>';
+            return;
+        }
+
+        const roundMap = new Map();
+        matches.forEach((match) => {
+            const key = `${match.round_num}|${match.round}`;
+            if (!roundMap.has(key)) {
+                roundMap.set(key, []);
+            }
+            roundMap.get(key).push(match);
+        });
+
+        host.innerHTML = Array.from(roundMap.entries()).map(([key, roundMatches]) => {
+            const roundLabel = String(key.split("|")[1] || "Round");
+            return `
+                <section class="psa-draw-round">
+                    <h3>${escapeHtml(roundLabel)}</h3>
+                    <div class="psa-draw-round-list">
+                        ${roundMatches.map((match) => {
+                            const names = (match.players || []).map((p) => escapeHtml(p?.name || "TBD"));
+                            return `
+                                <article class="psa-draw-match">
+                                    <p class="psa-match-meta">${escapeHtml(match.division)} · ${escapeHtml(match.bracket)}</p>
+                                    <p class="psa-draw-names">${names[0] || "TBD"} vs ${names[1] || "TBD"}</p>
+                                    <p class="psa-match-meta">${escapeHtml(match.date || "Sin fecha")}${match.time ? ` · ${escapeHtml(match.time)}` : ""}${match.court ? ` · Pista ${escapeHtml(match.court)}` : ""}</p>
+                                    <div class="psa-match-score">
+                                        <span class="psa-match-score-value">${escapeHtml(match.scoreline || "-")}</span>
+                                        ${statusChip(match.status)}
+                                    </div>
+                                </article>
+                            `;
+                        }).join("")}
+                    </div>
+                </section>
+            `;
+        }).join("");
+    }
+
+    function renderLiveScoreBoard(payload) {
+        const host = $("psaLiveBoard");
+        const count = $("psaLiveBoardCount");
+        if (!host) return;
+
+        const liveNow = Array.isArray(payload?.live?.in_progress) ? payload.live.in_progress : [];
+        const liveList = liveNow.length
+            ? liveNow
+            : (Array.isArray(payload?.live?.upcoming) ? payload.live.upcoming.slice(0, 8) : []);
+
+        if (count) count.textContent = String(liveList.length);
+
+        if (!liveList.length) {
+            host.innerHTML = '<p class="psa-empty">No hay partidos en directo ahora mismo.</p>';
+            return;
+        }
+
+        host.innerHTML = liveList.map((match) => {
+            const players = Array.isArray(match?.players) ? match.players : [];
+            const p1 = players[0]?.name || "TBD";
+            const p2 = players[1]?.name || "TBD";
+            const score = match?.scoreline || "-";
+            const status = String(match?.status || "scheduled");
+            return `
+                <article class="psa-live-item ${status === "in_progress" ? "is-live" : ""}">
+                    <div class="psa-panel-head">
+                        <h3>${escapeHtml(p1)} vs ${escapeHtml(p2)}</h3>
+                        ${statusChip(status)}
+                    </div>
+                    <p class="psa-match-meta">${escapeHtml(match?.division || "Division")}${match?.round ? ` · ${escapeHtml(match.round)}` : ""}</p>
+                    <div class="psa-live-score">${escapeHtml(score)}</div>
+                </article>
+            `;
+        }).join("");
+    }
+
     function renderRawPayload(detail) {
         const host = $("psaRawPayload");
         if (!host) return;
@@ -715,6 +919,9 @@
         renderMatchList("psaUpcomingMatches", payload.live?.upcoming || [], "psaUpcomingCount");
         renderMatchList("psaCompletedMatches", payload.live?.completed || [], "psaCompletedCount");
         renderDivisions(payload.divisions || []);
+        renderLiveScoreBoard(payload);
+        renderPlayersRoster(payload.divisions || []);
+        renderDrawBoard(payload.divisions || []);
         state.subscribableMatchIds = collectSubscribableMatchIds(payload);
         renderRawPayload(payload);
     }
