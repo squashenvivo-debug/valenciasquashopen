@@ -664,11 +664,16 @@
             return;
         }
 
-        host.innerHTML = items.map((division) => `
+        host.innerHTML = items.map((division) => {
+            const divisionPlayers = getDivisionPlayers(division);
+            const confirmedCount = divisionPlayers.filter((player) => isConfirmedPlayer(player)).length;
+            const playersCount = confirmedCount || division.entries_count || divisionPlayers.length || 0;
+
+            return `
             <article class="psa-division-card">
                 <div class="psa-panel-head">
                     <h3>${escapeHtml(division.name || "Division")}</h3>
-                    <span class="psa-badge">${escapeHtml(String(division.entries_count || 0))} jugadores</span>
+                    <span class="psa-badge">${escapeHtml(String(playersCount))} jugadores</span>
                 </div>
                 <p>${escapeHtml(division.level || "Nivel pendiente")}${division.sub_level ? ` · ${escapeHtml(division.sub_level)}` : ""}</p>
                 <p>Draw size: ${escapeHtml(String(division.draw_size || "-"))}</p>
@@ -678,7 +683,8 @@
                     `).join("") || "<li>Sin muestra de jugadores</li>"}
                 </ul>
             </article>
-        `).join("");
+        `;
+        }).join("");
     }
 
     function getDivisionPlayers(division) {
@@ -689,6 +695,11 @@
             return division.players_sample;
         }
         return [];
+    }
+
+    function isConfirmedPlayer(player) {
+        const status = String(player?.entry?.status || player?.entry_status || "").trim().toLowerCase();
+        return status === "confirmed";
     }
 
     function resolvePlayerPhoto(player) {
@@ -709,7 +720,11 @@
 
         const allPlayers = [];
         (Array.isArray(divisions) ? divisions : []).forEach((division) => {
-            getDivisionPlayers(division).forEach((player) => {
+            const divisionPlayers = getDivisionPlayers(division);
+            const confirmedPlayers = divisionPlayers.filter((player) => isConfirmedPlayer(player));
+            const sourcePlayers = confirmedPlayers.length ? confirmedPlayers : divisionPlayers;
+
+            sourcePlayers.forEach((player) => {
                 const id = String(player?.id || "").trim();
                 const key = id || String(player?.name || "").trim().toLowerCase();
                 if (!key) return;
