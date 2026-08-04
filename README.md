@@ -92,6 +92,18 @@ docker compose -f docker-compose.production.yml up -d --build
 
 La imagen Docker tambien se construye y publica automaticamente en GHCR tras push a `main`.
 
+## Prueba separada de integracion PSA
+
+Se ha anadido una Edge Function publica `psa-proxy` y una pagina de prueba en `psa-api-test.html` para validar la integracion con la API oficial de PSA sin exponer la API key en frontend.
+
+1. Configura el secreto `PSA_API_KEY` en Supabase Edge Functions.
+2. Despliega la funcion `supabase/functions/psa-proxy`.
+3. Abre `psa-api-test.html` y selecciona un torneo por ID o slug.
+
+Preset actual configurado para esta web: `12711` (`PSA Valencia 2026 - Memorial Chimo Marmaneu`).
+
+La pagina consulta el listado de torneos y el detalle simplificado/expanded del torneo. La parte de webhooks de live scores no se prueba desde navegador; esa fase requiere un endpoint HTTPS de servidor para suscribirse y recibir eventos.
+
 ### 4) Configuracion de produccion recomendada
 
 - Mantener `SUPABASE_URL` y `SUPABASE_ANON_KEY` solo en secretos de plataforma.

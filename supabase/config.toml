@@ -14,3 +14,6 @@ enable_confirmations = true
 
 [functions.process-photo]
 verify_jwt = true
+
+[functions.psa-proxy]
+verify_jwt = false

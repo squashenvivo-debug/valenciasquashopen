@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSA API Test | PSA Valencia Open</title>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/psa-api-test.css?v=20260804-1">
+</head>
+<body>
+<main class="psa-test-page">
+    <section class="psa-test-hero">
+        <div class="psa-test-shell">
+            <a class="psa-test-back" href="index.html">Volver a la web</a>
+            <p class="psa-test-kicker">PSA API Test</p>
+            <h1>Prueba separada de integracion con PSA</h1>
+            <p class="psa-test-intro">
+                Esta pagina consulta la API de PSA mediante la funcion segura `psa-proxy`.
+                Sirve para validar torneos, divisiones, partidos en juego y proximos cruces sin tocar todavia la home manual.
+            </p>
+            <div class="psa-test-note">
+                <strong>Preset activo:</strong> PSA Valencia 2026 - Memorial Chimo Marmaneu (`id 12711`, 11-15 agosto 2026, World Copper).
+            </div>
+            <div class="psa-test-note">
+                <strong>Nota:</strong> el API de live scores de PSA es por webhook. Desde navegador podemos verificar el detalle del torneo y el estado de partidos, pero no suscribir webhooks directamente aqui.
+            </div>
+        </div>
+    </section>
+
+    <section class="psa-test-section">
+        <div class="psa-test-shell">
+            <form id="psaTestForm" class="psa-test-form">
+                <label for="psaTournamentInput">Tournament ID o slug</label>
+                <div class="psa-test-form-row">
+                    <input id="psaTournamentInput" name="tournament" type="text" placeholder="12711" autocomplete="off">
+                    <button type="submit">Cargar torneo</button>
+                    <button id="psaRefreshButton" type="button" class="btn-secondary">Refrescar</button>
+                </div>
+
+                <label for="psaProxyUrlInput">URL de psa-proxy (opcional en local)</label>
+                <input id="psaProxyUrlInput" name="proxyUrl" type="url" placeholder="https://TU-PROYECTO.supabase.co/functions/v1/psa-proxy" autocomplete="off">
+            </form>
+            <p id="psaTestStatus" class="psa-test-status" aria-live="polite">Inicializando...</p>
+        </div>
+    </section>
+
+    <section class="psa-test-section">
+        <div class="psa-test-shell">
+            <div class="psa-test-grid">
+                <aside class="psa-test-sidebar">
+                    <div class="psa-panel">
+                        <div class="psa-panel-head">
+                            <h2>Torneos recientes</h2>
+                            <span id="psaTournamentCount" class="psa-badge">0</span>
+                        </div>
+                        <div id="psaTournamentList" class="psa-tournament-list"></div>
+                    </div>
+                </aside>
+
+                <div class="psa-test-main">
+                    <div id="psaTournamentSummary" class="psa-summary"></div>
+
+                    <div class="psa-cards-3">
+                        <section class="psa-panel">
+                            <div class="psa-panel-head">
+                                <h2>En juego</h2>
+                                <span id="psaLiveCount" class="psa-badge">0</span>
+                            </div>
+                            <div id="psaLiveMatches" class="psa-match-list"></div>
+                        </section>
+
+                        <section class="psa-panel">
+                            <div class="psa-panel-head">
+                                <h2>Proximos</h2>
+                                <span id="psaUpcomingCount" class="psa-badge">0</span>
+                            </div>
+                            <div id="psaUpcomingMatches" class="psa-match-list"></div>
+                        </section>
+
+                        <section class="psa-panel">
+                            <div class="psa-panel-head">
+                                <h2>Ultimos resultados</h2>
+                                <span id="psaCompletedCount" class="psa-badge">0</span>
+                            </div>
+                            <div id="psaCompletedMatches" class="psa-match-list"></div>
+                        </section>
+                    </div>
+
+                    <section class="psa-panel">
+                        <div class="psa-panel-head">
+                            <h2>Divisiones</h2>
+                            <span id="psaDivisionCount" class="psa-badge">0</span>
+                        </div>
+                        <div id="psaDivisions" class="psa-divisions"></div>
+                    </section>
+
+                    <section class="psa-panel">
+                        <div class="psa-panel-head">
+                            <h2>Respuesta tecnica</h2>
+                        </div>
+                        <pre id="psaRawPayload" class="psa-raw"></pre>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="config.js"></script>
+<script src="js/psa-api-test.js?v=20260804-1"></script>
+</body>
+</html>
