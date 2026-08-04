@@ -1,6 +1,8 @@
 (function () {
     const DEFAULT_TOURNAMENT_ID = "12711";
     const PSA_TEST_SUPABASE_FALLBACK_URL = "https://texjzaanugmssmolzwgb.supabase.co";
+    const PSA_DIRECT_API_URL = "https://data.psasquashtour.com";
+    const PSA_DIRECT_API_KEY = "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f";
     const STORAGE_KEY = "psaApiTestTournament";
     const PROXY_URL_STORAGE_KEY = "psaApiTestProxyUrl";
     const AUTO_REFRESH_MS = 60000;
@@ -10,6 +12,7 @@
     const state = {
         list: [],
         detail: null,
+        sourceMode: "proxy",
     };
 
     function escapeHtml(value) {
@@ -101,6 +104,248 @@
         }
 
         return payload;
+    }
+
+    function buildDirectQuery(params) {
+        const query = new URLSearchParams();
+        Object.entries(params || {}).forEach(([key, value]) => {
+            if (value === undefined || value === null || value === "") return;
+            query.set(key, String(value));
+        });
+        return query;
+    }
+
+    function parseSortTime(match) {
+        const date = String(match?.date || "").trim();
+        const time = String(match?.time || "").trim();
+        if (!date) return Number.POSITIVE_INFINITY;
+        const parsed = new Date(`${date}T${time || "00:00:00"}`);
+        return Number.isNaN(parsed.getTime()) ? Number.POSITIVE_INFINITY : parsed.getTime();
+    }
+
+    function simplifyDirectTournamentList(items) {
+        return (items || []).map((item) => ({
+            id: item.id,
+            name: item.name,
+            start_date: item.start_date || null,
+            end_date: item.end_date || null,
+            status: item.status || null,
+            city: item.city || null,
+            country: item.country || null,
+            divisions: Array.isArray(item.divisions)
+                ? item.divisions.map((division) => ({
+                    id: division.id || null,
+                    name: division.name || null,
+                    level: division.level || null,
+                    sub_level: division.sub_level || null,
+                }))
+                : [],
+        }));
+    }
+
+    function flattenDirectMatches(divisions, tournamentStreamUrl) {
+        return (divisions || []).flatMap((division) => (division.brackets || []).flatMap((bracket) => (bracket.matches || []).map((match) => {
+            const players = Array.isArray(match.match_players)
+                ? match.match_players.map((player) => ({
+                    id: player.id ?? null,
+                    name: player.name || null,
+                    games_won: player.games_won ?? null,
+                }))
+                : [];
+
+            return {
+                id: match.id ?? null,
+                division: division.name || null,
+                bracket: bracket.name || null,
+                round: match.round || null,
+                round_num: match.round_num ?? null,
+                match_num: match.match_num ?? null,
+                status: match.status || null,
+                date: match.date || null,
+                time: match.time || null,
+                court: match.court || null,
+                court_id: match.court_id ?? null,
+                best: match.best || null,
+                scoring: match.scoring || null,
+                duration_minutes: match.duration_minutes ?? null,
+                streamed: Boolean(match.streamed || match.stream_url || tournamentStreamUrl),
+                stream_url: match.stream_url || tournamentStreamUrl || null,
+                players,
+                scoreline: players.length === 2
+                    ? `${players[0].games_won ?? 0}-${players[1].games_won ?? 0}`
+                    : null,
+                winner_id: match.result?.winner_id ?? null,
+                retired: Boolean(match.result?.retired),
+                walkover: Boolean(match.result?.walkover),
+                games: Array.isArray(match.result?.games) ? match.result.games : [],
+                commentator_ids: Array.isArray(match.commentator_ids) ? match.commentator_ids : [],
+                head_to_head: match.head_to_head || null,
+                sort_time: parseSortTime(match),
+            };
+        })));
+    }
+
+    function stripSortTime(match) {
+        const { sort_time: _sortTime, ...rest } = match;
+        return rest;
+    }
+
+    function simplifyDirectDivisions(divisions, tournamentStreamUrl) {
+        return (divisions || []).map((division) => ({
+            id: division.id ?? null,
+            name: division.name || null,
+            gender: division.gender || null,
+            level: division.level || null,
+            sub_level: division.sub_level || null,
+            draw_size: division.draw_size ?? null,
+            entries_count: division.entries_count ?? null,
+            players_sample: Array.isArray(division.players)
+                ? division.players.slice(0, 8).map((player) => ({
+                    id: player.id ?? null,
+                    name: player.name || null,
+                    country: player.country || null,
+                    ranking: player.ranking ?? null,
+                    seed_number: player.entry?.seed_number ?? null,
+                    draw_type: player.entry?.draw_type || null,
+                    entry_status: player.entry?.status || null,
+                }))
+                : [],
+            brackets: Array.isArray(division.brackets)
+                ? division.brackets.map((bracket) => ({
+                    id: bracket.id ?? null,
+                    name: bracket.name || null,
+                    format: bracket.format || null,
+                    size: bracket.size ?? null,
+                    best_of: bracket.best_of ?? null,
+                    scoring_system: bracket.scoring_system || null,
+                    matches_count: Array.isArray(bracket.matches) ? bracket.matches.length : 0,
+                    matches: Array.isArray(bracket.matches)
+                        ? bracket.matches.map((match) => stripSortTime(flattenDirectMatches([
+                            { name: division.name || null, brackets: [{ name: bracket.name || null, matches: [match] }] }
+                        ], tournamentStreamUrl)[0]))
+                        : [],
+                }))
+                : [],
+        }));
+    }
+
+    async function fetchDirectPsa(params) {
+        const tournament = String(params?.tournament || "").trim();
+
+        const listQuery = buildDirectQuery({
+            search: params?.search,
+            level: params?.level,
+            sublevel: params?.sublevel,
+            status: params?.status,
+            start_date: params?.start_date,
+            end_date: params?.end_date,
+            dizplai: params?.dizplai,
+            sportradar: params?.sportradar,
+            redzone: params?.redzone,
+            squashlevels: params?.squashlevels,
+            squashtv: params?.squashtv,
+            tnt_sports: params?.tnt_sports,
+            supersports: params?.supersports,
+            skysports_nz: params?.skysports_nz,
+            squashref: params?.squashref,
+            show_past: params?.show_past ?? false,
+            include_divisions: params?.include_divisions ?? true,
+            limit: params?.limit ?? 10,
+        });
+
+        const listResponse = await fetch(`${PSA_DIRECT_API_URL}/api/v1/tournaments?${listQuery.toString()}`, {
+            headers: {
+                "Accept": "application/json",
+                "X-Api-Key": PSA_DIRECT_API_KEY,
+            },
+        });
+        if (!listResponse.ok) {
+            throw new Error(`PSA directo respondio ${listResponse.status} en listado.`);
+        }
+
+        const listPayload = await listResponse.json();
+        const listItems = Array.isArray(listPayload?.psa?.tournaments) ? listPayload.psa.tournaments : [];
+
+        if (!tournament) {
+            return {
+                success: true,
+                mode: "list",
+                fetched_at: new Date().toISOString(),
+                source: {
+                    api: listPayload?.api || null,
+                    timestamp: listPayload?.timestamp || null,
+                    transport: "direct",
+                },
+                tournaments: simplifyDirectTournamentList(listItems),
+            };
+        }
+
+        const detailQuery = new URLSearchParams();
+        if (params?.expanded !== false && params?.head_to_head) {
+            detailQuery.set("head_to_head", "true");
+        }
+
+        const detailPath = `${PSA_DIRECT_API_URL}/api/v1/tournaments/${encodeURIComponent(tournament)}/expanded${detailQuery.toString() ? `?${detailQuery.toString()}` : ""}`;
+        const detailResponse = await fetch(detailPath, {
+            headers: {
+                "Accept": "application/json",
+                "X-Api-Key": PSA_DIRECT_API_KEY,
+            },
+        });
+        if (!detailResponse.ok) {
+            throw new Error(`PSA directo respondio ${detailResponse.status} en detalle.`);
+        }
+
+        const detailPayload = await detailResponse.json();
+        const tournamentData = detailPayload?.psa?.tournament || null;
+        const rawDivisions = Array.isArray(detailPayload?.psa?.divisions) ? detailPayload.psa.divisions : [];
+        const tournamentStreamUrl = tournamentData?.stream_url || null;
+        const allMatches = flattenDirectMatches(rawDivisions, tournamentStreamUrl);
+        const asc = (a, b) => a.sort_time - b.sort_time;
+        const desc = (a, b) => b.sort_time - a.sort_time;
+
+        return {
+            success: true,
+            mode: "detail",
+            fetched_at: new Date().toISOString(),
+            source: {
+                api: detailPayload?.api || null,
+                timestamp: detailPayload?.timestamp || null,
+                expanded: true,
+                transport: "direct",
+            },
+            tournament: tournamentData ? {
+                id: tournamentData.id ?? null,
+                name: tournamentData.name || null,
+                status: tournamentData.status || null,
+                stream_url: tournamentData.stream_url || null,
+                dates: tournamentData.dates || null,
+                location: tournamentData.location || null,
+                metadata: tournamentData.metadata || null,
+                title_sponsor: tournamentData.title_sponsor || null,
+                commentators: Array.isArray(tournamentData.commentators) ? tournamentData.commentators : [],
+            } : null,
+            summary: detailPayload?.psa?.summary || detailPayload?.summary || null,
+            divisions: simplifyDirectDivisions(rawDivisions, tournamentStreamUrl),
+            live: {
+                in_progress: allMatches.filter((match) => match.status === "in_progress").sort(asc).map(stripSortTime),
+                upcoming: allMatches.filter((match) => match.status === "scheduled").sort(asc).slice(0, 12).map(stripSortTime),
+                completed: allMatches.filter((match) => ["completed", "retired", "walkover"].includes(String(match.status || ""))).sort(desc).slice(0, 12).map(stripSortTime),
+            },
+            tournaments: simplifyDirectTournamentList(listItems).slice(0, 10),
+        };
+    }
+
+    async function fetchTournamentData(params) {
+        try {
+            const payload = await fetchProxy(params);
+            state.sourceMode = "proxy";
+            return payload;
+        } catch (error) {
+            const payload = await fetchDirectPsa(params);
+            state.sourceMode = "direct";
+            return payload;
+        }
     }
 
     function updateUrl(tournament) {
@@ -328,7 +573,7 @@
     }
 
     async function loadList() {
-        const payload = await fetchProxy({ limit: 8, include_divisions: true, show_past: false });
+        const payload = await fetchTournamentData({ limit: 8, include_divisions: true, show_past: false });
         renderTournamentList(payload.tournaments || []);
         if ((!selectedTournament || !isValidTournamentValue(selectedTournament)) && Array.isArray(payload.tournaments) && payload.tournaments.length > 0) {
             persistTournament(String(payload.tournaments[0].id || ""));
@@ -347,7 +592,7 @@
             return;
         }
 
-        const payload = await fetchProxy({ tournament: selectedTournament, expanded: true, head_to_head: false, limit: 8, include_divisions: true, show_past: false });
+        const payload = await fetchTournamentData({ tournament: selectedTournament, expanded: true, head_to_head: false, limit: 8, include_divisions: true, show_past: false });
         state.detail = payload;
         renderSummary(payload);
         renderMatchList("psaLiveMatches", payload.live?.in_progress || [], "psaLiveCount");
@@ -362,7 +607,8 @@
         try {
             await loadList();
             await loadDetail();
-            setStatus(`Datos actualizados ${new Date().toLocaleTimeString("es-ES")}.`);
+            const modeLabel = state.sourceMode === "proxy" ? "proxy Supabase" : "modo directo temporal";
+            setStatus(`Datos actualizados ${new Date().toLocaleTimeString("es-ES")} · ${modeLabel}.`);
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "No se pudo consultar PSA.", true);
         }
