@@ -13,6 +13,8 @@
         list: [],
         detail: null,
         sourceMode: "proxy",
+        subscriptionMode: "proxy",
+        subscribableMatchIds: [],
     };
 
     function escapeHtml(value) {
@@ -101,6 +103,28 @@
         }
         if (!response.ok || payload?.success === false) {
             throw new Error(payload?.error || `Error ${response.status} consultando psa-proxy.`);
+        }
+
+        return payload;
+    }
+
+    async function fetchProxySubscribe(matchIds) {
+        const url = new URL(getFunctionUrl());
+        const response = await fetch(url.toString(), {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: "subscribe",
+                match_ids: Array.isArray(matchIds) ? matchIds : [],
+            }),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success === false) {
+            throw new Error(payload?.error || `Error ${response.status} solicitando suscripcion live.`);
         }
 
         return payload;
@@ -336,6 +360,37 @@
         };
     }
 
+    async function fetchDirectSubscribe(matchIds) {
+        const response = await fetch(`${PSA_DIRECT_API_URL}/api/v1/matches/subscribe`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-Api-Key": PSA_DIRECT_API_KEY,
+            },
+            body: JSON.stringify({
+                match_ids: Array.isArray(matchIds) ? matchIds : [],
+            }),
+        });
+
+        const payload = await response.json().catch(async () => {
+            const text = await response.text().catch(() => "");
+            return text ? { raw: text } : {};
+        });
+
+        if (!response.ok) {
+            throw new Error(payload?.error || payload?.message || `PSA directo respondio ${response.status} en subscribe.`);
+        }
+
+        return {
+            success: true,
+            mode: "subscribe",
+            transport: "direct",
+            requested_match_ids: Array.isArray(matchIds) ? matchIds : [],
+            psa: payload,
+        };
+    }
+
     async function fetchTournamentData(params) {
         try {
             const payload = await fetchProxy(params);
@@ -346,6 +401,66 @@
             state.sourceMode = "direct";
             return payload;
         }
+    }
+
+    async function fetchMatchSubscription(matchIds) {
+        try {
+            const payload = await fetchProxySubscribe(matchIds);
+            state.subscriptionMode = "proxy";
+            return payload;
+        } catch (error) {
+            const payload = await fetchDirectSubscribe(matchIds);
+            state.subscriptionMode = "direct";
+            return payload;
+        }
+    }
+
+    function collectSubscribableMatchIds(payload) {
+        const ids = [];
+        const live = Array.isArray(payload?.live?.in_progress) ? payload.live.in_progress : [];
+        const upcoming = Array.isArray(payload?.live?.upcoming) ? payload.live.upcoming : [];
+
+        [...live, ...upcoming].forEach((match) => {
+            const raw = match?.id;
+            if (raw === undefined || raw === null) return;
+            const clean = String(raw).trim();
+            if (!clean) return;
+            ids.push(/^\d+$/.test(clean) ? Number(clean) : clean);
+        });
+
+        return Array.from(new Set(ids));
+    }
+
+    async function requestLiveSubscription(options = {}) {
+        const silent = Boolean(options?.silent);
+        const matchIds = Array.isArray(state.subscribableMatchIds) ? state.subscribableMatchIds : [];
+
+        if (!matchIds.length) {
+            return { requested: false, count: 0, message: "sin partidos en juego o proximos" };
+        }
+
+        if (!silent) {
+            setStatus(`Solicitando live scores para ${matchIds.length} partidos...`);
+        }
+
+        const payload = await fetchMatchSubscription(matchIds);
+
+        if (state.detail && typeof state.detail === "object") {
+            state.detail.live_subscription = {
+                requested_match_ids: matchIds,
+                requested_at: new Date().toISOString(),
+                mode: state.subscriptionMode,
+                response: payload,
+            };
+        }
+
+        renderRawPayload(state.detail);
+
+        return {
+            requested: true,
+            count: matchIds.length,
+            mode: state.subscriptionMode,
+        };
     }
 
     function updateUrl(tournament) {
@@ -589,6 +704,7 @@
             renderMatchList("psaCompletedMatches", [], "psaCompletedCount");
             renderDivisions([]);
             renderRawPayload(null);
+            state.subscribableMatchIds = [];
             return;
         }
 
@@ -599,6 +715,7 @@
         renderMatchList("psaUpcomingMatches", payload.live?.upcoming || [], "psaUpcomingCount");
         renderMatchList("psaCompletedMatches", payload.live?.completed || [], "psaCompletedCount");
         renderDivisions(payload.divisions || []);
+        state.subscribableMatchIds = collectSubscribableMatchIds(payload);
         renderRawPayload(payload);
     }
 
@@ -607,8 +724,22 @@
         try {
             await loadList();
             await loadDetail();
+            let subscription = null;
+            try {
+                subscription = await requestLiveSubscription({ silent: true });
+            } catch (error) {
+                subscription = {
+                    requested: false,
+                    count: 0,
+                    message: error instanceof Error ? error.message : "fallo en subscribe",
+                };
+            }
+
             const modeLabel = state.sourceMode === "proxy" ? "proxy Supabase" : "modo directo temporal";
-            setStatus(`Datos actualizados ${new Date().toLocaleTimeString("es-ES")} · ${modeLabel}.`);
+            const subLabel = subscription?.requested
+                ? ` · subscribe ${subscription.count} (${state.subscriptionMode === "proxy" ? "proxy" : "directo"})`
+                : ` · subscribe: ${subscription?.message || "sin datos"}`;
+            setStatus(`Datos actualizados ${new Date().toLocaleTimeString("es-ES")} · ${modeLabel}${subLabel}.`);
         } catch (error) {
             setStatus(error instanceof Error ? error.message : "No se pudo consultar PSA.", true);
         }
@@ -626,6 +757,7 @@
     function bindEvents() {
         const form = $("psaTestForm");
         const refreshButton = $("psaRefreshButton");
+        const subscribeButton = $("psaSubscribeButton");
 
         if (form) {
             form.addEventListener("submit", async (event) => {
@@ -642,6 +774,22 @@
         if (refreshButton) {
             refreshButton.addEventListener("click", async () => {
                 await reloadAll();
+            });
+        }
+
+        if (subscribeButton) {
+            subscribeButton.addEventListener("click", async () => {
+                try {
+                    const subscription = await requestLiveSubscription({ silent: false });
+                    if (subscription?.requested) {
+                        const via = state.subscriptionMode === "proxy" ? "proxy Supabase" : "modo directo temporal";
+                        setStatus(`Live scores solicitados para ${subscription.count} partidos via ${via}.`);
+                    } else {
+                        setStatus(`No se envio subscribe: ${subscription?.message || "sin partidos"}.`, true);
+                    }
+                } catch (error) {
+                    setStatus(error instanceof Error ? error.message : "No se pudo solicitar live scores.", true);
+                }
             });
         }
     }

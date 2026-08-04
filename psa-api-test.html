@@ -22,7 +22,7 @@
                 <strong>Preset activo:</strong> PSA Valencia 2026 - Memorial Chimo Marmaneu (`id 12711`, 11-15 agosto 2026, World Copper).
             </div>
             <div class="psa-test-note">
-                <strong>Nota:</strong> el API de live scores de PSA es por webhook. Desde navegador podemos verificar el detalle del torneo y el estado de partidos, pero no suscribir webhooks directamente aqui.
+                <strong>Nota:</strong> esta prueba solicita live scores con <code>POST /api/v1/matches/subscribe</code> usando el proxy cuando esta disponible.
             </div>
         </div>
     </section>
@@ -35,6 +35,7 @@
                     <input id="psaTournamentInput" name="tournament" type="text" placeholder="12711" autocomplete="off">
                     <button type="submit">Cargar torneo</button>
                     <button id="psaRefreshButton" type="button" class="btn-secondary">Refrescar</button>
+                    <button id="psaSubscribeButton" type="button" class="btn-secondary">Solicitar live scores</button>
                 </div>
 
                 <label for="psaProxyUrlInput">URL de psa-proxy (opcional en local)</label>
@@ -107,6 +108,6 @@
 </main>
 
 <script src="config.js"></script>
-<script src="js/psa-api-test.js?v=20260804-1"></script>
+<script src="js/psa-api-test.js?v=20260804-2"></script>
 </body>
 </html>

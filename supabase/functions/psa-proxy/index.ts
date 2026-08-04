@@ -109,6 +109,61 @@ function readApiBaseUrl() {
   return String(Deno.env.get("PSA_API_BASE_URL") || "https://data.psasquashtour.com").replace(/\/$/, "");
 }
 
+function normalizeMatchIds(value: unknown) {
+  if (!Array.isArray(value)) return [] as Array<number | string>;
+
+  const ids = value
+    .map((item) => {
+      if (typeof item === "number" || typeof item === "string") return item;
+      if (item && typeof item === "object" && "id" in item) {
+        const raw = (item as { id?: unknown }).id;
+        if (typeof raw === "number" || typeof raw === "string") return raw;
+      }
+      return null;
+    })
+    .filter((item): item is number | string => item !== null)
+    .map((item) => String(item).trim())
+    .filter((item) => item.length > 0);
+
+  return Array.from(new Set(ids)).map((item) => (/^\d+$/.test(item) ? Number(item) : item));
+}
+
+async function subscribeMatches(matchIds: Array<number | string>) {
+  const apiKey = readPsaApiKey();
+  if (!apiKey) {
+    throw new Error("Falta el secreto PSA_API_KEY en la funcion psa-proxy.");
+  }
+
+  if (!matchIds.length) {
+    throw new Error("No se recibieron match_ids para suscripcion.");
+  }
+
+  const baseUrl = readApiBaseUrl();
+  const response = await fetch(`${baseUrl}/api/v1/matches/subscribe`, {
+    method: "POST",
+    headers: {
+      "X-Api-Key": apiKey,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ match_ids: matchIds }),
+  });
+
+  const text = await response.text();
+  let payload: unknown = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (_error) {
+    payload = text;
+  }
+
+  if (!response.ok) {
+    throw new Error(`PSA subscribe respondio ${response.status}: ${String(text).slice(0, 400)}`);
+  }
+
+  return payload;
+}
+
 function toBoolean(value: string | null, fallback = false) {
   if (value === null) return fallback;
   return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
@@ -282,6 +337,46 @@ function stripSortTime(match: Record<string, unknown>) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (req.method === "POST") {
+    try {
+      const body = await req.json().catch(() => ({}));
+      const action = String((body as { action?: unknown })?.action || "").trim().toLowerCase();
+
+      if (action !== "subscribe") {
+        return json({ success: false, error: "Accion POST no soportada. Usa action=subscribe." }, 400);
+      }
+
+      const matchIds = normalizeMatchIds(
+        (body as { match_ids?: unknown; matches?: unknown; matchIds?: unknown }).match_ids ||
+          (body as { matches?: unknown }).matches ||
+          (body as { matchIds?: unknown }).matchIds,
+      );
+
+      if (!matchIds.length) {
+        return json({ success: false, error: "Debes enviar match_ids para suscripcion." }, 400);
+      }
+
+      const subscribePayload = await subscribeMatches(matchIds);
+
+      return json({
+        success: true,
+        mode: "subscribe",
+        requested_match_ids: matchIds,
+        subscribed_count: matchIds.length,
+        fetched_at: new Date().toISOString(),
+        psa: subscribePayload,
+      });
+    } catch (error) {
+      return json(
+        {
+          success: false,
+          error: error instanceof Error ? error.message : "Error inesperado suscribiendo live scores.",
+        },
+        500,
+      );
+    }
   }
 
   if (req.method !== "GET") {
