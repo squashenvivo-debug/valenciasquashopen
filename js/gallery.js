@@ -76,6 +76,22 @@ function normalizeGalleryPhotoMeta(photo, galleryMeta = {}) {
     };
 }
 
+function getGalleryDisplayTitle(gallery, lang) {
+    const explicitTitle = String(getLocalizedText(gallery?.title, lang) || "").trim();
+    if (explicitTitle) return explicitTitle;
+
+    const meta = normalizeGalleryMeta(gallery?.meta || {});
+    const metaParts = [
+        String(meta.tournament || "").trim(),
+        String(meta.club || "").trim(),
+        formatGalleryDate(meta.date, lang),
+        String(meta.category || "").trim()
+    ].filter(Boolean);
+
+    if (metaParts.length) return metaParts.join(" · ");
+    return "Galeria";
+}
+
 function escapeHtml(value) {
     return String(value || "")
         .replace(/&/g, "&amp;")
@@ -105,6 +121,14 @@ function getVisiblePhotoCaption(photo) {
     if (!caption) return "";
     if (isLikelyFileNameCaption(caption)) return "";
     return caption;
+}
+
+function resolvePublicCaption(photo) {
+    const cleanCaption = getVisiblePhotoCaption(photo?.caption);
+    if (cleanCaption) return cleanCaption;
+
+    const playerLabel = String(photo?.meta?.player || "").trim();
+    return playerLabel;
 }
 
 function normalizeGalleryItem(item) {
@@ -214,10 +238,13 @@ function getGalleryScope() {
 
 function flattenGalleryPhotos(galleries, lang) {
     return galleries.flatMap((gallery) => {
-        const galleryTitle = getLocalizedText(gallery.title, lang) || "Galeria";
+        const galleryTitle = getGalleryDisplayTitle(gallery, lang);
         return (Array.isArray(gallery.photos) ? gallery.photos : []).map((photo, index) => {
             const meta = normalizeGalleryPhotoMeta(photo.meta, gallery.meta);
-            const caption = getVisiblePhotoCaption(getLocalizedText(photo.caption, lang));
+            const caption = resolvePublicCaption({
+                caption: getLocalizedText(photo.caption, lang),
+                meta
+            });
             const imageSrc = resolveOptimizedAssetUrl(photo.processedSrc || photo.src);
             const searchBlob = [
                 galleryTitle,
@@ -330,7 +357,7 @@ function renderGalleryArchive() {
     }
 
     titleEl.textContent = selectedGallery
-        ? (getLocalizedText(selectedGallery.title, lang) || "Galeria")
+        ? getGalleryDisplayTitle(selectedGallery, lang)
         : "Archivo de galerias";
 
     const photoEntries = flattenGalleryPhotos(galleries, lang);
