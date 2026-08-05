@@ -5,7 +5,6 @@
     const OFFICIAL_PSA_ROUND_1 = [
         {
             round: "Round 1",
-            court: "Pista 2",
             dateTime: "11 Aug 2026 • 12:00",
             status: "scheduled",
             player1: { name: "Sergio Garcia Pollan", country: "ESP", ranking: "#151", seed: "WC", mugshot: "https://secure.psasquashtour.com/players/cf4742efbc/headshot" },
@@ -14,7 +13,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista Central",
             dateTime: "11 Aug 2026 • 12:45",
             status: "scheduled",
             player1: { name: "Daniel Poleshchuk", country: "ISR", ranking: "#099", seed: "", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Daniel-Poleshchuk-1024x991.png" },
@@ -23,7 +21,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista 2",
             dateTime: "11 Aug 2026 • 17:00",
             status: "scheduled",
             player1: { name: "Khaled Labib", country: "EGY", ranking: "#137", seed: "", mugshot: "https://secure.psasquashtour.com/players/a7359e8a67/headshot" },
@@ -32,7 +29,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista 2",
             dateTime: "11 Aug 2026 • 17:45",
             status: "scheduled",
             player1: { name: "Marwan Tamer", country: "EGY", ranking: "#114", seed: "", mugshot: "https://secure.psasquashtour.com/players/0393163130/headshot" },
@@ -41,7 +37,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista Central",
             dateTime: "11 Aug 2026 • 18:30",
             status: "scheduled",
             player1: { name: "Omar Said", country: "EGY", ranking: "#105", seed: "", mugshot: "https://secure.psasquashtour.com/players/44f3ebd9cb/headshot" },
@@ -50,7 +45,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista Central",
             dateTime: "11 Aug 2026 • 19:15",
             status: "scheduled",
             player1: { name: "Ernesto Revert", country: "ESP", ranking: "#866", seed: "WC", mugshot: "https://secure.psasquashtour.com/players/a29ff8048d/headshot" },
@@ -59,7 +53,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista 2",
             dateTime: "11 Aug 2026 • 13:30",
             status: "scheduled",
             player1: { name: "Will Salter", country: "ENG", ranking: "#120", seed: "", mugshot: "https://secure.psasquashtour.com/players/3a5e840a1b/headshot" },
@@ -68,7 +61,6 @@
         },
         {
             round: "Round 1",
-            court: "Pista Central",
             dateTime: "11 Aug 2026 • 14:15",
             status: "scheduled",
             player1: { name: "Joseph White", country: "AUS", ranking: "#108", seed: "", mugshot: "https://secure.psasquashtour.com/players/1c2a3d4e5f/headshot" },
@@ -123,14 +115,13 @@
     function renderMatchCard(match) {
         const isLive = match.status === "in_progress";
         const metaDate = match.dateTime || "11 Aug 2026";
-        const courtTag = match.court ? ` • ${match.court}` : "";
 
         return `
             <div class="psa-match-item ${isLive ? 'is-live' : ''}">
                 ${renderPlayerRow(match.player1)}
                 ${renderPlayerRow(match.player2)}
                 <div class="psa-match-footer">
-                    <span>${metaDate}${courtTag}</span>
+                    <span>${metaDate}</span>
                     ${(match.player1?.name && match.player1.name !== "BYE" && match.player2?.name && match.player2.name !== "BYE") 
                         ? `<button class="psa-h2h-btn" onclick="openH2HModal('${match.player1.name}', '${match.player2.name}')">Head-to-head</button>` 
                         : ''}
@@ -191,7 +182,6 @@
             html += renderMatchCard({
                 round: "Round 2",
                 dateTime: "12 Aug 2026 • 16:00",
-                court: "Pista Central",
                 player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
                 player2: { name: "Ganador R1", seed: "", country: "", mugshot: "" }
             });
@@ -208,7 +198,6 @@
             html += renderMatchCard({
                 round: "Cuarto de Final",
                 dateTime: "13 Aug 2026",
-                court: "Pista Central",
                 player1: { name: `Ganador Octavo ${i*2-1}` },
                 player2: { name: `Ganador Octavo ${i*2}` }
             });
@@ -225,7 +214,6 @@
             html += renderMatchCard({
                 round: "Semifinal",
                 dateTime: "14 Aug 2026",
-                court: "Pista Central",
                 player1: { name: `Ganador Cuarto ${i*2-1}` },
                 player2: { name: `Ganador Cuarto ${i*2}` }
             });
@@ -240,7 +228,6 @@
         listContainer.innerHTML = renderMatchCard({
             round: "Gran Final",
             dateTime: "15 Aug 2026 • 18:30",
-            court: "Pista Central",
             player1: { name: "Semifinalista 1" },
             player2: { name: "Semifinalista 2" }
         });

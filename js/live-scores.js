@@ -19,17 +19,17 @@
         {
             id: "12711_01",
             round: "MENS ROUND 1",
-            court: "PISTA 2 - OLYMPIA",
+            court: "",
             dateTime: "11 AUG, 12:00",
             status: "scheduled",
             player1: { name: "Sergio Garcia Pollan", country: "ESP", seed: "WC", score: null },
-            player2: { name: "Yassin Elshafei", country: "EGY", seed: "", score: null },
+            player2: { name: "Brice Nicolas", country: "FRA", seed: "", score: null },
             scores: []
         },
         {
             id: "12711_02",
             round: "MENS ROUND 1",
-            court: "PISTA CENTRAL - OLYMPIA",
+            court: "",
             dateTime: "11 AUG, 12:45",
             status: "scheduled",
             player1: { name: "Daniel Poleshchuk", country: "ISR", seed: "", score: null },
@@ -39,28 +39,28 @@
         {
             id: "12711_03",
             round: "MENS ROUND 1",
-            court: "PISTA CENTRAL - OLYMPIA",
-            dateTime: "11 AUG, 13:30",
+            court: "",
+            dateTime: "11 AUG, 17:00",
             status: "scheduled",
-            player1: { name: "Ernesto Revert", country: "ESP", seed: "WC", score: null },
-            player2: { name: "Yannik Omlor", country: "GER", seed: "", score: null },
+            player1: { name: "Khaled Labib", country: "EGY", seed: "", score: null },
+            player2: { name: "Muhammad Asim Khan", country: "PAK", seed: "", score: null },
             scores: []
         },
         {
             id: "12711_04",
             round: "MENS ROUND 1",
-            court: "PISTA 2 - OLYMPIA",
-            dateTime: "11 AUG, 14:15",
+            court: "",
+            dateTime: "11 AUG, 17:45",
             status: "scheduled",
             player1: { name: "Marwan Tamer", country: "EGY", seed: "", score: null },
-            player2: { name: "Brice Nicolas", country: "FRA", seed: "", score: null },
+            player2: { name: "Aqeel Rehman", country: "AUT", seed: "", score: null },
             scores: []
         },
         {
             id: "12711_05",
             round: "MENS ROUND 1",
-            court: "PISTA CENTRAL - OLYMPIA",
-            dateTime: "11 AUG, 16:00",
+            court: "",
+            dateTime: "11 AUG, 18:30",
             status: "scheduled",
             player1: { name: "Omar Said", country: "EGY", seed: "", score: null },
             player2: { name: "Hamza Khan", country: "PAK", seed: "", score: null },
@@ -69,18 +69,18 @@
         {
             id: "12711_06",
             round: "MENS ROUND 1",
-            court: "PISTA 2 - OLYMPIA",
-            dateTime: "11 AUG, 16:45",
+            court: "",
+            dateTime: "11 AUG, 19:15",
             status: "scheduled",
-            player1: { name: "Khaled Labib", country: "EGY", seed: "", score: null },
-            player2: { name: "Muhammad Asim Khan", country: "PAK", seed: "", score: null },
+            player1: { name: "Ernesto Revert", country: "ESP", seed: "WC", score: null },
+            player2: { name: "Yannik Omlor", country: "GER", seed: "", score: null },
             scores: []
         },
         {
             id: "12711_07",
             round: "MENS ROUND 1",
-            court: "PISTA 2 - OLYMPIA",
-            dateTime: "11 AUG, 17:30",
+            court: "",
+            dateTime: "11 AUG, 13:30",
             status: "scheduled",
             player1: { name: "Will Salter", country: "ENG", seed: "", score: null },
             player2: { name: "Rhys Evans", country: "WAL", seed: "", score: null },
@@ -89,8 +89,8 @@
         {
             id: "12711_08",
             round: "MENS ROUND 1",
-            court: "PISTA CENTRAL - OLYMPIA",
-            dateTime: "11 AUG, 18:15",
+            court: "",
+            dateTime: "11 AUG, 14:15",
             status: "scheduled",
             player1: { name: "Joseph White", country: "AUS", seed: "", score: null },
             player2: { name: "Marek Panacek", country: "CZE", seed: "", score: null },
@@ -168,10 +168,7 @@
                             }).filter(Boolean)
                             : [];
 
-                        let courtName = m.court || "";
-                        if (courtName && !/^(pista|court)/i.test(courtName)) {
-                            courtName = `PISTA ${courtName}`;
-                        }
+                        let courtName = "";
 
                         let dateStr = "11 AUG";
                         if (m.date) {
