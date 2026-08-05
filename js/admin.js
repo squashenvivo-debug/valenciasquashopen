@@ -4345,7 +4345,6 @@ function buildDrawBuilderSelect(selectId, currentName, players) {
         const selected = matchedPlayer?.id === player.id ? "selected" : "";
         options.push(`<option value="${escapeHtml(player.id)}" ${selected}>${escapeHtml(label)}</option>`);
     });
-
     if (!isBye && !isTbd && !matchedPlayer) {
         options.unshift(`<option value="__KEEP__" selected>${escapeHtml(cleanName)}</option>`);
     }
@@ -4364,19 +4363,12 @@ async function renderDrawBuilder() {
 
     const players = await getDrawBuilderPlayers();
     const roundOneMatches = drawState.rounds[0].matches;
-    const forced = getForcedSeedAssignments(players, roundOneMatches.length);
 
     host.innerHTML = roundOneMatches.map((match, index) => {
         const p1SelectId = `drawBuilder_${index}_p1`;
         const p2SelectId = `drawBuilder_${index}_p2`;
-        const forcedP1 = forced.bySlot[`${index}_p1`] || "";
-        const forcedP2 = forced.bySlot[`${index}_p2`] || "";
-        const p1CurrentName = forcedP1
-            ? (formatDrawPlayerName(players.find((entry) => entry.id === forcedP1)) || match?.p1?.name)
-            : match?.p1?.name;
-        const p2CurrentName = forcedP2
-            ? (formatDrawPlayerName(players.find((entry) => entry.id === forcedP2)) || match?.p2?.name)
-            : match?.p2?.name;
+        const p1CurrentName = match?.p1?.name;
+        const p2CurrentName = match?.p2?.name;
 
         return `
             <article class="draw-builder-card" data-match-index="${index}">
@@ -4389,21 +4381,7 @@ async function renderDrawBuilder() {
         `;
     }).join("");
 
-    const topSelect = document.getElementById("drawBuilder_0_p1");
-    const bottomSelect = document.getElementById(`drawBuilder_${Math.max(0, roundOneMatches.length - 1)}_p2`);
-
-    if (topSelect && forced.seed1?.id) {
-        topSelect.value = forced.seed1.id;
-        topSelect.disabled = true;
-    }
-    if (bottomSelect && forced.seed2?.id) {
-        bottomSelect.value = forced.seed2.id;
-        bottomSelect.disabled = true;
-    }
-
-    if (forced.seed1?.id && forced.seed2?.id) {
-        updateDrawBuilderStatus("Seed 1 fijado arriba y seed 2 fijado abajo automáticamente.");
-    }
+    updateDrawBuilderStatus("Selecciona libremente cada jugador para los cruces.");
 }
 
 function buildDrawSlotFromSelection(selectedValue, existingSlot, players) {
@@ -4421,7 +4399,9 @@ function buildDrawSlotFromSelection(selectedValue, existingSlot, players) {
     }
 
     const player = players.find((entry) => entry.id === selectedValue);
-    if (!player) return { name: "TBD" };
+    if (!player) {
+        return { name: "TBD" };
+    }
 
     return {
         name: formatDrawPlayerName(player) || player.name,
@@ -4435,17 +4415,11 @@ async function saveDrawBuilderAssignments() {
 
     const players = await getDrawBuilderPlayers();
     const roundOneMatches = drawState.rounds[0].matches;
-    const forced = getForcedSeedAssignments(players, roundOneMatches.length);
     const selections = [];
 
     roundOneMatches.forEach((match, index) => {
-        let p1Value = document.getElementById(`drawBuilder_${index}_p1`)?.value || "__TBD__";
-        let p2Value = document.getElementById(`drawBuilder_${index}_p2`)?.value || "__TBD__";
-
-        const forcedP1 = forced.bySlot[`${index}_p1`];
-        const forcedP2 = forced.bySlot[`${index}_p2`];
-        if (forcedP1) p1Value = forcedP1;
-        if (forcedP2) p2Value = forcedP2;
+        const p1Value = document.getElementById(`drawBuilder_${index}_p1`)?.value || "__TBD__";
+        const p2Value = document.getElementById(`drawBuilder_${index}_p2`)?.value || "__TBD__";
 
         selections.push({
             index,
@@ -4491,7 +4465,7 @@ async function saveDrawBuilderAssignments() {
     populateScheduleRoundSelect();
     fillMatchEditor();
     fillScheduleEditor();
-    updateDrawBuilderStatus("Cruces guardados correctamente (seed 1 arriba, seed 2 abajo, sin duplicados).");
+    updateDrawBuilderStatus("Cruces guardados correctamente.");
 }
 
 function initDrawBuilder() {
