@@ -1024,7 +1024,7 @@ async function startAdminModulesOnce() {
         ensureProgrammingAdminUi();
         bindAdminSectionView();
 
-        if (!isLocalDevMode()) {
+        if (window.PSACloudStore?.isReady?.()) {
             await hydrateAdminStateFromCloud();
             installCloudStorageAutosync();
         }

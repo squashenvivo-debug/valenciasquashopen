@@ -154,15 +154,29 @@ window.PSACloudStore = (() => {
             const colName = COLUMN_MAP[key];
             const parsed = safeParseJson(value);
             const textToSave = typeof parsed === "string" ? parsed : safeStringify(parsed);
-            const { error } = await client
+            const { data, error } = await client
                 .from(TABLE_NAME)
                 .update({
                     [colName]: textToSave,
                     updated_at: new Date().toISOString()
                 })
-                .eq("id", 1);
+                .eq("id", 1)
+                .select();
 
-            if (!error) {
+            if (!error && Array.isArray(data) && data.length > 0) {
+                return { ok: true };
+            }
+
+            // Fallback: si update no devolvió filas (ej. RLS o id=1 no existe), probar upsert
+            const { error: upsertErr } = await client
+                .from(TABLE_NAME)
+                .upsert({
+                    id: 1,
+                    [colName]: textToSave,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: "id" });
+
+            if (!upsertErr) {
                 return { ok: true };
             }
         }
