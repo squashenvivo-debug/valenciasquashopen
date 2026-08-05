@@ -4,57 +4,57 @@
     const STORAGE_KEY_API = "psaApiKey";
     const STORAGE_KEY_WEBHOOK = "psaWebhookUrl";
 
-    // Initial Mock Matches matching the Ballarat Open 2026 / Grasshopper Cup 2025 screenshots
+    // Initial Matches for PSA Valencia Open 2026 - Memorial Chimo Marmaneu (ID: 12711)
     const MOCK_MATCHES = [
         {
-            id: 301,
+            id: 12711_01,
             round: "MENS ROUND 1",
-            court: "COURT C1",
-            dateTime: "06 AUG, 11:00",
+            court: "PISTA CENTRAL - OLYMPIA",
+            dateTime: "11 AUG, 11:00",
             status: "scheduled",
-            player1: { name: "MOEEN UD DIN", country: "PAK", seed: "", score: null },
-            player2: { name: "HURAIRA KHAN", country: "PAK", seed: "", score: null },
+            player1: { name: "Muhammad Ashab Irfan", country: "PAK", seed: "[1]", score: null },
+            player2: { name: "Marwan Tamer", country: "EGY", seed: "", score: null },
             scores: []
         },
         {
-            id: 302,
+            id: 12711_02,
             round: "MENS ROUND 1",
-            court: "COURT C1",
-            dateTime: "06 AUG, 11:45",
+            court: "PISTA 2 - OLYMPIA",
+            dateTime: "11 AUG, 11:45",
             status: "scheduled",
-            player1: { name: "ANSON WONG", country: "HKG", seed: "", score: null },
-            player2: { name: "SIDDANTH RAMANI", country: "AUS", seed: "", score: null },
+            player1: { name: "Balazs Farkas", country: "HUN", seed: "[5]", score: null },
+            player2: { name: "Brice Nicolas", country: "FRA", seed: "", score: null },
             scores: []
         },
         {
-            id: 303,
+            id: 12711_03,
             round: "MENS ROUND 1",
-            court: "COURT C1",
-            dateTime: "06 AUG, 12:30",
+            court: "PISTA CENTRAL - OLYMPIA",
+            dateTime: "11 AUG, 12:30",
             status: "in_progress",
-            player1: { name: "CORBEN WHITE", country: "AUS", seed: "", score: 1 },
-            player2: { name: "JACK WEBSTER", country: "ENG", seed: "", score: 2 },
+            player1: { name: "Ivan Perez", country: "ESP", seed: "[4]", score: 1 },
+            player2: { name: "Will Salter", country: "ENG", seed: "", score: 2 },
             scores: ["11-9", "8-11", "9-11", "12-10 (jugando)"]
         },
         {
-            id: 304,
-            round: "MENS ROUND 2",
-            court: "COURT C1",
-            dateTime: "06 AUG, 18:30",
+            id: 12711_04,
+            round: "MENS ROUND 1",
+            court: "PISTA CENTRAL - OLYMPIA",
+            dateTime: "11 AUG, 18:30",
             status: "scheduled",
-            player1: { name: "GIANLUCA BUSHELL-O'CONNOR", country: "AUS", seed: "[4]", score: null },
-            player2: { name: "THOMAS MARSHALL", country: "NZL", seed: "", score: null },
+            player1: { name: "Sergio Garcia Pollan", country: "ESP", seed: "WC [2]", score: null },
+            player2: { name: "Patrick Rooney", country: "ENG", seed: "[2]", score: null },
             scores: []
         },
         {
-            id: 3133381,
-            round: "ROUND 1",
-            court: "GC (ZURICH HAUPTBAHNHOF)",
-            dateTime: "22 APR, 17:30",
+            id: 12711_05,
+            round: "MENS ROUND 1",
+            court: "PISTA CENTRAL - OLYMPIA",
+            dateTime: "11 AUG, 19:15",
             status: "completed",
-            player1: { name: "YANNICK WILHELMI", country: "SUI", seed: "", score: 1 },
-            player2: { name: "NICOLAS MUELLER", country: "SUI", seed: "", score: 2 },
-            scores: ["13-11", "3-11", "6-11"]
+            player1: { name: "Ernesto Revert", country: "ESP", seed: "WC [1]", score: 3 },
+            player2: { name: "Marek Panacek", country: "CZE", seed: "", score: 1 },
+            scores: ["13-11", "8-11", "11-7", "11-9"]
         }
     ];
 
