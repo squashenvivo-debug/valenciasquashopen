@@ -281,11 +281,91 @@
         if (modal) modal.classList.remove("active");
     };
 
+    function drawBracketConnectors() {
+        const treeEl = document.querySelector(".psa-bracket-tree");
+        if (!treeEl) return;
+
+        let svgEl = treeEl.querySelector("#psaBracketSvg");
+        if (!svgEl) {
+            svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svgEl.id = "psaBracketSvg";
+            svgEl.setAttribute("class", "psa-bracket-svg-overlay");
+            treeEl.appendChild(svgEl);
+        }
+
+        const treeRect = treeEl.getBoundingClientRect();
+        const totalWidth = Math.max(treeEl.scrollWidth, treeRect.width);
+        const totalHeight = Math.max(treeEl.scrollHeight, treeRect.height);
+
+        svgEl.setAttribute("width", totalWidth);
+        svgEl.setAttribute("height", totalHeight);
+        svgEl.setAttribute("viewBox", `0 0 ${totalWidth} ${totalHeight}`);
+        svgEl.innerHTML = "";
+
+        const columns = treeEl.querySelectorAll(".psa-round-column");
+        if (columns.length < 2) return;
+
+        for (let colIdx = 0; colIdx < columns.length - 1; colIdx++) {
+            const feederColumn = columns[colIdx];
+            const receiverColumn = columns[colIdx + 1];
+
+            const feederCards = feederColumn.querySelectorAll(".psa-match-item");
+            const receiverCards = receiverColumn.querySelectorAll(".psa-match-item");
+
+            for (let pairIdx = 0; pairIdx < Math.floor(feederCards.length / 2); pairIdx++) {
+                const topCard = feederCards[pairIdx * 2];
+                const bottomCard = feederCards[pairIdx * 2 + 1];
+                const receiverCard = receiverCards[pairIdx];
+
+                if (!topCard || !bottomCard || !receiverCard) continue;
+
+                const topRect = topCard.getBoundingClientRect();
+                const bottomRect = bottomCard.getBoundingClientRect();
+                const recRect = receiverCard.getBoundingClientRect();
+
+                const x1 = topRect.right - treeRect.left;
+                const y1 = topRect.top + topRect.height / 2 - treeRect.top;
+
+                const x2 = bottomRect.right - treeRect.left;
+                const y2 = bottomRect.top + bottomRect.height / 2 - treeRect.top;
+
+                const xRec = recRect.left - treeRect.left;
+                const yRec = recRect.top + recRect.height / 2 - treeRect.top;
+
+                const xMid = x1 + (xRec - x1) / 2;
+
+                const pathTop = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const dTop = `M ${x1} ${y1} H ${xMid} V ${yRec} H ${xRec}`;
+                pathTop.setAttribute("d", dTop);
+                pathTop.setAttribute("stroke", "#FFFFFF");
+                pathTop.setAttribute("stroke-width", "2");
+                pathTop.setAttribute("fill", "none");
+                pathTop.setAttribute("stroke-linecap", "round");
+                pathTop.setAttribute("stroke-linejoin", "round");
+                svgEl.appendChild(pathTop);
+
+                const pathBottom = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const dBottom = `M ${x2} ${y2} H ${xMid} V ${yRec} H ${xRec}`;
+                pathBottom.setAttribute("d", dBottom);
+                pathBottom.setAttribute("stroke", "#FFFFFF");
+                pathBottom.setAttribute("stroke-width", "2");
+                pathBottom.setAttribute("fill", "none");
+                pathBottom.setAttribute("stroke-linecap", "round");
+                pathBottom.setAttribute("stroke-linejoin", "round");
+                svgEl.appendChild(pathBottom);
+            }
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         buildRound1Column();
         buildRound2Column();
         buildQFColumn();
         buildSFColumn();
         buildFinalColumn();
+
+        setTimeout(drawBracketConnectors, 100);
+        window.addEventListener("resize", drawBracketConnectors);
+        window.addEventListener("load", drawBracketConnectors);
     });
 })();
