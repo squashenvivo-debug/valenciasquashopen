@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro Oficial PSA | PSA Valencia Open 2026</title>
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/psa-draw.css?v=20260805-1">
+</head>
+<body>
+
+<div class="psa-draw-shell">
+
+    <!-- Top Navigation Header -->
+    <header class="psa-draw-top-bar">
+        <a href="index.html" class="psa-back-btn">← Volver al Inicio</a>
+        <div class="psa-live-indicator">
+            <span class="psa-pulse-dot"></span>
+            PSA OFFICIAL TOURNAMENT DRAW
+        </div>
+    </header>
+
+    <!-- Tournament Header Banner -->
+    <section class="psa-tournament-header">
+        <h1>PSA VALENCIA OPEN 2026</h1>
+        <div class="psa-tournament-meta">
+            MEMORIAL CHIMO MARMANEU • 11 - 15 AUGUST 2026 • <span class="psa-gold-pill">$36,000 COPPER</span> • DRAW 24
+        </div>
+    </section>
+
+    <!-- Scrollable Bracket Viewport -->
+    <main class="psa-bracket-viewport">
+        <div class="psa-bracket-tree">
+
+            <!-- Round 1 Column -->
+            <div class="psa-round-column">
+                <div class="psa-round-title">
+                    Round 1 <span class="count">16 partidos</span>
+                </div>
+                <div class="psa-matches-list" id="r1Matches">
+                    <!-- Dynamic Round 1 matches -->
+                </div>
+            </div>
+
+            <!-- Round 2 Column -->
+            <div class="psa-round-column">
+                <div class="psa-round-title">
+                    Round 2 <span class="count">8 partidos</span>
+                </div>
+                <div class="psa-matches-list" id="r2Matches">
+                    <!-- Dynamic Round 2 matches -->
+                </div>
+            </div>
+
+            <!-- Quarter Finals Column -->
+            <div class="psa-round-column">
+                <div class="psa-round-title">
+                    Cuartos <span class="count">4 partidos</span>
+                </div>
+                <div class="psa-matches-list" id="qfMatches">
+                    <!-- Dynamic QF matches -->
+                </div>
+            </div>
+
+            <!-- Semi Finals Column -->
+            <div class="psa-round-column">
+                <div class="psa-round-title">
+                    Semifinales <span class="count">2 partidos</span>
+                </div>
+                <div class="psa-matches-list" id="sfMatches">
+                    <!-- Dynamic SF matches -->
+                </div>
+            </div>
+
+            <!-- Final Column -->
+            <div class="psa-round-column">
+                <div class="psa-round-title">
+                    Final <span class="count">Gran Final</span>
+                </div>
+                <div class="psa-matches-list" id="finalMatches">
+                    <!-- Dynamic Final match -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<!-- Head to Head Modal -->
+<div class="psa-modal-overlay" id="h2hModal" onclick="if(event.target === this) closeH2HModal()">
+    <div class="psa-modal-card">
+        <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
+        <div class="psa-h2h-header">
+            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
+            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
+        </div>
+
+        <div class="psa-h2h-versus">
+            <div class="psa-h2h-player-box">
+                <div id="h2hP1Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 1</div>
+            </div>
+            <div class="psa-h2h-vs-badge">VS</div>
+            <div class="psa-h2h-player-box">
+                <div id="h2hP2Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 2</div>
+            </div>
+        </div>
+
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Enfrentamientos directos:</span>
+            <strong style="color: var(--psa-green);">0 - 0</strong>
+        </div>
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Último duelo:</span>
+            <strong>Primer enfrentamiento oficial</strong>
+        </div>
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Porcentaje de victorias:</span>
+            <strong>50% - 50%</strong>
+        </div>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script src="js/psa-draw.js?v=20260805-1"></script>
+</body>
+</html>
