@@ -200,45 +200,45 @@ body {
     position: relative;
 }
 
-/* Connector line extending from odd match item down */
+/* Connector line extending from odd match item right edge */
 .psa-round-column:not(:last-child) .psa-match-item:nth-child(odd)::after {
     content: '';
     position: absolute;
     right: -16px;
     top: 50%;
-    height: calc(50% + 8px);
+    height: calc(50% + 12px);
     width: 16px;
-    border-right: 2px solid rgba(255, 255, 255, 0.7);
-    border-top: 2px solid rgba(255, 255, 255, 0.7);
+    border-right: 2px solid #FFFFFF;
+    border-top: 2px solid #FFFFFF;
     border-top-right-radius: 6px;
     pointer-events: none;
     z-index: 2;
 }
 
-/* Connector line extending from even match item up */
+/* Connector line extending from even match item right edge */
 .psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::after {
     content: '';
     position: absolute;
     right: -16px;
     bottom: 50%;
-    height: calc(50% + 8px);
+    height: calc(50% + 12px);
     width: 16px;
-    border-right: 2px solid rgba(255, 255, 255, 0.7);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.7);
+    border-right: 2px solid #FFFFFF;
+    border-bottom: 2px solid #FFFFFF;
     border-bottom-right-radius: 6px;
     pointer-events: none;
     z-index: 2;
 }
 
-/* Horizontal stem extending from meeting point to next column */
+/* Horizontal stem extending from connector meeting point to next column match card left edge */
 .psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::before {
     content: '';
     position: absolute;
     right: -32px;
-    top: -8px;
+    top: -12px;
     width: 16px;
     height: 2px;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: #FFFFFF;
     pointer-events: none;
     z-index: 2;
 }
