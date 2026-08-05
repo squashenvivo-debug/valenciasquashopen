@@ -5,9 +5,11 @@
 
 window.AdminSupabase = (() => {
     const runtimeConfig = window.PSA_CONFIG || {};
+    const FALLBACK_SUPABASE_URL = "https://texjzaanugmssmolzwgb.supabase.co";
+    const FALLBACK_SUPABASE_ANON_KEY = "sb_publishable_lTEaFAp9lgMMInv-0TjeCA_ViWtDg2J";
     const config = {
-        url: String(runtimeConfig.supabaseUrl || runtimeConfig.SUPABASE_URL || "").trim(),
-        anonKey: String(runtimeConfig.supabaseAnonKey || runtimeConfig.SUPABASE_ANON_KEY || "").trim()
+        url: String(runtimeConfig.supabaseUrl || runtimeConfig.SUPABASE_URL || FALLBACK_SUPABASE_URL).trim(),
+        anonKey: String(runtimeConfig.supabaseAnonKey || runtimeConfig.SUPABASE_ANON_KEY || FALLBACK_SUPABASE_ANON_KEY).trim()
     };
 
     let client = null;
