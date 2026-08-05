@@ -150,18 +150,6 @@ body {
     gap: 32px;
     min-width: 1200px;
     padding: 10px 4px;
-    position: relative;
-}
-
-/* SVG Overlay for Dynamic Bracket Lines */
-.psa-bracket-svg-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 5;
 }
 
 .psa-round-column {
@@ -199,82 +187,6 @@ body {
     justify-content: space-around;
     flex-grow: 1;
     gap: 16px;
-    position: relative;
-}
-
-/* Bracket Connector Lines per Round Column (located strictly inside the 32px whitespace gap) */
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(odd)::after {
-    content: '';
-    position: absolute;
-    right: -16px;
-    top: 50%;
-    width: 16px;
-    border-right: 2px solid rgba(255, 255, 255, 0.7);
-    border-top: 2px solid rgba(255, 255, 255, 0.7);
-    border-top-right-radius: 6px;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::after {
-    content: '';
-    position: absolute;
-    right: -16px;
-    bottom: 50%;
-    width: 16px;
-    border-right: 2px solid rgba(255, 255, 255, 0.7);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.7);
-    border-bottom-right-radius: 6px;
-    pointer-events: none;
-    z-index: 3;
-}
-
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::before {
-    content: '';
-    position: absolute;
-    right: -32px;
-    width: 16px;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.7);
-    pointer-events: none;
-    z-index: 3;
-}
-
-/* Height tuning per round column */
-/* Round 1 -> Round 2 */
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 12px);
-}
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::before {
-    top: -12px;
-}
-
-/* Round 2 -> Cuartos */
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 36px);
-}
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::before {
-    top: -36px;
-}
-
-/* Cuartos -> Semifinales */
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 84px);
-}
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::before {
-    top: -84px;
-}
-
-/* Semifinales -> Final */
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 180px);
-}
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::before {
-    top: -180px;
 }
 
 /* Match Card Item */
@@ -282,9 +194,11 @@ body {
     background: var(--psa-bg-card);
     border: 1px solid var(--psa-border);
     border-radius: var(--psa-radius);
-    overflow: visible;
+    overflow: hidden;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
+}
+
 .psa-match-item:hover {
     border-color: var(--psa-border-accent);
     transform: translateY(-2px);
@@ -294,80 +208,6 @@ body {
 .psa-match-item.is-live {
     border-color: var(--psa-green);
     box-shadow: 0 0 15px var(--psa-green-glow);
-}
-
-/* Language Selector Styles */
-.psa-header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.language-selector {
-    position: relative;
-}
-
-.language-toggle {
-    background: rgba(255, 255, 255, 0.08);
-    color: #FFF;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.language-toggle:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--psa-green);
-}
-
-.language-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 6px;
-    background: var(--psa-bg-card);
-    border: 1px solid var(--psa-border-accent);
-    border-radius: 10px;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px);
-    transition: all 0.2s ease;
-    z-index: 100;
-    min-width: 110px;
-}
-
-.language-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.language-menu button {
-    background: none;
-    border: none;
-    color: var(--psa-text);
-    padding: 6px 12px;
-    text-align: left;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-.language-menu button:hover,
-.language-menu button.active {
-    background: rgba(0, 230, 118, 0.15);
-    color: var(--psa-green);
 }
 
 /* Match Player Rows */

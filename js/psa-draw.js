@@ -115,12 +115,6 @@
     function renderMatchCard(match) {
         const isLive = match.status === "in_progress";
         const metaDate = match.dateTime || "11 Aug 2026";
-        const p1Name = match.player1?.name || "";
-        const p2Name = match.player2?.name || "";
-        const showH2H = p1Name && p1Name !== "BYE" && p2Name && p2Name !== "BYE";
-
-        const p1Safe = p1Name.replace(/'/g, "\\'");
-        const p2Safe = p2Name.replace(/'/g, "\\'");
 
         return `
             <div class="psa-match-item ${isLive ? 'is-live' : ''}">
@@ -128,8 +122,8 @@
                 ${renderPlayerRow(match.player2)}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
-                    ${showH2H 
-                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}')">Head-to-head</button>` 
+                    ${(match.player1?.name && match.player1.name !== "BYE" && match.player2?.name && match.player2.name !== "BYE") 
+                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${match.player1.name}', '${match.player2.name}')">Head-to-head</button>` 
                         : ''}
                 </div>
             </div>
@@ -140,28 +134,34 @@
         const listContainer = document.getElementById("r1Matches");
         if (!listContainer) return;
 
-        const allR1Matches = [];
+        let html = "";
+        // Round 1 alternates between Bye matches for seeds and real pairings
         let matchIdx = 0;
         for (let i = 0; i < 4; i++) {
+            // Seed BYE match
             const seed = SEEDED_BYES[i];
-            allR1Matches.push({
+            html += renderMatchCard({
                 round: "Round 1",
                 dateTime: "-",
                 player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
                 player2: { name: "BYE" }
             });
+
+            // Real pairing
             if (OFFICIAL_PSA_ROUND_1[matchIdx]) {
-                allR1Matches.push(OFFICIAL_PSA_ROUND_1[matchIdx]);
+                html += renderMatchCard(OFFICIAL_PSA_ROUND_1[matchIdx]);
                 matchIdx++;
             }
         }
         for (let i = 4; i < 8; i++) {
+            // Real pairing
             if (OFFICIAL_PSA_ROUND_1[matchIdx]) {
-                allR1Matches.push(OFFICIAL_PSA_ROUND_1[matchIdx]);
+                html += renderMatchCard(OFFICIAL_PSA_ROUND_1[matchIdx]);
                 matchIdx++;
             }
+            // Seed BYE match
             const seed = SEEDED_BYES[i];
-            allR1Matches.push({
+            html += renderMatchCard({
                 round: "Round 1",
                 dateTime: "-",
                 player1: { name: "BYE" },
@@ -169,22 +169,12 @@
             });
         }
 
-        listContainer.innerHTML = allR1Matches.map(m => renderMatchCard(m)).join("");
-    }
-
-    function getPsaText(key, fallback) {
-        if (typeof window.t === "function") {
-            const val = window.t(`psaDraw.${key}`);
-            if (val && val !== `psaDraw.${key}`) return val;
-        }
-        return fallback;
+        listContainer.innerHTML = html;
     }
 
     function buildRound2Column() {
         const listContainer = document.getElementById("r2Matches");
         if (!listContainer) return;
-
-        const winnerLabel = getPsaText("winnerR1", "Ganador R1");
 
         let html = "";
         for (let i = 0; i < 8; i++) {
@@ -193,7 +183,7 @@
                 round: "Round 2",
                 dateTime: "12 Aug 2026 • 16:00",
                 player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
-                player2: { name: winnerLabel, seed: "", country: "", mugshot: "" }
+                player2: { name: "Ganador R1", seed: "", country: "", mugshot: "" }
             });
         }
         listContainer.innerHTML = html;
@@ -203,16 +193,13 @@
         const listContainer = document.getElementById("qfMatches");
         if (!listContainer) return;
 
-        const winnerLabel = getPsaText("winnerOctavo", "Ganador Octavos");
-        const qfRoundText = getPsaText("quarterFinals", "Cuartos de Final");
-
         let html = "";
         for (let i = 1; i <= 4; i++) {
             html += renderMatchCard({
-                round: qfRoundText,
+                round: "Cuarto de Final",
                 dateTime: "13 Aug 2026",
-                player1: { name: `${winnerLabel} ${i*2-1}` },
-                player2: { name: `${winnerLabel} ${i*2}` }
+                player1: { name: `Ganador Octavo ${i*2-1}` },
+                player2: { name: `Ganador Octavo ${i*2}` }
             });
         }
         listContainer.innerHTML = html;
@@ -222,16 +209,13 @@
         const listContainer = document.getElementById("sfMatches");
         if (!listContainer) return;
 
-        const winnerLabel = getPsaText("winnerCuarto", "Ganador Cuartos");
-        const sfRoundText = getPsaText("semiFinals", "Semifinales");
-
         let html = "";
         for (let i = 1; i <= 2; i++) {
             html += renderMatchCard({
-                round: sfRoundText,
+                round: "Semifinal",
                 dateTime: "14 Aug 2026",
-                player1: { name: `${winnerLabel} ${i*2-1}` },
-                player2: { name: `${winnerLabel} ${i*2}` }
+                player1: { name: `Ganador Cuarto ${i*2-1}` },
+                player2: { name: `Ganador Cuarto ${i*2}` }
             });
         }
         listContainer.innerHTML = html;
@@ -241,23 +225,12 @@
         const listContainer = document.getElementById("finalMatches");
         if (!listContainer) return;
 
-        const semiLabel = getPsaText("semifinalist", "Semifinalista");
-        const finalRoundText = getPsaText("mainFinal", "Gran Final");
-
         listContainer.innerHTML = renderMatchCard({
-            round: finalRoundText,
+            round: "Gran Final",
             dateTime: "15 Aug 2026 • 18:30",
-            player1: { name: `${semiLabel} 1` },
-            player2: { name: `${semiLabel} 2` }
+            player1: { name: "Semifinalista 1" },
+            player2: { name: "Semifinalista 2" }
         });
-    }
-
-    function renderAllColumns() {
-        buildRound1Column();
-        buildRound2Column();
-        buildQFColumn();
-        buildSFColumn();
-        buildFinalColumn();
     }
 
     // Modal Head to Head Handler
@@ -272,8 +245,8 @@
                 <div class="psa-modal-card">
                     <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
                     <div class="psa-h2h-header">
-                        <h3 style="color: var(--psa-green, #00E676); font-size: 1.1rem; text-transform: uppercase;" data-i18n="psaDraw.h2hTitle">Head-to-head Stats</h3>
-                        <p style="color: var(--psa-text-muted, #8E9BAE); font-size: 0.85rem; margin-top: 4px;" data-i18n="psaDraw.h2hSubtitle">Histórico de enfrentamientos en el PSA World Tour</p>
+                        <h3 style="color: var(--psa-green, #00E676); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
+                        <p style="color: var(--psa-text-muted, #8E9BAE); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
                     </div>
                     <div class="psa-h2h-versus">
                         <div class="psa-h2h-player-box">
@@ -285,15 +258,15 @@
                         </div>
                     </div>
                     <div class="psa-h2h-stat-row">
-                        <span style="color: var(--psa-text-muted, #8E9BAE);" data-i18n="psaDraw.h2hMatches">Enfrentamientos directos:</span>
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Enfrentamientos directos:</span>
                         <strong style="color: var(--psa-green, #00E676);">0 - 0</strong>
                     </div>
                     <div class="psa-h2h-stat-row">
-                        <span style="color: var(--psa-text-muted, #8E9BAE);" data-i18n="psaDraw.h2hLastMeeting">Último duelo:</span>
-                        <strong data-i18n="psaDraw.h2hFirstMeeting">Primer enfrentamiento oficial</strong>
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Último duelo:</span>
+                        <strong>Primer enfrentamiento oficial</strong>
                     </div>
                     <div class="psa-h2h-stat-row">
-                        <span style="color: var(--psa-text-muted, #8E9BAE);" data-i18n="psaDraw.h2hWinPct">Porcentaje de victorias:</span>
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Porcentaje de victorias:</span>
                         <strong>50% - 50%</strong>
                     </div>
                 </div>
@@ -314,17 +287,11 @@
         if (modal) modal.classList.remove("active");
     };
 
-    document.addEventListener("app-language-changed", () => {
-        renderAllColumns();
-        if (typeof window.setLanguage === "function") {
-            window.setLanguage(localStorage.getItem("language") || "es");
-        }
-    });
-
     document.addEventListener("DOMContentLoaded", () => {
-        renderAllColumns();
-        if (typeof window.setLanguage === "function") {
-            window.setLanguage(localStorage.getItem("language") || "es");
-        }
+        buildRound1Column();
+        buildRound2Column();
+        buildQFColumn();
+        buildSFColumn();
+        buildFinalColumn();
     });
 })();

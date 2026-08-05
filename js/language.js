@@ -61,30 +61,6 @@ quick: {
     players: {
         title: "JUGADORES",
         text: "Conoce a todos los participantes"
-    },
-
-    psaDraw: {
-        backHome: "← Volver al Inicio",
-        officialDraw: "CUADRO OFICIAL DEL TORNEO PSA",
-        title: "PSA VALENCIA OPEN 2026",
-        subtitle: "MEMORIAL CHIMO MARMANEU • 11 - 15 AGOSTO 2026 • $36,000 COPPER • CUADRO 24",
-        round1: "Ronda 1",
-        round2: "Ronda 2",
-        quarterFinals: "Cuartos de Final",
-        semiFinals: "Semifinales",
-        final: "Final",
-        matchesCount: "partidos",
-        mainFinal: "Gran Final",
-        h2hTitle: "Estadísticas Head-to-Head",
-        h2hSubtitle: "Histórico de enfrentamientos en el PSA World Tour",
-        h2hMatches: "Enfrentamientos directos:",
-        h2hLastMeeting: "Último duelo:",
-        h2hFirstMeeting: "Primer enfrentamiento oficial",
-        h2hWinPct: "Porcentaje de victorias:",
-        winnerR1: "Ganador R1",
-        winnerOctavo: "Ganador Octavos",
-        winnerCuarto: "Ganador Cuartos",
-        semifinalist: "Semifinalista"
     }
 
 },
@@ -146,30 +122,6 @@ quick: {
     players: {
         title: "JUGADORS",
         text: "Coneix tots els participants"
-    },
-
-    psaDraw: {
-        backHome: "← Tornar a l'Inici",
-        officialDraw: "QUADRE OFICIAL DEL TORNEIG PSA",
-        title: "PSA VALENCIA OPEN 2026",
-        subtitle: "MEMORIAL CHIMO MARMANEU • 11 - 15 AGOST 2026 • $36,000 COPPER • QUADRE 24",
-        round1: "Ronda 1",
-        round2: "Ronda 2",
-        quarterFinals: "Quarts de Final",
-        semiFinals: "Semifinals",
-        final: "Final",
-        matchesCount: "partits",
-        mainFinal: "Gran Final",
-        h2hTitle: "Estadístiques Head-to-Head",
-        h2hSubtitle: "Històric d'enfrontaments al PSA World Tour",
-        h2hMatches: "Enfrontaments directes:",
-        h2hLastMeeting: "Últim duel:",
-        h2hFirstMeeting: "Primer enfrontament oficial",
-        h2hWinPct: "Percentatge de victòries:",
-        winnerR1: "Guanyador R1",
-        winnerOctavo: "Guanyador Vuitens",
-        winnerCuarto: "Guanyador Quarts",
-        semifinalist: "Semifinalista"
     }
 
 },
@@ -230,30 +182,6 @@ quick: {
     players: {
         title: "PLAYERS",
         text: "Meet all participants"
-    },
-
-    psaDraw: {
-        backHome: "← Back to Home",
-        officialDraw: "PSA OFFICIAL TOURNAMENT DRAW",
-        title: "PSA VALENCIA OPEN 2026",
-        subtitle: "CHIMO MARMANEU MEMORIAL • 11 - 15 AUGUST 2026 • $36,000 COPPER • DRAW 24",
-        round1: "Round 1",
-        round2: "Round 2",
-        quarterFinals: "Quarter Finals",
-        semiFinals: "Semi Finals",
-        final: "Final",
-        matchesCount: "matches",
-        mainFinal: "Grand Final",
-        h2hTitle: "Head-to-Head Stats",
-        h2hSubtitle: "PSA World Tour head-to-head match history",
-        h2hMatches: "Head-to-head matches:",
-        h2hLastMeeting: "Last meeting:",
-        h2hFirstMeeting: "First official meeting",
-        h2hWinPct: "Win percentage:",
-        winnerR1: "Winner R1",
-        winnerOctavo: "Winner Round 2",
-        winnerCuarto: "Winner Quarter",
-        semifinalist: "Semifinalist"
     }
 
 },
@@ -314,30 +242,6 @@ quick: {
     players: {
         title: "JOUEURS",
         text: "Découvrez tous les participants"
-    },
-
-    psaDraw: {
-        backHome: "← Retour à l'Accueil",
-        officialDraw: "TABLEAU OFFICIEL DU TOURNOI PSA",
-        title: "PSA VALENCIA OPEN 2026",
-        subtitle: "MÉMORIAL CHIMO MARMANEU • 11 - 15 AOÛT 2026 • $36,000 COPPER • TABLEAU 24",
-        round1: "Tour 1",
-        round2: "Tour 2",
-        quarterFinals: "Quarts de finale",
-        semiFinals: "Demi-finales",
-        final: "Finale",
-        matchesCount: "matchs",
-        mainFinal: "Grande Finale",
-        h2hTitle: "Statistiques Face-à-Face",
-        h2hSubtitle: "Historique des confrontations sur le PSA World Tour",
-        h2hMatches: "Confrontations directes:",
-        h2hLastMeeting: "Dernier duel:",
-        h2hFirstMeeting: "Première confrontation officielle",
-        h2hWinPct: "Pourcentage de victoires:",
-        winnerR1: "Vainqueur T1",
-        winnerOctavo: "Vainqueur Huitièmes",
-        winnerCuarto: "Vainqueur Quarts",
-        semifinalist: "Demi-finaliste"
     }
 
 },
