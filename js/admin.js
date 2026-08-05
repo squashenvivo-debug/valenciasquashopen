@@ -2217,6 +2217,14 @@ function readNewsCollection() {
 function saveNewsCollection(collection) {
     try {
         localStorage.setItem(NEWS_COLLECTION_KEY, JSON.stringify(collection));
+
+        const cloud = window.PSACloudStore;
+        if (cloud?.isReady?.()) {
+            cloud.saveLocalStorageKeyToCloud(NEWS_COLLECTION_KEY).catch(() => {
+                // Mantenemos al menos la copia local.
+            });
+        }
+
         return true;
     } catch (error) {
         return false;
