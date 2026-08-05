@@ -343,9 +343,48 @@ Deno.serve(async (req) => {
     try {
       const body = await req.json().catch(() => ({}));
       const action = String((body as { action?: unknown })?.action || "").trim().toLowerCase();
+      const userApiKey = String((body as { apiKey?: unknown; api_key?: unknown }).apiKey || (body as { api_key?: unknown }).api_key || readPsaApiKey()).trim();
+      const baseUrl = readApiBaseUrl();
 
-      if (action !== "subscribe") {
-        return json({ success: false, error: "Accion POST no soportada. Usa action=subscribe." }, 400);
+      if (action === "subscribe" || (body as { endpoint_url?: unknown }).endpoint_url) {
+        const endpointUrl = String((body as { endpoint_url?: unknown }).endpoint_url || "").trim();
+        const apiKeyHeaderName = String((body as { api_key_header_name?: unknown }).api_key_header_name || "x-api-key").trim();
+        const useSportyIds = Boolean((body as { use_sporty_ids?: unknown }).use_sporty_ids);
+
+        if (!userApiKey) {
+          return json({ success: false, error: "Falta API Key de PSA para realizar la suscripcion." }, 400);
+        }
+
+        const response = await fetch(`${baseUrl}/api/v1/matches/subscribe`, {
+          method: "POST",
+          headers: {
+            "X-Api-Key": userApiKey,
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            endpoint_url: endpointUrl,
+            use_sporty_ids: useSportyIds,
+            api_key: userApiKey,
+            api_key_header_name: apiKeyHeaderName
+          }),
+        });
+
+        const text = await response.text();
+        let payload: unknown = null;
+        try {
+          payload = text ? JSON.parse(text) : null;
+        } catch (_err) {
+          payload = text;
+        }
+
+        return json({
+          success: response.ok,
+          status: response.status,
+          mode: "subscribe",
+          fetched_at: new Date().toISOString(),
+          data: payload
+        }, response.ok ? 200 : response.status);
       }
 
       const matchIds = normalizeMatchIds(
@@ -355,7 +394,7 @@ Deno.serve(async (req) => {
       );
 
       if (!matchIds.length) {
-        return json({ success: false, error: "Debes enviar match_ids para suscripcion." }, 400);
+        return json({ success: false, error: "Debes enviar match_ids o endpoint_url para suscripcion." }, 400);
       }
 
       const subscribePayload = await subscribeMatches(matchIds);
@@ -379,12 +418,85 @@ Deno.serve(async (req) => {
     }
   }
 
+  if (req.method === "DELETE") {
+    try {
+      const url = new URL(req.url);
+      const userApiKey = String(url.searchParams.get("apiKey") || readPsaApiKey()).trim();
+      const baseUrl = readApiBaseUrl();
+
+      if (!userApiKey) {
+        return json({ success: false, error: "Falta API Key de PSA para cancelar la suscripcion." }, 400);
+      }
+
+      const response = await fetch(`${baseUrl}/api/v1/matches/subscription`, {
+        method: "DELETE",
+        headers: {
+          "X-Api-Key": userApiKey,
+          "Accept": "application/json"
+        }
+      });
+
+      const text = await response.text();
+      let payload: unknown = null;
+      try {
+        payload = text ? JSON.parse(text) : null;
+      } catch (_err) {
+        payload = text;
+      }
+
+      return json({
+        success: response.ok,
+        status: response.status,
+        mode: "unsubscribe",
+        fetched_at: new Date().toISOString(),
+        data: payload
+      }, response.ok ? 200 : response.status);
+    } catch (error) {
+      return json({ success: false, error: error instanceof Error ? error.message : "Error al cancelar." }, 500);
+    }
+  }
+
   if (req.method !== "GET") {
     return json({ error: "Metodo no permitido." }, 405);
   }
 
   try {
     const url = new URL(req.url);
+    const action = String(url.searchParams.get("action") || "").trim().toLowerCase();
+
+    if (action === "subscription-status") {
+      const userApiKey = String(url.searchParams.get("apiKey") || readPsaApiKey()).trim();
+      const baseUrl = readApiBaseUrl();
+
+      if (!userApiKey) {
+        return json({ success: false, error: "Falta API Key de PSA para consultar el estado." }, 400);
+      }
+
+      const response = await fetch(`${baseUrl}/api/v1/matches/subscription`, {
+        method: "GET",
+        headers: {
+          "X-Api-Key": userApiKey,
+          "Accept": "application/json"
+        }
+      });
+
+      const text = await response.text();
+      let payload: unknown = null;
+      try {
+        payload = text ? JSON.parse(text) : null;
+      } catch (_err) {
+        payload = text;
+      }
+
+      return json({
+        success: response.ok,
+        status: response.status,
+        mode: "subscription-status",
+        fetched_at: new Date().toISOString(),
+        data: payload
+      }, response.ok ? 200 : response.status);
+    }
+
     const tournament = String(url.searchParams.get("tournament") || "").trim();
     const expanded = toBoolean(url.searchParams.get("expanded"), true);
     const includeDivisions = toBoolean(url.searchParams.get("include_divisions"), true);
