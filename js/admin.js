@@ -4570,7 +4570,13 @@ async function saveDrawState() {
     localStorage.setItem(DRAW_BRACKET_KEY, JSON.stringify(drawState));
     if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
         try {
-            await window.PSACloudStore.saveLocalStorageKeyToCloud(DRAW_BRACKET_KEY);
+            const res = await window.PSACloudStore.saveLocalStorageKeyToCloud(DRAW_BRACKET_KEY);
+            if (res && res.ok) {
+                updateScheduleStatus("Horario guardado y sincronizado online.");
+                updateDrawStatus("Cuadro guardado y sincronizado online.");
+            } else {
+                updateScheduleStatus("Horario guardado en este navegador.");
+            }
         } catch (err) {
             console.error("Error guardando cuadro en la nube:", err);
         }
