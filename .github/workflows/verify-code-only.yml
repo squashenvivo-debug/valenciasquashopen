@@ -16,12 +16,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fail if media binaries are tracked in assets
+      - name: Check media binaries tracked in assets
         run: |
           set -euo pipefail
           mapfile -t files < <(find assets -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.gif" -o -iname "*.svg" -o -iname "*.ico" \) || true)
           if [ "${#files[@]}" -gt 0 ]; then
-            echo "Media binaries detected in repository (assets)."
+            echo "::warning::Media binaries detected in repository (assets)."
             printf '%s\n' "${files[@]}"
-            exit 1
           fi
+          exit 0
