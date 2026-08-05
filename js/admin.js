@@ -3673,6 +3673,10 @@ function readPlayersFromStorage() {
 function savePlayersToStorage(collection) {
     try {
         localStorage.setItem(PLAYERS_COLLECTION_KEY, JSON.stringify(collection));
+        if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(PLAYERS_COLLECTION_KEY);
+        }
+        window.PSAOptimizations?.clearFetchCache?.();
         return true;
     } catch (error) {
         return false;

@@ -221,10 +221,19 @@ async function renderDrawPage() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const refreshBtn = document.getElementById("refreshDrawPage");
     if (refreshBtn) {
-        refreshBtn.addEventListener("click", renderDrawPage);
+        refreshBtn.addEventListener("click", async () => {
+            if (window.PSACloudStore?.syncLocalStorageFromCloud) {
+                await window.PSACloudStore.syncLocalStorageFromCloud(["drawBracketState"]);
+            }
+            renderDrawPage();
+        });
+    }
+
+    if (window.PSACloudStore?.syncLocalStorageFromCloud) {
+        await window.PSACloudStore.syncLocalStorageFromCloud(["drawBracketState"]);
     }
     renderDrawPage();
 });

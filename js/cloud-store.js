@@ -18,6 +18,7 @@ window.PSACloudStore = (() => {
 
     const COLUMN_MAP = {
         drawBracketState: "r1",
+        playersCollection: "r2",
         eventProgrammingCollection: "intro",
         liveStreamYoutubeUrl: "youtube_url",
         heroSettings: "headline"
@@ -25,6 +26,7 @@ window.PSACloudStore = (() => {
 
     const REVERSE_COLUMN_MAP = {
         r1: "drawBracketState",
+        r2: "playersCollection",
         intro: "eventProgrammingCollection",
         youtube_url: "liveStreamYoutubeUrl",
         headline: "heroSettings"
