@@ -296,6 +296,80 @@ body {
     box-shadow: 0 0 15px var(--psa-green-glow);
 }
 
+/* Language Selector Styles */
+.psa-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.language-selector {
+    position: relative;
+}
+
+.language-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    color: #FFF;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.language-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--psa-green);
+}
+
+.language-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 6px;
+    background: var(--psa-bg-card);
+    border: 1px solid var(--psa-border-accent);
+    border-radius: 10px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    z-index: 100;
+    min-width: 110px;
+}
+
+.language-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.language-menu button {
+    background: none;
+    border: none;
+    color: var(--psa-text);
+    padding: 6px 12px;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.language-menu button:hover,
+.language-menu button.active {
+    background: rgba(0, 230, 118, 0.15);
+    color: var(--psa-green);
+}
+
 /* Match Player Rows */
 .psa-player-row {
     display: flex;

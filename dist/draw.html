@@ -13,17 +13,33 @@
 
     <!-- Top Navigation Header -->
     <header class="psa-draw-top-bar">
-        <a href="index.html#draw" class="psa-back-btn">← Volver al Inicio</a>
-        <div class="psa-live-indicator">
-            <span class="psa-pulse-dot"></span>
-            PSA OFFICIAL TOURNAMENT DRAW
+        <a href="index.html#draw" class="psa-back-btn" data-i18n="psaDraw.backHome">← Volver al Inicio</a>
+        
+        <div class="psa-header-right">
+            <div class="psa-live-indicator">
+                <span class="psa-pulse-dot"></span>
+                <span data-i18n="psaDraw.officialDraw">PSA OFFICIAL TOURNAMENT DRAW</span>
+            </div>
+
+            <!-- Language Selector Dropdown -->
+            <div class="language-selector">
+                <button id="languageToggle" class="language-toggle">
+                    Español ▼
+                </button>
+                <div id="languageMenu" class="language-menu">
+                    <button data-lang="es">Español</button>
+                    <button data-lang="va">Valencià</button>
+                    <button data-lang="en">English</button>
+                    <button data-lang="fr">Français</button>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- Tournament Header Banner -->
     <section class="psa-tournament-header">
-        <h1>PSA VALENCIA OPEN 2026</h1>
-        <div class="psa-tournament-meta">
+        <h1 data-i18n="psaDraw.title">PSA VALENCIA OPEN 2026</h1>
+        <div class="psa-tournament-meta" data-i18n="psaDraw.subtitle">
             MEMORIAL CHIMO MARMANEU • 11 - 15 AUGUST 2026 • <span class="psa-gold-pill">$36,000 COPPER</span> • DRAW 24
         </div>
     </section>
@@ -35,7 +51,7 @@
             <!-- Round 1 Column -->
             <div class="psa-round-column">
                 <div class="psa-round-title">
-                    Round 1 <span class="count">16 partidos</span>
+                    <span data-i18n="psaDraw.round1">Round 1</span> <span class="count">16 <span data-i18n="psaDraw.matchesCount">partidos</span></span>
                 </div>
                 <div class="psa-matches-list" id="r1Matches">
                     <!-- Dynamic Round 1 matches -->
@@ -45,7 +61,7 @@
             <!-- Round 2 Column -->
             <div class="psa-round-column">
                 <div class="psa-round-title">
-                    Round 2 <span class="count">8 partidos</span>
+                    <span data-i18n="psaDraw.round2">Round 2</span> <span class="count">8 <span data-i18n="psaDraw.matchesCount">partidos</span></span>
                 </div>
                 <div class="psa-matches-list" id="r2Matches">
                     <!-- Dynamic Round 2 matches -->
@@ -55,7 +71,7 @@
             <!-- Quarter Finals Column -->
             <div class="psa-round-column">
                 <div class="psa-round-title">
-                    Cuartos <span class="count">4 partidos</span>
+                    <span data-i18n="psaDraw.quarterFinals">Cuartos</span> <span class="count">4 <span data-i18n="psaDraw.matchesCount">partidos</span></span>
                 </div>
                 <div class="psa-matches-list" id="qfMatches">
                     <!-- Dynamic QF matches -->
@@ -65,7 +81,7 @@
             <!-- Semi Finals Column -->
             <div class="psa-round-column">
                 <div class="psa-round-title">
-                    Semifinales <span class="count">2 partidos</span>
+                    <span data-i18n="psaDraw.semiFinals">Semifinales</span> <span class="count">2 <span data-i18n="psaDraw.matchesCount">partidos</span></span>
                 </div>
                 <div class="psa-matches-list" id="sfMatches">
                     <!-- Dynamic SF matches -->
@@ -75,7 +91,7 @@
             <!-- Final Column -->
             <div class="psa-round-column">
                 <div class="psa-round-title">
-                    Final <span class="count">Gran Final</span>
+                    <span data-i18n="psaDraw.final">Final</span> <span class="count" data-i18n="psaDraw.mainFinal">Gran Final</span>
                 </div>
                 <div class="psa-matches-list" id="finalMatches">
                     <!-- Dynamic Final match -->
@@ -92,8 +108,8 @@
     <div class="psa-modal-card">
         <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
         <div class="psa-h2h-header">
-            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
-            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
+            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;" data-i18n="psaDraw.h2hTitle">Head-to-head Stats</h3>
+            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;" data-i18n="psaDraw.h2hSubtitle">Histórico de enfrentamientos en el PSA World Tour</p>
         </div>
 
         <div class="psa-h2h-versus">
@@ -107,21 +123,22 @@
         </div>
 
         <div class="psa-h2h-stat-row">
-            <span style="color: var(--psa-text-muted);">Enfrentamientos directos:</span>
+            <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hMatches">Enfrentamientos directos:</span>
             <strong style="color: var(--psa-green);">0 - 0</strong>
         </div>
         <div class="psa-h2h-stat-row">
-            <span style="color: var(--psa-text-muted);">Último duelo:</span>
-            <strong>Primer enfrentamiento oficial</strong>
+            <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hLastMeeting">Último duelo:</span>
+            <strong data-i18n="psaDraw.h2hFirstMeeting">Primer enfrentamiento oficial</strong>
         </div>
         <div class="psa-h2h-stat-row">
-            <span style="color: var(--psa-text-muted);">Porcentaje de victorias:</span>
+            <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hWinPct">Porcentaje de victorias:</span>
             <strong>50% - 50%</strong>
         </div>
     </div>
 </div>
 
 <script src="config.js"></script>
-<script src="js/psa-draw.js?v=20260805-1"></script>
+<script src="js/language.js?v=20260805-9"></script>
+<script src="js/psa-draw.js?v=20260805-2"></script>
 </body>
 </html>
