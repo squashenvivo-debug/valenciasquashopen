@@ -307,9 +307,15 @@
 
     document.addEventListener("app-language-changed", () => {
         renderAllColumns();
+        if (typeof window.setLanguage === "function") {
+            window.setLanguage(localStorage.getItem("language") || "es");
+        }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
         renderAllColumns();
+        if (typeof window.setLanguage === "function") {
+            window.setLanguage(localStorage.getItem("language") || "es");
+        }
     });
 })();
