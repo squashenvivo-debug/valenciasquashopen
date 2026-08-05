@@ -12,7 +12,9 @@ function getLocalhostCdnFallback() {
 }
 
 window.PSA_CONFIG = Object.assign({
-    supabaseUrl: "",
-    supabaseAnonKey: "",
+    supabaseUrl: "https://texjzaanugmssmolzwgb.supabase.co",
+    supabaseAnonKey: "sb_publishable_lTEaFAp9lgMMInv-0TjeCA_ViWtDg2J",
+    psaApiKey: "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f",
+    psaTournamentId: "12711",
     assetCdnBase: getLocalhostCdnFallback()
 }, window.PSA_CONFIG || {});

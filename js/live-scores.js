@@ -1,6 +1,6 @@
 (function () {
     const PSA_DIRECT_API_URL = "https://data.psasquashtour.com";
-    const DEFAULT_API_KEY = "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f";
+    const DEFAULT_API_KEY = (window.PSA_CONFIG?.psaApiKey || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f").trim();
     const STORAGE_KEY_API = "psaApiKey";
     const STORAGE_KEY_WEBHOOK = "psaWebhookUrl";
 
