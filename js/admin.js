@@ -4652,12 +4652,18 @@ function populateScheduleMatchSelect() {
     if (!drawState || !roundSelect || !matchSelect) return;
 
     const roundIndex = Number(roundSelect.value);
-    const round = drawState.rounds[roundIndex];
-
+    const round = drawState?.rounds?.[roundIndex];
     matchSelect.innerHTML = "";
+
+    if (!round || !Array.isArray(round.matches)) {
+        matchSelect.innerHTML = '<option value="" selected>Sin partidos programables</option>';
+        fillScheduleEditor();
+        return;
+    }
 
     const schedulableMatches = [];
     round.matches.forEach((match, i) => {
+        if (!match) return;
         const hasBye = isByePlayer(match.p1?.name) || isByePlayer(match.p2?.name);
         if (!hasBye) {
             schedulableMatches.push(i);
@@ -4670,22 +4676,24 @@ function populateScheduleMatchSelect() {
         return;
     }
 
-    schedulableMatches.forEach((matchIndex) => {
-        matchSelect.innerHTML += `<option value="${matchIndex}">Partido ${matchIndex + 1}</option>`;
-    });
+    const options = schedulableMatches.map((matchIndex) => `<option value="${matchIndex}">Partido ${matchIndex + 1}</option>`);
+    matchSelect.innerHTML = options.join("");
 
     fillScheduleEditor();
 }
 
 function populateScheduleRoundSelect() {
     const roundSelect = document.getElementById("scheduleRoundSelect");
-    if (!drawState || !roundSelect) return;
+    if (!drawState || !Array.isArray(drawState.rounds) || !roundSelect) return;
 
-    roundSelect.innerHTML = "";
+    const options = [];
     drawState.rounds.forEach((round, i) => {
-        roundSelect.innerHTML += `<option value="${i}">${round.title}</option>`;
+        if (round && round.title) {
+            options.push(`<option value="${i}">${round.title}</option>`);
+        }
     });
 
+    roundSelect.innerHTML = options.join("");
     populateScheduleMatchSelect();
 }
 
@@ -5009,8 +5017,12 @@ async function createDrawFromZero() {
 }
 
 async function initDrawAdmin() {
-    const panel = document.getElementById("draw-results-panel");
-    if (!panel) return;
+    const hasDrawControls = document.getElementById("draw-results-panel") ||
+                            document.getElementById("draw-schedule-panel") ||
+                            document.getElementById("draw-builder-panel") ||
+                            document.getElementById("scheduleRoundSelect") ||
+                            document.getElementById("roundSelect");
+    if (!hasDrawControls) return;
 
     const response = await fetch("data/draw-bracket.json", { cache: "no-store" });
     const baseBracket = await response.json();
