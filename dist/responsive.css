@@ -1,0 +1,577 @@
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1100px){
+    
+    .main-menu{
+
+        gap:20px;
+
+    }
+
+}
+
+
+@media (max-width:992px){
+
+    .navbar{
+
+        height:80px;
+
+    }
+
+    .mobile-toggle{
+
+        display:flex;
+
+        z-index:1002;
+
+    }
+
+    .main-menu{
+
+        position:fixed;
+
+        top:80px;
+
+        right:-100%;
+
+        width:320px;
+
+        height:calc(100vh - 80px);
+
+        background:#071826;
+
+        flex-direction:column;
+
+        justify-content:flex-start;
+
+        align-items:flex-start;
+
+        padding:40px;
+
+        gap:28px;
+
+        transition:.35s;
+
+        box-shadow:-10px 0 30px rgba(0,0,0,.35);
+
+    }
+
+    .main-menu.open{
+
+        right:0;
+
+    }
+
+    .header-right{
+
+        gap:15px;
+        margin-left:auto;
+
+    }
+
+    .language-selector{
+        order:1;
+    }
+
+    .mobile-toggle{
+        order:2;
+    }
+
+    .header-right .admin-link{
+        order:3;
+        width:34px;
+        height:34px;
+        border-radius:8px;
+    }
+
+    .language-toggle{
+        min-width:96px;
+        height:34px;
+        padding:0 10px;
+        border-radius:8px;
+        font-size:.78rem;
+    }
+
+    .language-menu{
+        top:38px;
+        width:120px;
+        border-radius:8px;
+    }
+
+    .language-menu button{
+        padding:9px 10px;
+        font-size:.78rem;
+    }
+
+    .live-button{
+
+        display:none;
+
+    }
+
+    .header-right .admin-link::before{
+        font-size:.92rem;
+    }
+
+    .logo-group{
+        margin-left:0;
+        gap:10px;
+    }
+
+    #header .logo-group .logo:nth-child(2){
+        margin-left:0;
+    }
+
+    #header .logo img{
+        height:34px;
+        max-height:34px;
+        width:auto;
+    }
+
+}
+
+
+@media (max-width:768px){
+
+    :root {
+        --hero-logo-mobile-width: min(180px, 35vw);
+        --hero-button-mobile-min-width: 130px;
+        --hero-button-mobile-padding: 10px 20px;
+        --hero-button-mobile-font-size: .85rem;
+        --countdown-box-mobile-size: 50px;
+    }
+
+    body, html {
+        margin: 0;
+        padding: 0;
+    }
+
+    #hero {
+        min-height: 0;
+        height: calc(50vw + 60px);
+        padding: 0;
+        margin: 0;
+    }
+
+    .hero-background {
+        inset: 60px 0 0;
+    }
+
+    .hero-background img {
+        object-fit: cover;
+        object-position: top center;
+        width: 100%;
+        height: 100%;
+        transform: none;
+    }
+
+    .hero-logo {
+        width: var(--hero-logo-mobile-width);
+        top: -107px;
+    }
+
+    .hero-content {
+        width: min(900px, 90%);
+        gap: 15px;
+        padding-top: 0;
+        transform: translateY(60px) scale(.8);
+        transform-origin: center top;
+    }
+
+    #programming {
+        padding: 84px 0;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .hero-buttons {
+        display: none;
+        gap: 14px;
+        margin-top: 80px;
+        transform: translateY(100px);
+    }
+
+    .hero-buttons .btn {
+        min-width: var(--hero-button-mobile-min-width);
+        padding: var(--hero-button-mobile-padding);
+        font-size: var(--hero-button-mobile-font-size);
+    }
+
+    .countdown {
+        gap: 10px;
+        margin-top: 12px;
+        transform: scale(.82);
+        transform-origin: center;
+    }
+
+    .count-box {
+        width: var(--countdown-box-mobile-size);
+        height: var(--countdown-box-mobile-size);
+    }
+
+    .count-box span {
+        font-size: 1.2rem;
+    }
+
+    .count-box small {
+        font-size: 0.55rem;
+    }
+
+    .hero-event {
+        bottom: -45px;
+    }
+
+    .event-label {
+        font-size: 0.95rem;
+        letter-spacing: 6px;
+        margin-bottom: 4px;
+    }
+
+    .event-title {
+        font-size: 1.6rem;
+        letter-spacing: 1.5px;
+    }
+
+    .event-location {
+        font-size: 0.82rem;
+        letter-spacing: 3px;
+        margin-top: 6px;
+    }
+
+    #header .logo img{
+        height:30px;
+        max-height:30px;
+        width:auto;
+    }
+
+}
+
+
+@media (max-width:576px){
+
+    :root {
+        --hero-logo-mobile-width: min(160px, 32vw);
+        --hero-button-mobile-min-width: 115px;
+        --hero-button-mobile-padding: 9px 18px;
+        --hero-button-mobile-font-size: .8rem;
+        --countdown-box-mobile-size: 45px;
+    }
+
+    body, html {
+        margin: 0;
+        padding: 0;
+    }
+
+    #hero {
+        min-height: 0;
+        height: calc(50vw + 60px);
+        padding: 0;
+        padding-top: 0;
+        margin: 0;
+    }
+
+    .hero-background {
+        inset: 60px 0 0;
+    }
+
+    .hero-background img {
+        object-fit: cover;
+        object-position: top center;
+        width: 100%;
+        height: 100%;
+        transform: none;
+    }
+
+    .hero-logo {
+        width: var(--hero-logo-mobile-width);
+        top: -112px;
+    }
+
+    .hero-content {
+        width: min(900px, 90%);
+        gap: 12px;
+        padding-top: 0;
+        transform: translateY(60px) scale(.8);
+        transform-origin: center top;
+    }
+
+    #programming {
+        padding: 74px 0;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .hero-buttons {
+        display: none;
+        gap: 12px;
+        margin-top: 10px;
+        transform: translateY(100px);
+    }
+
+    .hero-buttons .btn {
+        min-width: var(--hero-button-mobile-min-width);
+        padding: var(--hero-button-mobile-padding);
+        font-size: var(--hero-button-mobile-font-size);
+    }
+
+    .countdown {
+        gap: 8px;
+        margin-top: 5px;
+        transform: scale(.75);
+        transform-origin: center;
+    }
+
+    .count-box {
+        width: var(--countdown-box-mobile-size);
+        height: var(--countdown-box-mobile-size);
+    }
+
+    .count-box span {
+        font-size: 1.1rem;
+    }
+
+    .count-box small {
+        font-size: 0.5rem;
+    }
+
+    .hero-event {
+        bottom: -55px;
+    }
+
+    .event-label {
+        font-size: 0.65rem;
+        letter-spacing: 6px;
+        margin-bottom: 3px;
+    }
+
+    .event-title {
+        font-size: 0.65rem;
+        letter-spacing: 1.5px;
+    }
+
+    .event-location {
+        font-size: 0.65rem;
+        letter-spacing: 4px;
+        margin-top: 2px;
+    }
+
+    #header .logo-group{
+        gap:8px;
+    }
+
+    .language-toggle{
+        min-width:82px;
+        height:30px;
+        padding:0 8px;
+        font-size:.72rem;
+        border-radius:7px;
+    }
+
+    .language-menu{
+        top:34px;
+        width:108px;
+        border-radius:7px;
+    }
+
+    .language-menu button{
+        padding:8px 8px;
+        font-size:.72rem;
+    }
+
+    .header-right .admin-link{
+        width:30px;
+        height:30px;
+        border-radius:7px;
+    }
+
+    .header-right .admin-link::before{
+        font-size:.82rem;
+    }
+
+    #header .logo img {
+        height: 26px;
+        max-height:26px;
+        width: auto;
+        object-fit: contain;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .section-title{
+        font-size:2.25rem;
+        margin-bottom:44px;
+        line-height:1.1;
+    }
+
+    #venue{
+        padding:90px 0;
+    }
+
+    #venue .venue-grid{
+        grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+        gap:12px;
+        align-items:start;
+    }
+
+    #venue .venue-info{
+        padding:18px;
+        border-radius:14px;
+    }
+
+    #venue .venue-info h3{
+        font-size:1.25rem;
+        margin-bottom:18px;
+    }
+
+    #venue .venue-item{
+        gap:10px;
+        margin-bottom:14px;
+        font-size:.94rem;
+    }
+
+    #venue .venue-buttons{
+        gap:10px;
+        margin:18px 0;
+    }
+
+    #venue .venue-buttons .btn{
+        padding:10px 14px;
+        font-size:.82rem;
+    }
+
+    #venue .venue-services{
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+    }
+
+    #venue .venue-services span{
+        padding:9px;
+        font-size:.82rem;
+    }
+
+    #venue .venue-map iframe{
+        min-height:250px;
+        border-radius:14px;
+    }
+
+    #discover .discover-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:12px;
+    }
+
+    #discover .discover-card img{
+        height:180px;
+    }
+
+    #discover .discover-overlay{
+        padding:14px;
+    }
+
+    #discover .discover-overlay h3{
+        font-size:1.02rem;
+        margin-bottom:6px;
+    }
+
+    #discover .discover-overlay p{
+        font-size:.8rem;
+    }
+
+    #sponsors .sponsors-header h2,
+    #venue .venue-header .section-title{
+        font-size:2.25rem;
+    }
+
+    #sponsors .sponsors-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:12px;
+    }
+
+    #sponsors .sponsor-card{
+        height:108px;
+        padding:14px;
+        border-radius:12px;
+    }
+
+    #sponsors .sponsor-card img{
+        max-width:120px;
+        max-height:54px;
+    }
+
+}
+
+@media (max-width:576px){
+
+    .section-title{
+        font-size:1.9rem;
+        margin-bottom:34px;
+    }
+
+    #venue .venue-grid{
+        grid-template-columns:minmax(0, 1.05fr) minmax(0, .95fr);
+        gap:10px;
+    }
+
+    #venue .venue-header p,
+    #sponsors .sponsors-header p,
+    #discover .section-header p{
+        font-size:.93rem;
+    }
+
+    #venue .venue-info{
+        padding:14px;
+    }
+
+    #venue .venue-map iframe{
+        min-height:220px;
+    }
+
+    #discover .discover-card img{
+        height:150px;
+    }
+
+    #discover .discover-overlay h3{
+        font-size:.9rem;
+    }
+
+    #discover .discover-overlay p{
+        font-size:.72rem;
+    }
+
+    #sponsors .sponsors-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+    }
+
+    #sponsors .sponsor-card{
+        height:94px;
+        padding:10px;
+    }
+
+    #sponsors .sponsor-card img{
+        max-width:95px;
+        max-height:42px;
+    }
+
+    #sponsors .sponsors-header h2,
+    #venue .venue-header .section-title{
+        font-size:1.9rem;
+    }
+
+}
+

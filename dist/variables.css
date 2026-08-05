@@ -1,0 +1,13 @@
+:root{
+--color-primary:#071826;
+--color-secondary:#0D2538;
+--color-copper:#C77C35;
+--color-white:#FFF;
+--color-text:#E7EEF7;
+--container:1400px;
+--font-main:'Inter',sans-serif;
+--space-4:1rem;
+--space-8:4rem;
+--radius-lg:20px;
+--shadow-md:0 12px 30px rgba(0,0,0,.2);
+}

@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeria | PSA Valencia Open</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="gallery-page">
+
+<main class="gallery-page-main">
+    <div class="container">
+        <header class="gallery-page-header">
+            <h1 class="gallery-page-title" id="galleryPageTitle">Galeria</h1>
+            <a class="gallery-back-link" href="index.html#gallery">Salir de galeria</a>
+        </header>
+
+        <p id="galleryResultsSummary" class="gallery-filter-summary"></p>
+
+        <div id="galleryDetailGrid" class="gallery-detail-grid"></div>
+        <p id="galleryDetailEmpty" class="gallery-empty" style="display:none;">No hay fotos en esta galeria.</p>
+    </div>
+</main>
+
+<div id="galleryLightbox" class="gallery-lightbox" aria-hidden="true">
+    <button id="galleryLightboxClose" class="gallery-lightbox-close" type="button" aria-label="Cerrar">X</button>
+    <img id="galleryLightboxImage" class="gallery-lightbox-image" alt="Foto ampliada">
+    <p id="galleryLightboxCaption" class="gallery-lightbox-caption"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/runtime-optimizations.js?v=20260803-1"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
+<script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/gallery.js?v=20260803-5"></script>
+</body>
+</html>

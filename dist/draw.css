@@ -1,0 +1,443 @@
+#draw{
+
+    padding:120px 0;
+
+}
+
+#draw .container{
+
+    width:min(96vw, 1920px);
+
+}
+
+.draw-bracket-wrapper{
+
+    margin-top:24px;
+
+    overflow:auto;
+
+    max-height:78vh;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    border-radius:10px;
+
+    background:#eef3f7;
+
+    padding-bottom:12px;
+
+}
+
+.draw-bracket-wrapper.draw-openable{
+
+    cursor:zoom-in;
+
+}
+
+.draw-bracket{
+
+    min-width:0;
+
+    width:max-content;
+
+    display:grid;
+
+    grid-template-columns:repeat(5, minmax(270px, 22vw));
+
+    gap:16px;
+
+    padding:10px;
+
+}
+
+
+.draw-round{
+
+    background:#f5f8fc;
+
+    border-radius:8px;
+
+    padding:0 0 8px;
+
+}
+
+.draw-round-title{
+
+    background:#063847;
+
+    color:#fff;
+
+    text-align:center;
+
+    font-size:.9rem;
+
+    font-weight:700;
+
+    letter-spacing:.4px;
+
+    padding:7px 10px;
+
+    border-radius:8px 8px 0 0;
+
+}
+
+.draw-round-matches{
+
+    position:relative;
+
+    min-height:var(--round-height, 760px);
+
+    height:var(--round-height, 760px);
+
+    padding:8px 6px;
+
+}
+
+.draw-match{
+
+    position:absolute;
+
+    left:6px;
+
+    right:6px;
+
+    height:var(--match-height, 112px);
+
+    background:#ffffff;
+
+    border:1px solid #d9e2ec;
+
+    border-radius:8px;
+
+    overflow:hidden;
+
+    display:grid;
+
+    grid-template-rows:auto auto auto;
+
+}
+
+.draw-player{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    min-height:0;
+
+    padding:6px 10px;
+
+    min-height:38px;
+
+    border-bottom:1px solid #edf2f7;
+
+}
+
+.draw-player-main{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    height:100%;
+    min-width:0;
+}
+
+.draw-player{
+    justify-content:space-between;
+}
+
+.draw-scoreline{
+    display:grid;
+    grid-template-columns:20px repeat(5, 22px);
+    gap:0;
+    align-items:stretch;
+    flex-shrink:0;
+    border-left:1px solid #edf2f7;
+}
+
+.draw-sets-won,
+.draw-game-score{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    font-size:.84rem;
+    color:#0b3648;
+    border-right:1px solid #edf2f7;
+}
+
+.draw-sets-won{
+    font-weight:700;
+}
+
+.draw-game-score{
+    font-weight:500;
+}
+
+.draw-player:last-child{
+
+    border-bottom:none;
+
+}
+
+.draw-avatar-wrap{
+
+    width:28px;
+
+    height:28px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+
+}
+
+.draw-avatar{
+
+    width:28px;
+
+    height:28px;
+
+    border-radius:3px;
+
+    object-fit:cover;
+
+    position:relative;
+
+    top:2px;
+
+}
+
+
+.draw-player-name{
+
+    color:#0b3648;
+
+    font-size:.92rem;
+
+    font-weight:600;
+
+    line-height:1.2;
+
+    display:flex;
+
+    align-items:center;
+  
+    height:100%;
+
+    overflow:visible;
+
+    white-space:normal;
+
+}
+
+.draw-match-footer{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:8px;
+
+    padding:3px 10px 5px;
+
+    font-size:.7rem;
+
+    color:#4a5f72;
+
+    border-top:1px solid #edf2f7;
+
+}
+
+.draw-player.is-muted .draw-player-name{
+
+    color:#2a3b47;
+
+    font-weight:700;
+
+}
+
+.draw-player.is-muted .draw-game-score,
+.draw-player.is-muted .draw-sets-won{
+    color:#7a8a98;
+}
+
+.draw-error{
+
+    color:#d9e2ec;
+
+}
+
+@media(max-width:900px){
+
+    #draw{
+
+        padding:90px 0;
+
+    }
+
+    .draw-bracket{
+
+        min-width:1200px;
+
+        width:max-content;
+
+        gap:10px;
+
+    }
+
+    .draw-player-name{
+
+        font-size:.66rem;
+
+    }
+
+    .draw-scoreline{
+        grid-template-columns:18px repeat(5, 18px);
+    }
+
+    .draw-sets-won,
+    .draw-game-score{
+        min-height:20px;
+        font-size:.72rem;
+    }
+
+    .draw-avatar-wrap,
+    .draw-avatar{
+
+        width:12px;
+
+        height:12px;
+
+    }
+
+
+    .draw-bracket-wrapper{
+
+        max-height:70vh;
+
+    }
+
+}
+
+@media(max-width:600px){
+
+    #draw{
+
+        padding:72px 0;
+
+    }
+
+    .draw-bracket-wrapper{
+
+        max-height:66vh;
+
+        margin-top:16px;
+
+    }
+
+    .draw-bracket{
+
+        min-width:0;
+
+        grid-template-columns:repeat(5, minmax(180px, 44vw));
+
+        width:max-content;
+
+        gap:6px;
+
+        padding:6px;
+
+    }
+
+    .draw-round{
+
+        border-radius:6px;
+
+        padding:0 0 6px;
+
+    }
+
+    .draw-round-title{
+
+        font-size:.52rem;
+
+        padding:4px 4px;
+
+        border-radius:6px 6px 0 0;
+
+        letter-spacing:.2px;
+
+    }
+
+    .draw-round-matches{
+
+        min-height:var(--round-height, 760px);
+
+        height:var(--round-height, 760px);
+
+        padding:5px 4px;
+
+    }
+
+    .draw-match{
+
+        left:4px;
+
+        right:4px;
+
+        border-radius:4px;
+
+    }
+
+    .draw-player{
+
+        min-height:18px;
+
+        gap:4px;
+
+        padding:1px 3px;
+
+    }
+
+    .draw-avatar-wrap,
+    .draw-avatar{
+
+        width:9px;
+
+        height:9px;
+
+    }
+
+
+    .draw-player-name{
+
+        font-size:.58rem;
+
+        line-height:1.15;
+
+    }
+
+    .draw-scoreline{
+        grid-template-columns:14px repeat(5, 14px);
+    }
+
+    .draw-sets-won,
+    .draw-game-score{
+        min-height:14px;
+        font-size:.52rem;
+    }
+
+    .draw-match-footer{
+        font-size:.52rem;
+        padding:2px 4px 3px;
+    }
+
+}

@@ -1,0 +1,42 @@
+{
+    "event": {
+        "name": "PSA Valencia Open 2026",
+        "subtitle": "Memorial Chimo Marmaneu",
+        "venue": "Olympia Alboraya",
+        "city": "Valencia",
+        "country": "España",
+
+        "startDate": "2026-08-11",
+        "endDate": "2026-08-16"
+    },
+
+    "live": {
+
+        "youtube": "",
+
+        "enabled": true
+
+    },
+
+    "social": {
+
+        "instagram": "",
+
+        "facebook": "",
+
+        "youtube": ""
+
+    },
+
+    "languages":[
+
+        "es",
+
+        "va",
+
+        "en",
+
+        "fr"
+
+    ]
+}

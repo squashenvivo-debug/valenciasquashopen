@@ -392,14 +392,81 @@ body {
 }
 
 .ls-vs-badge {
-    background: #ffffff;
-    color: #000000;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     font-weight: 900;
     font-size: 0.95rem;
-    padding: 4px 12px;
-    border-radius: 4px;
+    padding: 6px 14px;
+    border-radius: 8px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    min-width: 60px;
+}
+
+.ls-vs-badge.is-live-score {
+    background: #00e676;
+    color: #05101a;
+    border: none;
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+    animation: pulse 2s infinite;
+}
+
+.ls-vs-badge.is-final-score {
+    background: #091018;
+    color: #00e676;
+    border: 1px solid rgba(0, 230, 118, 0.3);
+    font-size: 1.05rem;
+}
+
+.ls-match-card.card-live {
+    border-left: 3px solid #00e676;
+    background: linear-gradient(90deg, rgba(0, 230, 118, 0.05) 0%, var(--ls-card-bg) 100%);
+}
+
+.ls-player.is-winner .ls-player-name {
+    color: #00e676;
+}
+
+.ls-winner-badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #00e676;
+    color: #05101a;
+    font-size: 0.72rem;
+    font-weight: 900;
+    margin: 0 6px;
+    vertical-align: middle;
+}
+
+.ls-sets-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--ls-muted);
+    letter-spacing: 0.08em;
+    margin-right: 4px;
+}
+
+.ls-score-pill.is-live-pill {
+    border-color: #00e676;
+    background: rgba(0, 230, 118, 0.18);
+    color: #ffffff;
+}
+
+.live-dot {
+    color: #00e676;
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
 }
 
 /* Live Game Details & Scores */
@@ -417,8 +484,9 @@ body {
 
 .ls-scores-summary {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .ls-score-pill {
@@ -484,3 +552,4 @@ body {
         width: fit-content;
     }
 }
+

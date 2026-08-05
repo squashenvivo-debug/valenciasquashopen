@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noticia | PSA Valencia Open</title>
+<meta name="description" content="Noticias del PSA Valencia Open">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/news.css">
+<link rel="stylesheet" href="css/gallery.css">
+</head>
+<body class="gallery-page">
+
+<main class="gallery-page-main">
+    <div class="container">
+        <header class="gallery-page-header">
+            <h1 class="gallery-page-title" id="newsPageTitle">Noticia</h1>
+            <a class="gallery-back-link" href="index.html#news">Volver</a>
+        </header>
+
+        <article class="news-card" id="newsPageArticle" style="max-width:980px;margin:0 auto;">
+            <img id="newsPageImage" alt="Noticia">
+            <div class="news-content">
+                <span id="newsPageDate" class="news-date"></span>
+                <span id="newsPageCategory" class="news-date"></span>
+                <span id="newsPagePlayer" class="news-date"></span>
+                <h2 id="newsPageHeading"></h2>
+                <p id="newsPageBody" style="white-space:pre-wrap;"></p>
+                <p id="newsPageTags" class="admin-muted"></p>
+            </div>
+        </article>
+
+        <p id="newsPageEmpty" class="gallery-empty" style="display:none;">Noticia no encontrada.</p>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/runtime-optimizations.js?v=20260803-1"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
+<script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/news.js?v=20260803-3"></script>
+</body>
+</html>

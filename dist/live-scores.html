@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSA Live Scores | BALLARAT OPEN & PSA Valencia Open 2026</title>
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+<link rel="stylesheet" href="css/live-scores.css?v=20260805-1">
+</head>
+<body>
+
+<div class="ls-shell">
+
+    <!-- Navigation / Header -->
+    <header class="ls-page-header">
+        <a href="index.html" class="ls-back-link">← Volver a PSA Valencia Open</a>
+        <div style="font-weight: 700; color: var(--ls-green); font-size: 0.9rem;">
+            ● PSA LIVE SCORES INTEGRATION
+        </div>
+    </header>
+
+
+
+    <!-- Tournament Header Banner -->
+    <section class="ls-tournament-banner">
+        <h1 class="ls-tournament-name">PSA VALENCIA OPEN 2026</h1>
+        <div class="ls-tournament-location">MEMORIAL CHIMO MARMANEU · VALENCIA, SPAIN</div>
+        <div class="ls-tournament-dates">11 - 15 AUGUST 2026 · $36,000 COPPER · DRAW 32</div>
+    </section>
+
+    <!-- Digital Clock Badge -->
+    <div class="ls-clock-container">
+        <div class="ls-clock-badge">
+            <div id="lsDigitalClock" class="ls-clock-time">03:07</div>
+            <div class="ls-clock-sub">LOCAL TIME (GMT +2)</div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="ls-tabs">
+        <button type="button" class="ls-tab-btn active" data-filter="all">TODOS LOS PARTIDOS</button>
+        <button type="button" class="ls-tab-btn" data-filter="in_progress">EN JUEGO LIVE</button>
+        <button type="button" class="ls-tab-btn" data-filter="scheduled">PROGRAMADOS</button>
+        <button type="button" class="ls-tab-btn" data-filter="completed">FINALIZADOS</button>
+    </div>
+
+    <!-- Match Cards List -->
+    <main id="lsMatchesContainer" class="ls-matches-list">
+        <!-- Match Cards render dynamically here -->
+    </main>
+
+</div>
+
+<script src="config.js"></script>
+<script src="js/live-scores.js?v=20260805-1"></script>
+</body>
+</html>

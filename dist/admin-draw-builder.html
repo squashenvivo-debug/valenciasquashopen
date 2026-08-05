@@ -1,0 +1,460 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PSA Valencia Open | Admin</title>
+
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+<section id="admin-auth" class="admin-auth-screen">
+    <div class="admin-auth-card">
+        <h1>Acceso Admin</h1>
+        <p class="admin-muted">Inicia sesión con tu cuenta de Supabase para acceder al panel.</p>
+
+        <label for="adminEmail" class="field-label">Email</label>
+        <input id="adminEmail" type="email" placeholder="admin@tu-dominio.com" autocomplete="username">
+
+        <label for="adminPassword" class="field-label">Contraseña</label>
+        <input id="adminPassword" type="password" placeholder="********" autocomplete="current-password">
+
+        <div class="results-actions">
+            <button id="adminLoginBtn" type="button">Entrar</button>
+        </div>
+
+        <p id="adminAuthStatus" class="admin-status" aria-live="polite"></p>
+    </div>
+</section>
+
+<div class="admin" id="adminApp" hidden>
+
+    <aside class="sidebar">
+
+        <h2>ADMIN</h2>
+
+        <nav>
+
+            <a href="#dashboard" data-section="dashboard">Dashboard</a>
+
+            <a href="#news-admin-panel" data-section="news-admin-panel">Noticias</a>
+
+            <a href="#live-settings-panel" data-section="live-settings-panel">Streaming</a>
+
+            <a href="#sponsors-admin-panel" data-section="sponsors-admin-panel">Sponsors</a>
+
+            <a href="#gallery-admin-panel" data-section="gallery-admin-panel">Galería</a>
+
+            <a href="#hero-admin-panel" data-section="hero-admin-panel">Hero</a>
+
+            <a href="#tournament-mode-panel" data-section="tournament-mode-panel">Configuración</a>
+
+            <a href="#tournament-mode-panel" data-section="tournament-mode-panel">Torneo</a>
+
+            <a href="#tournament-text-panel" data-section="tournament-text-panel">Texto Torneo</a>
+
+            <a href="#players-admin-panel" data-section="players-admin-panel">Jugadores</a>
+
+            <a href="#draw-schedule-panel" data-section="draw-schedule-panel">Cuadro</a>
+
+            <a href="#draw-builder-panel" data-section="draw-builder-panel">Cruces</a>
+
+            <a href="#draw-results-panel" data-section="draw-results-panel">Resultados</a>
+
+            <button id="adminLogoutBtn" type="button" class="sidebar-logout-btn">Cerrar sesión</button>
+
+            <a href="index.html" class="menu-exit-link">Salir a Inicio</a>
+
+        </nav>
+
+    </aside>
+
+    <main class="content">
+
+        <div id="adminDashboardIntro" class="admin-dashboard-intro">
+            <h1>Panel de Administración</h1>
+
+            <p>
+
+                Bienvenido al panel del PSA Valencia Open.
+
+            </p>
+        </div>
+
+        <section class="admin-card" id="tournament-mode-panel">
+            <h2>Contenido Torneo</h2>
+            <p class="admin-muted">Elige la version manual o la version conectada por API.</p>
+
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="tournamentMode" value="manual">
+                    Version manual (texto fijo)
+                </label>
+                <label>
+                    <input type="radio" name="tournamentMode" value="api">
+                    Version API (contenido remoto)
+                </label>
+            </div>
+
+            <label for="tournamentApiUrl" class="field-label">URL API (opcional)</label>
+            <input id="tournamentApiUrl" type="url" placeholder="https://tu-api.com/tournament-content">
+
+            <button id="saveTournamentSettings" type="button">Guardar configuracion</button>
+            <p id="adminStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+        <section class="admin-card" id="hero-admin-panel">
+            <h2>Hero Principal</h2>
+            <p class="admin-muted">Configura portada del próximo año: imagen de fondo, textos y contador.</p>
+
+            <label for="heroEventLabel_es" class="field-label">Etiqueta ES (ej: MEMORIAL)</label>
+            <input id="heroEventLabel_es" type="text" placeholder="MEMORIAL">
+
+            <label for="heroEventTitle_es" class="field-label">Título ES</label>
+            <input id="heroEventTitle_es" type="text" placeholder="CHIMO MARMANEAU">
+
+            <label for="heroEventLocation_es" class="field-label">Ubicación ES</label>
+            <input id="heroEventLocation_es" type="text" placeholder="Alboraya · Valencia">
+
+            <label for="heroCountdownDate" class="field-label">Fecha y hora del contador</label>
+            <input id="heroCountdownDate" type="datetime-local">
+
+            <label for="heroBackgroundPath" class="field-label">Ruta imagen fondo (opcional)</label>
+            <input id="heroBackgroundPath" type="text" placeholder="assets/images/hero/banner-2027.jpg">
+
+            <label for="heroBackgroundFile" class="field-label">O subir imagen de fondo</label>
+            <input id="heroBackgroundFile" type="file" accept="image/*">
+
+            <div class="results-actions">
+                <button id="saveHeroSettings" type="button">Guardar Hero</button>
+                <button id="resetHeroSettings" type="button" class="btn-secondary-admin">Restaurar Hero base</button>
+            </div>
+
+            <p id="heroAdminStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+        <section class="admin-card" id="tournament-text-panel">
+            <h2>Texto Manual de Torneo</h2>
+            <p class="admin-muted">Escribe en español y se traducirá automáticamente a VA, EN y FR.</p>
+
+            <label for="tournamentManualTitle_es" class="field-label">Título (ES)</label>
+            <input id="tournamentManualTitle_es" type="text" placeholder="Título del bloque de torneo en español">
+
+            <label for="tournamentManualBody_es" class="field-label">Texto (ES)</label>
+            <textarea id="tournamentManualBody_es" rows="8" placeholder="Texto del torneo en español"></textarea>
+
+            <div class="results-actions">
+                <button id="saveTournamentManualContent" type="button">Traducir y guardar texto</button>
+                <button id="resetTournamentManualContent" type="button" class="btn-secondary-admin">Restaurar texto base</button>
+            </div>
+
+            <p id="tournamentManualStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+        <section class="admin-card" id="players-admin-panel">
+            <h2>Jugadores</h2>
+            <p class="admin-muted">Añade, edita o borra jugadores de la portada.</p>
+
+            <label for="newPlayerName" class="field-label">Nombre jugador</label>
+            <input id="newPlayerName" type="text" placeholder="Nombre completo">
+
+            <div class="results-grid">
+                <div>
+                    <label for="newPlayerCountry" class="field-label">País (código bandera)</label>
+                    <input id="newPlayerCountry" type="text" placeholder="ESP, FRA, ENG..." maxlength="3">
+                </div>
+                <div>
+                    <label for="newPlayerRanking" class="field-label">Ranking</label>
+                    <input id="newPlayerRanking" type="number" min="1" placeholder="52">
+                </div>
+            </div>
+
+            <div class="results-grid">
+                <div>
+                    <label for="newPlayerSeed" class="field-label">Seed (opcional)</label>
+                    <input id="newPlayerSeed" type="text" placeholder="[4] o WC [1]">
+                </div>
+                <div>
+                    <label for="newPlayerPhotoPosition" class="field-label">Posición foto (opcional)</label>
+                    <input id="newPlayerPhotoPosition" type="text" placeholder="center 8%">
+                </div>
+            </div>
+
+            <label for="newPlayerImagePath" class="field-label">Ruta imagen (opcional)</label>
+            <input id="newPlayerImagePath" type="text" placeholder="assets/images/players/player-25.jpg">
+
+            <label for="newPlayerImage" class="field-label">O subir imagen (opcional)</label>
+            <input id="newPlayerImage" type="file" accept="image/*">
+
+            <div class="results-actions">
+                <button id="saveNewPlayer" type="button">Añadir jugador</button>
+                <button id="resetPlayersCollection" type="button" class="btn-secondary-admin">Restaurar jugadores base</button>
+            </div>
+
+            <p id="playersAdminStatus" class="admin-status" aria-live="polite"></p>
+
+            <h3 class="gallery-admin-subtitle">Listado de jugadores</h3>
+            <div id="playersAdminList" class="gallery-admin-list"></div>
+        </section>
+
+        <section class="admin-card" id="sponsors-admin-panel">
+            <h2>Sponsors</h2>
+            <p class="admin-muted">Añade o quita sponsors manteniendo el mismo patrón visual de tarjetas.</p>
+
+            <label for="newSponsorName" class="field-label">Nombre sponsor</label>
+            <input id="newSponsorName" type="text" placeholder="Nombre del sponsor">
+
+            <label for="newSponsorLink" class="field-label">Enlace (opcional)</label>
+            <input id="newSponsorLink" type="url" placeholder="https://sponsor.com">
+
+            <label for="newSponsorImagePath" class="field-label">Ruta imagen (opcional)</label>
+            <input id="newSponsorImagePath" type="text" placeholder="assets/images/sponsors/sponsor-11.jpg">
+
+            <label for="newSponsorImage" class="field-label">O subir imagen (opcional)</label>
+            <input id="newSponsorImage" type="file" accept="image/*">
+
+            <div class="results-actions">
+                <button id="saveNewSponsor" type="button">Añadir sponsor</button>
+                <button id="resetSponsorsCollection" type="button" class="btn-secondary-admin">Restaurar sponsors base</button>
+            </div>
+
+            <p id="sponsorsAdminStatus" class="admin-status" aria-live="polite"></p>
+
+            <h3 class="gallery-admin-subtitle">Listado de sponsors</h3>
+            <div id="sponsorsAdminList" class="gallery-admin-list"></div>
+        </section>
+
+        <section class="admin-card" id="live-settings-panel">
+            <h2>Streaming en Directo</h2>
+            <p class="admin-muted">Pega aqui el enlace de YouTube del directo para mostrarlo en la sección LIVE.</p>
+
+            <label for="liveStreamTitle" class="field-label">Título del directo (automático)</label>
+            <input id="liveStreamTitle" type="text" placeholder="Se detecta automáticamente desde YouTube" readonly>
+
+            <label for="liveYoutubeUrl" class="field-label">Enlace de YouTube</label>
+            <input id="liveYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX">
+
+            <div class="results-actions">
+                <button id="saveLiveSettings" type="button">Guardar enlace del directo</button>
+                <button id="clearLiveHistory" type="button" class="btn-secondary-admin">Borrar directos guardados</button>
+            </div>
+
+            <p id="liveAdminStatus" class="admin-status" aria-live="polite"></p>
+            <p id="liveHistoryInfo" class="admin-muted"></p>
+
+            <div id="liveHistoryAdminList" class="live-history-admin-list"></div>
+        </section>
+
+        <section class="admin-card" id="news-admin-panel">
+            <h2>Noticias</h2>
+            <p class="admin-muted">Escribe solo en español y el panel traducirá automáticamente a VA, EN y FR.</p>
+
+            <label for="newNewsTitle_es" class="field-label">Título ES</label>
+            <input id="newNewsTitle_es" type="text" placeholder="Título en español">
+
+            <label for="newNewsImage" class="field-label">Foto de noticia</label>
+            <input id="newNewsImage" type="file" accept="image/*">
+
+            <label for="newNewsArticle_es" class="field-label">Artículo ES</label>
+            <textarea id="newNewsArticle_es" rows="5" placeholder="Artículo completo en español"></textarea>
+
+            <div class="results-actions">
+                <button id="saveNewNews" type="button">Guardar noticia</button>
+            </div>
+
+            <p id="newsAdminStatus" class="admin-status" aria-live="polite"></p>
+
+            <h3 class="gallery-admin-subtitle">Gestión de noticias</h3>
+            <div class="gallery-admin-actions">
+                <button id="toggleNewsEditMode" type="button" class="btn-gallery-save">Editar noticias</button>
+            </div>
+
+            <div class="gallery-admin-actions">
+                <select id="newsDeleteSelect"></select>
+                <button id="deleteSelectedNews" type="button" class="btn-gallery-danger">Borrar noticia</button>
+            </div>
+
+            <div id="newsAdminEditor" class="gallery-admin-editor is-hidden">
+                <h3 class="gallery-admin-subtitle">Editor de noticias</h3>
+                <div id="newsAdminList" class="gallery-admin-list"></div>
+            </div>
+        </section>
+
+        <section class="admin-card" id="gallery-admin-panel">
+            <h2>Galería</h2>
+            <p class="admin-muted">Crea galerías por jornada, añade pies de foto por imagen y gestiona edición o borrado por foto o por galería.</p>
+
+            <div class="admin-lang-grid">
+                <label for="newGalleryTitle_es" class="field-label">Título galería ES</label>
+                <input id="newGalleryTitle_es" type="text" placeholder="Jornada primera ronda">
+
+                <label for="newGalleryTitle_va" class="field-label">Título galería VA</label>
+                <input id="newGalleryTitle_va" type="text" placeholder="Jornada primera ronda">
+
+                <label for="newGalleryTitle_en" class="field-label">Título galería EN</label>
+                <input id="newGalleryTitle_en" type="text" placeholder="First round morning session">
+
+                <label for="newGalleryTitle_fr" class="field-label">Título galería FR</label>
+                <input id="newGalleryTitle_fr" type="text" placeholder="Session du matin premier tour">
+            </div>
+
+            <label for="newGalleryFiles" class="field-label">Subir foto o fotos</label>
+            <input id="newGalleryFiles" type="file" accept="image/*" multiple>
+            <div class="results-actions">
+                <button id="saveNewGallery" type="button">Guardar galería</button>
+            </div>
+            <div id="newGalleryPhotosEditor" class="gallery-admin-photo-list"></div>
+
+            
+
+            <p id="galleryAdminStatus" class="admin-status" aria-live="polite"></p>
+
+            <h3 class="gallery-admin-subtitle">Gestión de galerías</h3>
+
+            <div class="gallery-admin-actions">
+                <button id="toggleGalleryEditMode" type="button" class="btn-gallery-save">Editar galerías</button>
+            </div>
+
+            <div class="gallery-admin-actions">
+                <select id="galleryDeleteSelect"></select>
+                <button id="deleteSelectedGallery" type="button" class="btn-gallery-danger">Borrar galería</button>
+            </div>
+
+            <div id="galleryAdminEditor" class="gallery-admin-editor is-hidden">
+                <h3 class="gallery-admin-subtitle">Editor de galerías</h3>
+                <div id="galleryAdminList" class="gallery-admin-list"></div>
+            </div>
+        </section>
+
+        <section class="admin-card" id="draw-schedule-panel">
+            <h2>Horario de Partidos</h2>
+            <p class="admin-muted">Asigna fecha y hora antes de introducir resultados. Se guardara en el cuadro y se mostrara en cada partido.</p>
+
+            <div class="results-grid">
+                <div>
+                    <label for="scheduleRoundSelect" class="field-label">Ronda</label>
+                    <select id="scheduleRoundSelect"></select>
+                </div>
+                <div>
+                    <label for="scheduleMatchSelect" class="field-label">Partido</label>
+                    <select id="scheduleMatchSelect"></select>
+                </div>
+            </div>
+
+            <p id="schedulePlayersPreview" class="admin-muted"></p>
+
+            <label for="scheduleDate" class="field-label">Fecha y hora del partido</label>
+            <input id="scheduleDate" type="text" placeholder="17 APR 2026 · 17:45" />
+
+            <div class="results-actions">
+                <button id="saveMatchSchedule" type="button">Guardar Horario</button>
+            </div>
+
+            <p id="scheduleAdminStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+        <section class="admin-card" id="draw-builder-panel">
+            <h2>Cruces del Cuadro</h2>
+            <p class="admin-muted">Selecciona qué jugador va en cada posición del Round 1. Puedes asignar BYE y conservar horarios ya cargados.</p>
+
+            <div class="results-actions">
+                <button id="saveDrawBuilder" type="button">Guardar cruces</button>
+                <button id="resetDrawBuilderToBase" type="button" class="btn-secondary-admin">Restaurar cruces base</button>
+            </div>
+
+            <div id="drawBuilderGrid" class="draw-builder-grid"></div>
+            <p id="drawBuilderStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+        <section class="admin-card" id="draw-results-panel">
+            <h2>Resultados del Cuadro</h2>
+            <p class="admin-muted">Introduce tanteo por juego y el ganador pasara automaticamente a la siguiente ronda.</p>
+
+            <div class="results-grid">
+                <div>
+                    <label for="roundSelect" class="field-label">Ronda</label>
+                    <select id="roundSelect"></select>
+                </div>
+                <div>
+                    <label for="matchSelect" class="field-label">Partido</label>
+                    <select id="matchSelect"></select>
+                </div>
+            </div>
+
+            <p id="playersPreview" class="admin-muted"></p>
+
+            <div class="score-table">
+                <div class="score-header">Jugador</div>
+                <div class="score-header">Sets</div>
+                <div class="score-header">G1</div>
+                <div class="score-header">G2</div>
+                <div class="score-header">G3</div>
+                <div class="score-header">G4</div>
+                <div class="score-header">G5</div>
+
+                <div class="score-name" id="p1Name">P1</div>
+                <input id="p1Sets" type="number" min="0" max="3" />
+                <input id="p1g1" type="number" min="0" max="25" />
+                <input id="p1g2" type="number" min="0" max="25" />
+                <input id="p1g3" type="number" min="0" max="25" />
+                <input id="p1g4" type="number" min="0" max="25" />
+                <input id="p1g5" type="number" min="0" max="25" />
+
+                <div class="score-name" id="p2Name">P2</div>
+                <input id="p2Sets" type="number" min="0" max="3" />
+                <input id="p2g1" type="number" min="0" max="25" />
+                <input id="p2g2" type="number" min="0" max="25" />
+                <input id="p2g3" type="number" min="0" max="25" />
+                <input id="p2g4" type="number" min="0" max="25" />
+                <input id="p2g5" type="number" min="0" max="25" />
+            </div>
+
+            <div class="results-actions">
+                <button id="saveMatchResult" type="button">Guardar Resultado</button>
+                <button id="resetDrawState" type="button" class="btn-secondary-admin">Reset Cuadro</button>
+            </div>
+
+            <p id="drawAdminStatus" class="admin-status" aria-live="polite"></p>
+        </section>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
+<script>
+window.ADMIN_DEFAULT_SECTION = "draw-builder-panel";
+window.ADMIN_MULTI_PAGE_MODE = true;
+</script>
+<script src="js/admin.js?v=20260803-9"></script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -250,13 +250,17 @@ function simplifyTournamentList(items: TournamentListItem[]) {
 
 function simplifyMatch(match: TournamentMatch, division: TournamentDivision, bracketName: string, tournamentStreamUrl: string | null) {
   const sortTime = parseMatchDate(match);
-  const players = Array.isArray(match.match_players)
-    ? match.match_players.map((player) => ({
-        id: player.id ?? null,
-        name: player.name || null,
-        games_won: player.games_won ?? null,
-      }))
-    : [];
+  const rawPlayers = Array.isArray(match.match_players) && match.match_players.length > 0
+    ? match.match_players
+    : (Array.isArray((match as unknown as { players?: Array<{ id?: number | string; name?: string; games_won?: number }> }).players)
+        ? (match as unknown as { players: Array<{ id?: number | string; name?: string; games_won?: number }> }).players
+        : []);
+
+  const players = rawPlayers.map((player) => ({
+    id: player.id ?? null,
+    name: player.name || null,
+    games_won: player.games_won ?? null,
+  }));
 
   return {
     id: match.id ?? null,
@@ -275,6 +279,7 @@ function simplifyMatch(match: TournamentMatch, division: TournamentDivision, bra
     duration_minutes: match.duration_minutes ?? null,
     streamed: Boolean(match.streamed || match.stream_url || tournamentStreamUrl),
     stream_url: match.stream_url || tournamentStreamUrl || null,
+    bye: Boolean((match as unknown as { bye?: boolean }).bye),
     players,
     scoreline: players.length === 2
       ? `${players[0].games_won ?? 0}-${players[1].games_won ?? 0}`
@@ -326,7 +331,23 @@ function simplifyDivision(division: TournamentDivision, tournamentStreamUrl: str
 }
 
 function flattenMatches(divisions: ReturnType<typeof simplifyDivision>[]) {
-  return divisions.flatMap((division) => division.brackets.flatMap((bracket) => bracket.matches));
+  const matches = divisions.flatMap((division) => division.brackets.flatMap((bracket) => bracket.matches));
+  const seenIds = new Set<string | number>();
+  const uniqueMatches: typeof matches = [];
+  for (const m of matches) {
+    if (m.bye) continue;
+    if (!Array.isArray(m.players) || m.players.length < 2) continue;
+    const p1 = String(m.players[0]?.name || "").trim().toLowerCase();
+    const p2 = String(m.players[1]?.name || "").trim().toLowerCase();
+    if (!p1 || !p2 || p1 === "tbd" || p2 === "tbd" || p1 === "bye" || p2 === "bye" || p1.startsWith("tbd") || p2.startsWith("bye")) continue;
+
+    if (m.id !== null && m.id !== undefined) {
+      if (seenIds.has(m.id)) continue;
+      seenIds.add(m.id);
+    }
+    uniqueMatches.push(m);
+  }
+  return uniqueMatches;
 }
 
 function stripSortTime(match: Record<string, unknown>) {
