@@ -119,8 +119,20 @@ async function renderDrawPage() {
 
         const bracketData = await bracketResponse.json();
         const storedState = localStorage.getItem(DRAW_BRACKET_KEY);
-        const parsedState = storedState ? JSON.parse(storedState) : null;
-        const activeBracket = parsedState?.rounds ? parsedState : bracketData;
+        let parsedState = null;
+        if (storedState) {
+            try {
+                parsedState = JSON.parse(storedState);
+                while (typeof parsedState === "string") {
+                    parsedState = JSON.parse(parsedState);
+                }
+            } catch (e) {
+                parsedState = null;
+            }
+        }
+        const activeBracket = (parsedState?.rounds && Array.isArray(parsedState.rounds) && parsedState.rounds.length > 0)
+            ? parsedState
+            : bracketData;
 
         normalizeBracket(activeBracket);
         autoAdvanceBracket(activeBracket);

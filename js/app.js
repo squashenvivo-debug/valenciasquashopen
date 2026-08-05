@@ -716,13 +716,37 @@ async function loadDraws(){
     initDrawOpenInNewTab();
 
     try {
-        const bracketData = await fetchCachedJson("data/draw-bracket.json", { cacheKey: "draw-bracket", ttlMs: 300000 });
+        let bracketData = null;
+        try {
+            bracketData = await fetchCachedJson("data/draw-bracket.json", { cacheKey: "draw-bracket", ttlMs: 300000, forceFresh: true });
+        } catch (e) {
+            const res = await fetch("data/draw-bracket.json", { cache: "no-store" });
+            bracketData = await res.json();
+        }
+
+        if (!bracketData || !Array.isArray(bracketData.rounds)) {
+            const res = await fetch("data/draw-bracket.json", { cache: "no-store" });
+            bracketData = await res.json();
+        }
+
         const storedState = localStorage.getItem("drawBracketState");
-        const parsedState = storedState ? JSON.parse(storedState) : null;
-        const activeBracket = parsedState?.rounds ? parsedState : bracketData;
+        let parsedState = null;
+        if (storedState) {
+            try {
+                parsedState = JSON.parse(storedState);
+                while (typeof parsedState === "string") {
+                    parsedState = JSON.parse(parsedState);
+                }
+            } catch (e) {
+                parsedState = null;
+            }
+        }
+
+        const activeBracket = (parsedState?.rounds && Array.isArray(parsedState.rounds) && parsedState.rounds.length > 0)
+            ? parsedState
+            : bracketData;
 
         normalizeBracket(activeBracket);
-
         autoAdvanceBracket(activeBracket);
 
         const firstRoundCount = bracketData.rounds[0]?.matches?.length || 0;
