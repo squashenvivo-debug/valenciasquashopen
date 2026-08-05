@@ -185,8 +185,8 @@
                             court: courtName,
                             dateTime: dateTimeStr,
                             status: m.status || "scheduled",
-                            player1: { name: p1Name, country: p1Country, seed: "", score: playersList[0]?.games_won ?? null },
-                            player2: { name: p2Name, country: p2Country, seed: "", score: playersList[1]?.games_won ?? null },
+                            player1: { name: p1Name, country: p1Country, seed: "", score: (m.status === "scheduled" ? null : (playersList[0]?.games_won ?? null)) },
+                            player2: { name: p2Name, country: p2Country, seed: "", score: (m.status === "scheduled" ? null : (playersList[1]?.games_won ?? null)) },
                             scores: gameScores
                         });
                     });
@@ -442,7 +442,7 @@
             const p2Winner = match.status === "completed" && p1Score !== null && p2Score !== null && p2Score > p1Score;
 
             let scoreBadgeHtml = `<div class="ls-vs-badge">VS</div>`;
-            if (p1Score !== null && p2Score !== null) {
+            if (match.status !== "scheduled" && p1Score !== null && p2Score !== null) {
                 const liveClass = match.status === "in_progress" ? "is-live-score" : "is-final-score";
                 scoreBadgeHtml = `<div class="ls-vs-badge ${liveClass}"><span class="${p1Winner ? 'winner-num' : ''}">${p1Score}</span> - <span class="${p2Winner ? 'winner-num' : ''}">${p2Score}</span></div>`;
             }
