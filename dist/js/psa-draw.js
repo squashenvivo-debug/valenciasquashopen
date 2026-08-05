@@ -115,6 +115,12 @@
     function renderMatchCard(match) {
         const isLive = match.status === "in_progress";
         const metaDate = match.dateTime || "11 Aug 2026";
+        const p1Name = match.player1?.name || "";
+        const p2Name = match.player2?.name || "";
+        const showH2H = p1Name && p1Name !== "BYE" && p2Name && p2Name !== "BYE";
+
+        const p1Safe = p1Name.replace(/'/g, "\\'");
+        const p2Safe = p2Name.replace(/'/g, "\\'");
 
         return `
             <div class="psa-match-item ${isLive ? 'is-live' : ''}">
@@ -122,8 +128,8 @@
                 ${renderPlayerRow(match.player2)}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
-                    ${(match.player1?.name && match.player1.name !== "BYE" && match.player2?.name && match.player2.name !== "BYE") 
-                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${match.player1.name}', '${match.player2.name}')">Head-to-head</button>` 
+                    ${showH2H 
+                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}')">Head-to-head</button>` 
                         : ''}
                 </div>
             </div>
@@ -197,12 +203,13 @@
         const listContainer = document.getElementById("qfMatches");
         if (!listContainer) return;
 
-        const winnerLabel = getPsaText("winnerOctavo", "Ganador Octavo");
+        const winnerLabel = getPsaText("winnerOctavo", "Ganador Octavos");
+        const qfRoundText = getPsaText("quarterFinals", "Cuartos de Final");
 
         let html = "";
         for (let i = 1; i <= 4; i++) {
             html += renderMatchCard({
-                round: "Cuarto de Final",
+                round: qfRoundText,
                 dateTime: "13 Aug 2026",
                 player1: { name: `${winnerLabel} ${i*2-1}` },
                 player2: { name: `${winnerLabel} ${i*2}` }
@@ -215,12 +222,13 @@
         const listContainer = document.getElementById("sfMatches");
         if (!listContainer) return;
 
-        const winnerLabel = getPsaText("winnerCuarto", "Ganador Cuarto");
+        const winnerLabel = getPsaText("winnerCuarto", "Ganador Cuartos");
+        const sfRoundText = getPsaText("semiFinals", "Semifinales");
 
         let html = "";
         for (let i = 1; i <= 2; i++) {
             html += renderMatchCard({
-                round: "Semifinal",
+                round: sfRoundText,
                 dateTime: "14 Aug 2026",
                 player1: { name: `${winnerLabel} ${i*2-1}` },
                 player2: { name: `${winnerLabel} ${i*2}` }
@@ -234,9 +242,10 @@
         if (!listContainer) return;
 
         const semiLabel = getPsaText("semifinalist", "Semifinalista");
+        const finalRoundText = getPsaText("mainFinal", "Gran Final");
 
         listContainer.innerHTML = renderMatchCard({
-            round: "Gran Final",
+            round: finalRoundText,
             dateTime: "15 Aug 2026 • 18:30",
             player1: { name: `${semiLabel} 1` },
             player2: { name: `${semiLabel} 2` }

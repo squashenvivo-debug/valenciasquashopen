@@ -70,7 +70,7 @@ quick: {
         subtitle: "MEMORIAL CHIMO MARMANEU • 11 - 15 AGOSTO 2026 • $36,000 COPPER • CUADRO 24",
         round1: "Ronda 1",
         round2: "Ronda 2",
-        quarterFinals: "Cuartos",
+        quarterFinals: "Cuartos de Final",
         semiFinals: "Semifinales",
         final: "Final",
         matchesCount: "partidos",
@@ -82,8 +82,8 @@ quick: {
         h2hFirstMeeting: "Primer enfrentamiento oficial",
         h2hWinPct: "Porcentaje de victorias:",
         winnerR1: "Ganador R1",
-        winnerOctavo: "Ganador Octavo",
-        winnerCuarto: "Ganador Cuarto",
+        winnerOctavo: "Ganador Octavos",
+        winnerCuarto: "Ganador Cuartos",
         semifinalist: "Semifinalista"
     }
 
@@ -155,7 +155,7 @@ quick: {
         subtitle: "MEMORIAL CHIMO MARMANEU • 11 - 15 AGOST 2026 • $36,000 COPPER • QUADRE 24",
         round1: "Ronda 1",
         round2: "Ronda 2",
-        quarterFinals: "Quarts",
+        quarterFinals: "Quarts de Final",
         semiFinals: "Semifinals",
         final: "Final",
         matchesCount: "partits",
