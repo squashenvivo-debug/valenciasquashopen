@@ -19,42 +19,42 @@
         {
             id: "12711_01",
             round: "MENS ROUND 1",
-            court: "PISTA CENTRAL - OLYMPIA",
-            dateTime: "11 AUG, 12:30",
-            status: "in_progress",
-            player1: { name: "Sergio Garcia Pollan", country: "ESP", seed: "WC", score: 1 },
-            player2: { name: "Yassin Elshafei", country: "EGY", seed: "", score: 2 },
-            scores: ["9-11", "11-8", "7-11", "8-6 (LIVE)"]
+            court: "PISTA 2 - OLYMPIA",
+            dateTime: "11 AUG, 12:00",
+            status: "scheduled",
+            player1: { name: "Sergio Garcia Pollan", country: "ESP", seed: "WC", score: null },
+            player2: { name: "Yassin Elshafei", country: "EGY", seed: "", score: null },
+            scores: []
         },
         {
             id: "12711_02",
             round: "MENS ROUND 1",
-            court: "PISTA 2 - OLYMPIA",
-            dateTime: "11 AUG, 13:15",
-            status: "in_progress",
-            player1: { name: "Daniel Poleshchuk", country: "ISR", seed: "", score: 2 },
-            player2: { name: "Aly Tolba", country: "EGY", seed: "", score: 1 },
-            scores: ["11-9", "8-11", "11-7", "12-10 (LIVE)"]
+            court: "PISTA CENTRAL - OLYMPIA",
+            dateTime: "11 AUG, 12:45",
+            status: "scheduled",
+            player1: { name: "Daniel Poleshchuk", country: "ISR", seed: "", score: null },
+            player2: { name: "Aly Tolba", country: "EGY", seed: "", score: null },
+            scores: []
         },
         {
             id: "12711_03",
             round: "MENS ROUND 1",
             court: "PISTA CENTRAL - OLYMPIA",
-            dateTime: "11 AUG, 10:00",
-            status: "completed",
-            player1: { name: "Ernesto Revert", country: "ESP", seed: "WC", score: 3 },
-            player2: { name: "Yannik Omlor", country: "GER", seed: "", score: 1 },
-            scores: ["13-11", "8-11", "11-7", "11-9"]
+            dateTime: "11 AUG, 13:30",
+            status: "scheduled",
+            player1: { name: "Ernesto Revert", country: "ESP", seed: "WC", score: null },
+            player2: { name: "Yannik Omlor", country: "GER", seed: "", score: null },
+            scores: []
         },
         {
             id: "12711_04",
             round: "MENS ROUND 1",
             court: "PISTA 2 - OLYMPIA",
-            dateTime: "11 AUG, 10:45",
-            status: "completed",
-            player1: { name: "Marwan Tamer", country: "EGY", seed: "", score: 3 },
-            player2: { name: "Brice Nicolas", country: "FRA", seed: "", score: 2 },
-            scores: ["11-8", "9-11", "11-6", "8-11", "11-9"]
+            dateTime: "11 AUG, 14:15",
+            status: "scheduled",
+            player1: { name: "Marwan Tamer", country: "EGY", seed: "", score: null },
+            player2: { name: "Brice Nicolas", country: "FRA", seed: "", score: null },
+            scores: []
         },
         {
             id: "12711_05",
