@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/gallery.css">
 <link rel="stylesheet" href="css/venue.css">
 <link rel="stylesheet" href="css/draw.css?v=20260726-2">
+<link rel="stylesheet" href="css/psa-draw.css?v=20260805-1">
 <link rel="stylesheet" href="css/tournament-center.css">
 <link rel="stylesheet" href="css/sponsors.css?v=20260725-2">
 <link rel="stylesheet" href="css/discover.css">
@@ -362,8 +363,59 @@ DRAW
             <p data-i18n="sectionHeaders.draw.intro">Resultados, cruces y evolución completa del torneo.</p>
         </div>
 
-        <div class="draw-bracket-wrapper">
-            <div class="draw-bracket" aria-live="polite"></div>
+        <div style="margin-bottom: 24px; text-align: center;">
+            <a href="draw.html" class="hero-btn primary" style="display: inline-block; padding: 12px 24px; border-radius: 10px; background: #00E676; color: #05101A; font-weight: 800; text-decoration: none;">
+                ⚡ Ver Cuadro Completo PSA
+            </a>
+        </div>
+
+        <!-- Official PSA Interactive Bracket -->
+        <div class="psa-bracket-viewport" style="max-height: 700px; overflow-y: auto;">
+            <div class="psa-bracket-tree">
+
+                <div class="psa-round-column">
+                    <div class="psa-round-title">
+                        Round 1 <span class="count">16 partidos</span>
+                    </div>
+                    <div class="psa-matches-list" id="r1Matches"></div>
+                </div>
+
+                <div class="psa-round-column">
+                    <div class="psa-round-title">
+                        Round 2 <span class="count">8 partidos</span>
+                    </div>
+                    <div class="psa-matches-list" id="r2Matches"></div>
+                </div>
+
+                <div class="psa-round-column">
+                    <div class="psa-round-title">
+                        Cuartos <span class="count">4 partidos</span>
+                    </div>
+                    <div class="psa-matches-list" id="qfMatches"></div>
+                </div>
+
+                <div class="psa-round-column">
+                    <div class="psa-round-title">
+                        Semifinales <span class="count">2 partidos</span>
+                    </div>
+                    <div class="psa-matches-list" id="sfMatches"></div>
+                </div>
+
+                <div class="psa-round-column">
+                    <div class="psa-round-title">
+                        Final <span class="count">Gran Final</span>
+                    </div>
+                    <div class="psa-matches-list" id="finalMatches"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Legacy Draw Backup (Hidden) -->
+        <div id="legacyDrawBackupContainer" style="display: none;" aria-hidden="true">
+            <div class="draw-bracket-wrapper">
+                <div class="draw-bracket" aria-live="polite"></div>
+            </div>
         </div>
 
     </div>
@@ -881,6 +933,7 @@ FOOTER
 <script src="js/hero.js?v=20260805-7"></script>
 <script src="js/news.js?v=20260805-7"></script>
 <script src="js/app.js?v=20260805-7"></script>
+<script src="js/psa-draw.js?v=20260805-1"></script>
 
 </body>
 </html>

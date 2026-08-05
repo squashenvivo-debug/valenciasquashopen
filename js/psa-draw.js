@@ -248,11 +248,49 @@
 
     // Modal Head to Head Handler
     window.openH2HModal = function (p1Name, p2Name) {
-        const modal = document.getElementById("h2hModal");
-        if (!modal) return;
+        let modal = document.getElementById("h2hModal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.className = "psa-modal-overlay";
+            modal.id = "h2hModal";
+            modal.onclick = function (e) { if (e.target === modal) closeH2HModal(); };
+            modal.innerHTML = `
+                <div class="psa-modal-card">
+                    <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
+                    <div class="psa-h2h-header">
+                        <h3 style="color: var(--psa-green, #00E676); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
+                        <p style="color: var(--psa-text-muted, #8E9BAE); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
+                    </div>
+                    <div class="psa-h2h-versus">
+                        <div class="psa-h2h-player-box">
+                            <div id="h2hP1Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 1</div>
+                        </div>
+                        <div class="psa-h2h-vs-badge">VS</div>
+                        <div class="psa-h2h-player-box">
+                            <div id="h2hP2Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 2</div>
+                        </div>
+                    </div>
+                    <div class="psa-h2h-stat-row">
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Enfrentamientos directos:</span>
+                        <strong style="color: var(--psa-green, #00E676);">0 - 0</strong>
+                    </div>
+                    <div class="psa-h2h-stat-row">
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Último duelo:</span>
+                        <strong>Primer enfrentamiento oficial</strong>
+                    </div>
+                    <div class="psa-h2h-stat-row">
+                        <span style="color: var(--psa-text-muted, #8E9BAE);">Porcentaje de victorias:</span>
+                        <strong>50% - 50%</strong>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
 
-        document.getElementById("h2hP1Name").textContent = p1Name;
-        document.getElementById("h2hP2Name").textContent = p2Name;
+        const el1 = document.getElementById("h2hP1Name");
+        const el2 = document.getElementById("h2hP2Name");
+        if (el1) el1.textContent = p1Name;
+        if (el2) el2.textContent = p2Name;
 
         modal.classList.add("active");
     };
