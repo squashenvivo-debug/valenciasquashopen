@@ -202,6 +202,81 @@ body {
     position: relative;
 }
 
+/* Bracket Connector Lines per Round Column (located strictly inside the 32px whitespace gap) */
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(odd)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    width: 16px;
+    border-right: 2px solid rgba(255, 255, 255, 0.7);
+    border-top: 2px solid rgba(255, 255, 255, 0.7);
+    border-top-right-radius: 6px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    bottom: 50%;
+    width: 16px;
+    border-right: 2px solid rgba(255, 255, 255, 0.7);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.7);
+    border-bottom-right-radius: 6px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    right: -32px;
+    width: 16px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Height tuning per round column */
+/* Round 1 -> Round 2 */
+.psa-round-column:nth-child(1) .psa-match-item:nth-child(odd)::after,
+.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::after {
+    height: calc(50% + 12px);
+}
+.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::before {
+    top: -12px;
+}
+
+/* Round 2 -> Cuartos */
+.psa-round-column:nth-child(2) .psa-match-item:nth-child(odd)::after,
+.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::after {
+    height: calc(50% + 36px);
+}
+.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::before {
+    top: -36px;
+}
+
+/* Cuartos -> Semifinales */
+.psa-round-column:nth-child(3) .psa-match-item:nth-child(odd)::after,
+.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::after {
+    height: calc(50% + 84px);
+}
+.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::before {
+    top: -84px;
+}
+
+/* Semifinales -> Final */
+.psa-round-column:nth-child(4) .psa-match-item:nth-child(odd)::after,
+.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::after {
+    height: calc(50% + 180px);
+}
+.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::before {
+    top: -180px;
+}
+
 /* Match Card Item */
 .psa-match-item {
     background: var(--psa-bg-card);
@@ -210,9 +285,6 @@ body {
     overflow: visible;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
-}
-
-
 .psa-match-item:hover {
     border-color: var(--psa-border-accent);
     transform: translateY(-2px);
