@@ -1058,27 +1058,30 @@ function initLiveStream() {
     const validHistory = history.filter((item) => item?.url && extractYouTubeVideoId(item.url));
     const currentItem = validHistory.length ? validHistory[validHistory.length - 1] : null;
 
-    if (currentItem?.url) {
+    const isOldDefaultStream = Boolean(currentItem?.url?.includes("8Th2hgkl1v8"));
+    if (currentItem?.url && extractYouTubeVideoId(currentItem.url) && !isOldDefaultStream) {
         renderLivePlayer(videoContainer, currentItem.url);
+    } else {
+        videoContainer.innerHTML = `
+            <div class="video-placeholder">
+                📺
+                <h3 data-i18n="live.videoTitle">Streaming PSA Valencia Open</h3>
+                <p data-i18n="live.videoIntro">
+                    Aquí aparecerá el reproductor de YouTube cuando el directo esté activo.
+                </p>
+            </div>
+        `;
     }
 
-    if (history.length === 0) {
-        if (archivePanel) archivePanel.hidden = false;
-        if (archiveGrid) {
-            archiveGrid.innerHTML = '<p class="live-archive-empty">Todavía no hay directos anteriores.</p>';
-        }
+    if (validHistory.length <= 1) {
+        if (archivePanel) archivePanel.hidden = true;
+        if (archiveGrid) archiveGrid.innerHTML = "";
         return;
     }
 
     if (!archivePanel || !archiveGrid) return;
 
     const previous = validHistory.slice(0, -1);
-    if (previous.length === 0) {
-        archivePanel.hidden = false;
-        archiveGrid.innerHTML = '<p class="live-archive-empty">Todavía no hay directos anteriores.</p>';
-        return;
-    }
-
     archivePanel.hidden = false;
     archiveGrid.innerHTML = previous.map((item) => {
         const id = extractYouTubeVideoId(item.url);

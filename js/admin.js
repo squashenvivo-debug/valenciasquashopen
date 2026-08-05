@@ -1276,12 +1276,22 @@ function persistLiveHistory(history) {
     if (normalized.length === 0) {
         localStorage.removeItem(LIVE_STREAM_URL_KEY);
         localStorage.removeItem(LIVE_STREAM_HISTORY_KEY);
+        if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+        }
+        window.PSAOptimizations?.clearFetchCache?.();
         return;
     }
 
     const latest = normalized[normalized.length - 1];
-    localStorage.setItem(LIVE_STREAM_URL_KEY, String(latest.url || "").trim());
+    const latestUrl = String(latest.url || "").trim();
+    localStorage.setItem(LIVE_STREAM_URL_KEY, latestUrl);
     localStorage.setItem(LIVE_STREAM_HISTORY_KEY, JSON.stringify(normalized));
+
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+    }
+    window.PSAOptimizations?.clearFetchCache?.();
 }
 
 function renderLiveHistoryAdminList(history = readLiveHistory()) {
