@@ -248,6 +248,63 @@
         }
     }
 
+    // Helper to resolve player country accurately and suppress flags for TBD/BYE/STB
+    function resolvePlayerCountry(name, countryCode) {
+        const cleanName = String(name || "").trim();
+        if (!cleanName || /^(tbd|bye|stb)$/i.test(cleanName) || /tbd|bye|stb/i.test(cleanName)) {
+            return ""; // No flag for TBD / BYE / STB
+        }
+
+        // Try provided countryCode if valid
+        const code = String(countryCode || "").trim().toUpperCase();
+        if (code && code.length >= 2 && code.length <= 3 && code !== "ESP") {
+            return code;
+        }
+
+        // Check local players collection from storage or window
+        try {
+            const rawCollection = localStorage.getItem("playersCollection");
+            const players = rawCollection ? JSON.parse(rawCollection) : [];
+            const match = players.find(p => p.name && p.name.toLowerCase() === cleanName.toLowerCase());
+            if (match && match.country) {
+                return match.country.toUpperCase();
+            }
+        } catch (_err) {}
+
+        // Predefined fallback map for tournament players
+        const PLAYER_COUNTRY_MAP = {
+            "muhammad ashab irfan": "PAK",
+            "patrick rooney": "ENG",
+            "samuel osborne-wylde": "ENG",
+            "ivan perez": "ESP",
+            "balazs farkas": "HUN",
+            "simon herbert": "ENG",
+            "abdulla al-tamimi": "QAT",
+            "mohamed nasser": "EGY",
+            "yassin elshafei": "EGY",
+            "muhammad asim khan": "PAK",
+            "joseph white": "AUS",
+            "rhys evans": "WAL",
+            "omar said": "EGY",
+            "daniel poleshchuk": "ISR",
+            "yannik omlor": "GER",
+            "marwan tamer": "EGY",
+            "brice nicolas": "FRA",
+            "aly tolba": "EGY",
+            "will salter": "ENG",
+            "hamza khan": "PAK",
+            "khaled labib": "EGY",
+            "marek panacek": "CZE",
+            "sergio garcia pollan": "ESP",
+            "ernesto revert": "ESP"
+        };
+
+        const mapped = PLAYER_COUNTRY_MAP[cleanName.toLowerCase()];
+        if (mapped) return mapped;
+
+        return code || "";
+    }
+
     // Render matches UI
     function renderMatches(filter = "all") {
         const container = $("lsMatchesContainer");
@@ -264,8 +321,16 @@
         }
 
         container.innerHTML = filtered.map((match) => {
-            const p1Flag = `assets/images/flags/${match.player1.country || "ENG"}.svg`;
-            const p2Flag = `assets/images/flags/${match.player2.country || "ENG"}.svg`;
+            const p1Country = resolvePlayerCountry(match.player1.name, match.player1.country);
+            const p2Country = resolvePlayerCountry(match.player2.name, match.player2.country);
+
+            const p1FlagHtml = p1Country
+                ? `<img class="ls-player-flag" src="assets/images/flags/${p1Country}.svg" alt="${p1Country}" onerror="this.style.display='none'">`
+                : `<span style="display:inline-block; width:38px; height:25px;"></span>`;
+
+            const p2FlagHtml = p2Country
+                ? `<img class="ls-player-flag" src="assets/images/flags/${p2Country}.svg" alt="${p2Country}" onerror="this.style.display='none'">`
+                : `<span style="display:inline-block; width:38px; height:25px;"></span>`;
 
             const statusClass = `ls-status-${match.status}`;
             const statusLabel = match.status === "in_progress" ? "EN JUEGO LIVE" : match.status === "completed" ? "FINALIZADO" : "PROGRAMADO";
@@ -285,7 +350,7 @@
                     </div>
                     <div class="ls-match-card">
                         <div class="ls-player left">
-                            <img class="ls-player-flag" src="${p1Flag}" alt="${match.player1.country}" onerror="this.src='assets/images/flags/xx.svg'">
+                            ${p1FlagHtml}
                             <span class="ls-player-name">
                                 ${match.player1.name}
                                 ${match.player1.seed ? `<span class="ls-player-seed">${match.player1.seed}</span>` : ""}
@@ -299,7 +364,7 @@
                                 ${match.player2.name}
                                 ${match.player2.seed ? `<span class="ls-player-seed">${match.player2.seed}</span>` : ""}
                             </span>
-                            <img class="ls-player-flag" src="${p2Flag}" alt="${match.player2.country}" onerror="this.src='assets/images/flags/xx.svg'">
+                            ${p2FlagHtml}
                         </div>
 
                         <div class="ls-live-details">

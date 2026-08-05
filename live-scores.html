@@ -19,40 +19,7 @@
         </div>
     </header>
 
-    <!-- Subscription & Control Panel -->
-    <section class="ls-controls-card">
-        <h2 class="ls-controls-title">
-            <span>⚡ Configuración e Integración PSA Live Scores API</span>
-        </h2>
-        <p class="ls-controls-desc">
-            Esta pantalla permite suscribir tu endpoint de webhook a <code>POST /api/v1/matches/subscribe</code> con tu API Key oficial de PSA, consultar el estado de entregas en vivo y probar la renderización del marcador idéntica al diseño oficial del PSA Tour.
-        </p>
 
-        <div class="ls-form-grid">
-            <div class="ls-form-group">
-                <label for="lsApiKeyInput">API Key de PSA (X-Api-Key)</label>
-                <input id="lsApiKeyInput" type="text" class="ls-input" placeholder="Ingresa tu API Key de PSA...">
-            </div>
-            <div class="ls-form-group">
-                <label for="lsWebhookUrlInput">Endpoint Webhook (HTTPS URL)</label>
-                <input id="lsWebhookUrlInput" type="url" class="ls-input" placeholder="https://tu-dominio.com/webhooks/psa-live-scores">
-            </div>
-        </div>
-
-        <div class="ls-actions-row">
-            <button id="lsSubscribeBtn" type="button" class="ls-btn ls-btn-primary">
-                🚀 Solicitar Suscripción (POST /subscribe)
-            </button>
-            <button id="lsCheckBtn" type="button" class="ls-btn ls-btn-secondary">
-                🔍 Consultar Estado (GET /subscription)
-            </button>
-            <button id="lsCancelBtn" type="button" class="ls-btn ls-btn-danger">
-                ❌ Cancelar Suscripción (DELETE)
-            </button>
-        </div>
-
-        <div id="lsStatusBox" class="ls-status-box"></div>
-    </section>
 
     <!-- Tournament Header Banner -->
     <section class="ls-tournament-banner">
