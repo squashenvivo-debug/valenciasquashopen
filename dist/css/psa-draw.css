@@ -186,44 +186,8 @@ body {
     flex-direction: column;
     justify-content: space-around;
     flex-grow: 1;
-    gap: 24px;
-}
-
-/* Match Pair and Bracket Connector Lines */
-.psa-match-pair {
-    position: relative;
-    display: flex;
-    flex-direction: column;
     gap: 16px;
-}
-
-/* White bracket connector line ] connecting match 1 and match 2 of a pair */
-.psa-round-column:not(:last-child) .psa-match-pair::after {
-    content: '';
-    position: absolute;
-    right: -16px;
-    top: 25%;
-    bottom: 25%;
-    width: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.85);
-    border-left: none;
-    border-radius: 0 6px 6px 0;
-    pointer-events: none;
-    z-index: 2;
-}
-
-/* Horizontal line extending from the pair connector to the next round column */
-.psa-round-column:not(:last-child) .psa-match-pair::before {
-    content: '';
-    position: absolute;
-    right: -32px;
-    top: 50%;
-    width: 16px;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.85);
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 2;
+    position: relative;
 }
 
 /* Match Card Item */
@@ -231,9 +195,52 @@ body {
     background: var(--psa-bg-card);
     border: 1px solid var(--psa-border);
     border-radius: var(--psa-radius);
-    overflow: hidden;
+    overflow: visible;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
+}
+
+/* Connector line extending from odd match item down */
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(odd)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    height: calc(50% + 8px);
+    width: 16px;
+    border-right: 2px solid rgba(255, 255, 255, 0.7);
+    border-top: 2px solid rgba(255, 255, 255, 0.7);
+    border-top-right-radius: 6px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Connector line extending from even match item up */
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    bottom: 50%;
+    height: calc(50% + 8px);
+    width: 16px;
+    border-right: 2px solid rgba(255, 255, 255, 0.7);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.7);
+    border-bottom-right-radius: 6px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Horizontal stem extending from meeting point to next column */
+.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    right: -32px;
+    top: -8px;
+    width: 16px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 2;
 }
 
 .psa-match-item:hover {

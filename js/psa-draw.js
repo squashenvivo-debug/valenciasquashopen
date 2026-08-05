@@ -130,10 +130,6 @@
         `;
     }
 
-    function renderMatchPair(match1Html, match2Html) {
-        return `<div class="psa-match-pair">${match1Html}${match2Html || ''}</div>`;
-    }
-
     function buildRound1Column() {
         const listContainer = document.getElementById("r1Matches");
         if (!listContainer) return;
@@ -167,14 +163,7 @@
             });
         }
 
-        let html = "";
-        for (let i = 0; i < allR1Matches.length; i += 2) {
-            const m1 = renderMatchCard(allR1Matches[i]);
-            const m2 = renderMatchCard(allR1Matches[i + 1]);
-            html += renderMatchPair(m1, m2);
-        }
-
-        listContainer.innerHTML = html;
+        listContainer.innerHTML = allR1Matches.map(m => renderMatchCard(m)).join("");
     }
 
     function buildRound2Column() {
@@ -182,25 +171,14 @@
         if (!listContainer) return;
 
         let html = "";
-        for (let i = 0; i < 8; i += 2) {
-            const seed1 = SEEDED_BYES[i] || { name: "Seed" };
-            const seed2 = SEEDED_BYES[i + 1] || { name: "Seed" };
-
-            const m1 = renderMatchCard({
+        for (let i = 0; i < 8; i++) {
+            const seed = SEEDED_BYES[i] || { name: "Seed" };
+            html += renderMatchCard({
                 round: "Round 2",
                 dateTime: "12 Aug 2026 • 16:00",
-                player1: { name: seed1.name, seed: seed1.seed, country: seed1.country, mugshot: seed1.mugshot },
+                player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
                 player2: { name: "Ganador R1", seed: "", country: "", mugshot: "" }
             });
-
-            const m2 = renderMatchCard({
-                round: "Round 2",
-                dateTime: "12 Aug 2026 • 17:00",
-                player1: { name: seed2.name, seed: seed2.seed, country: seed2.country, mugshot: seed2.mugshot },
-                player2: { name: "Ganador R1", seed: "", country: "", mugshot: "" }
-            });
-
-            html += renderMatchPair(m1, m2);
         }
         listContainer.innerHTML = html;
     }
@@ -210,20 +188,13 @@
         if (!listContainer) return;
 
         let html = "";
-        for (let i = 1; i <= 4; i += 2) {
-            const m1 = renderMatchCard({
+        for (let i = 1; i <= 4; i++) {
+            html += renderMatchCard({
                 round: "Cuarto de Final",
                 dateTime: "13 Aug 2026",
-                player1: { name: `Ganador Octavo ${i}` },
-                player2: { name: `Ganador Octavo ${i + 1}` }
+                player1: { name: `Ganador Octavo ${i*2-1}` },
+                player2: { name: `Ganador Octavo ${i*2}` }
             });
-            const m2 = renderMatchCard({
-                round: "Cuarto de Final",
-                dateTime: "13 Aug 2026",
-                player1: { name: `Ganador Octavo ${i + 2}` },
-                player2: { name: `Ganador Octavo ${i + 3}` }
-            });
-            html += renderMatchPair(m1, m2);
         }
         listContainer.innerHTML = html;
     }
@@ -232,34 +203,28 @@
         const listContainer = document.getElementById("sfMatches");
         if (!listContainer) return;
 
-        const m1 = renderMatchCard({
-            round: "Semifinal",
-            dateTime: "14 Aug 2026",
-            player1: { name: "Ganador Cuarto 1" },
-            player2: { name: "Ganador Cuarto 2" }
-        });
-        const m2 = renderMatchCard({
-            round: "Semifinal",
-            dateTime: "14 Aug 2026",
-            player1: { name: "Ganador Cuarto 3" },
-            player2: { name: "Ganador Cuarto 4" }
-        });
-
-        listContainer.innerHTML = renderMatchPair(m1, m2);
+        let html = "";
+        for (let i = 1; i <= 2; i++) {
+            html += renderMatchCard({
+                round: "Semifinal",
+                dateTime: "14 Aug 2026",
+                player1: { name: `Ganador Cuarto ${i*2-1}` },
+                player2: { name: `Ganador Cuarto ${i*2}` }
+            });
+        }
+        listContainer.innerHTML = html;
     }
 
     function buildFinalColumn() {
         const listContainer = document.getElementById("finalMatches");
         if (!listContainer) return;
 
-        const m1 = renderMatchCard({
+        listContainer.innerHTML = renderMatchCard({
             round: "Gran Final",
             dateTime: "15 Aug 2026 • 18:30",
             player1: { name: "Semifinalista 1" },
             player2: { name: "Semifinalista 2" }
         });
-
-        listContainer.innerHTML = renderMatchPair(m1, "");
     }
 
     // Modal Head to Head Handler
