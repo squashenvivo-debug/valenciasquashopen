@@ -60,6 +60,74 @@
 
     let matchesData = [...MOCK_MATCHES];
 
+    async function fetchRealPsaMatches() {
+        const apiKey = getApiKey();
+        const proxyUrl = getProxyUrl();
+
+        try {
+            let url = `${proxyUrl}?tournament=12711&expanded=true`;
+            let res = await fetch(url).catch(() => null);
+
+            let data = null;
+            if (res && res.ok) {
+                data = await res.json().catch(() => null);
+            }
+
+            if (!data?.divisions || data?.divisions?.length === 0) {
+                const directUrl = `${PSA_DIRECT_API_URL}/api/v1/tournaments/12711/expanded`;
+                const directRes = await fetch(directUrl, {
+                    headers: { "X-Api-Key": apiKey, "Accept": "application/json" }
+                }).catch(() => null);
+
+                if (directRes && directRes.ok) {
+                    data = await directRes.json().catch(() => null);
+                }
+            }
+
+            const rawDivisions = data?.divisions || data?.psa?.divisions || [];
+            const realMatches = [];
+
+            rawDivisions.forEach((div) => {
+                const brackets = div.brackets || [];
+                brackets.forEach((br) => {
+                    const matches = br.matches || [];
+                    matches.forEach((m, idx) => {
+                        const p1Name = m.players?.[0]?.name || m.match_players?.[0]?.name || "TBD";
+                        const p2Name = m.players?.[1]?.name || m.match_players?.[1]?.name || "TBD";
+                        const p1Country = m.players?.[0]?.country || "ESP";
+                        const p2Country = m.players?.[1]?.country || "ESP";
+
+                        const gameScores = Array.isArray(m.games)
+                            ? m.games.map((g) => {
+                                const s1 = g.scores?.[0] ?? g.p1;
+                                const s2 = g.scores?.[1] ?? g.p2;
+                                return (s1 !== undefined && s2 !== undefined) ? `${s1}-${s2}` : "";
+                            }).filter(Boolean)
+                            : [];
+
+                        realMatches.push({
+                            id: m.id || `real_${idx}`,
+                            round: (m.round || "ROUND 1").toUpperCase(),
+                            court: m.court ? `COURT ${m.court}` : "PISTA CENTRAL",
+                            dateTime: m.date ? `${m.date} ${m.time || ''}`.trim() : "11 AUG, 12:00",
+                            status: m.status || "scheduled",
+                            player1: { name: p1Name, country: p1Country, seed: "", score: m.players?.[0]?.games_won ?? null },
+                            player2: { name: p2Name, country: p2Country, seed: "", score: m.players?.[1]?.games_won ?? null },
+                            scores: gameScores
+                        });
+                    });
+                });
+            });
+
+            if (realMatches.length > 0) {
+                matchesData = realMatches;
+                renderMatches("all");
+            }
+        } catch (err) {
+            console.warn("Error cargando partidos en tiempo real de PSA API:", err);
+        }
+    }
+
     function $(id) {
         return document.getElementById(id);
     }
@@ -293,7 +361,8 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // Initial render
+        // Initial render & fetch from real PSA API
         renderMatches("all");
+        fetchRealPsaMatches();
     });
 })();
