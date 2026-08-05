@@ -1530,18 +1530,66 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
+function extractStringFromLocalized(val) {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string") {
+        const trimmed = val.trim();
+        if (trimmed.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && typeof parsed === "object") {
+                    return extractStringFromLocalized(parsed);
+                }
+            } catch (e) {}
+        }
+        return val;
+    }
+    if (typeof val === "number" || typeof val === "boolean") return String(val);
+    if (typeof val === "object") {
+        if (typeof val.es === "string") return val.es;
+        if (typeof val.va === "string") return val.va;
+        if (typeof val.en === "string") return val.en;
+        if (typeof val.fr === "string") return val.fr;
+        for (const k in val) {
+            if (typeof val[k] === "string") return val[k];
+            if (typeof val[k] === "object" && val[k] !== null) {
+                const sub = extractStringFromLocalized(val[k]);
+                if (sub) return sub;
+            }
+        }
+    }
+    return "";
+}
+
 function normalizeLocalizedText(value) {
-    if (value && typeof value === "object") {
-        const base = value.es || value.va || value.en || value.fr || "";
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && typeof parsed === "object") {
+                    value = parsed;
+                }
+            } catch (e) {}
+        }
+    }
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+        const esStr = extractStringFromLocalized(value.es);
+        const vaStr = extractStringFromLocalized(value.va);
+        const enStr = extractStringFromLocalized(value.en);
+        const frStr = extractStringFromLocalized(value.fr);
+        const base = esStr || vaStr || enStr || frStr || "";
+
         return {
-            es: String(value.es ?? base),
-            va: String(value.va ?? base),
-            en: String(value.en ?? base),
-            fr: String(value.fr ?? base)
+            es: esStr || base,
+            va: vaStr || base,
+            en: enStr || base,
+            fr: frStr || base
         };
     }
 
-    const text = String(value || "");
+    const text = extractStringFromLocalized(value);
     return { es: text, va: text, en: text, fr: text };
 }
 
