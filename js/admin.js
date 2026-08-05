@@ -5056,14 +5056,32 @@ async function initDrawAdmin() {
                             document.getElementById("roundSelect");
     if (!hasDrawControls) return;
 
-    const response = await fetch("data/draw-bracket.json", { cache: "no-store" });
-    const baseBracket = await response.json();
-    const stored = localStorage.getItem(DRAW_BRACKET_KEY);
+    let baseBracket = null;
+    try {
+        const response = await fetch("data/draw-bracket.json", { cache: "no-store" });
+        baseBracket = await response.json();
+    } catch (err) {
+        console.error("Error cargando data/draw-bracket.json:", err);
+    }
 
-    drawState = stored ? JSON.parse(stored) : baseBracket;
+    const stored = localStorage.getItem(DRAW_BRACKET_KEY);
+    let parsed = null;
+    if (stored) {
+        try {
+            parsed = JSON.parse(stored);
+            while (typeof parsed === "string") {
+                parsed = JSON.parse(parsed);
+            }
+        } catch (e) {
+            parsed = null;
+        }
+    }
+
+    drawState = (parsed?.rounds && Array.isArray(parsed.rounds) && parsed.rounds.length > 0) ? parsed : baseBracket;
+    if (!drawState) return;
+
     normalizeBracket(drawState);
     autoAdvanceBracket(drawState);
-    saveDrawState();
 
     populateRoundSelect();
     populateScheduleRoundSelect();
@@ -5077,10 +5095,10 @@ async function initDrawAdmin() {
     const saveScheduleBtn = document.getElementById("saveMatchSchedule");
     const createDrawFromZeroBtn = document.getElementById("createDrawFromZero");
 
-    roundSelect.addEventListener("change", populateMatchSelect);
-    matchSelect.addEventListener("change", fillMatchEditor);
-    saveBtn.addEventListener("click", saveMatchResult);
-    resetBtn.addEventListener("click", resetDrawState);
+    if (roundSelect) roundSelect.addEventListener("change", populateMatchSelect);
+    if (matchSelect) matchSelect.addEventListener("change", fillMatchEditor);
+    if (saveBtn) saveBtn.addEventListener("click", saveMatchResult);
+    if (resetBtn) resetBtn.addEventListener("click", resetDrawState);
 
     if (scheduleRoundSelect) {
         scheduleRoundSelect.addEventListener("change", populateScheduleMatchSelect);
