@@ -4566,11 +4566,19 @@ function populateRoundSelect() {
     populateMatchSelect();
 }
 
-function saveDrawState() {
+async function saveDrawState() {
     localStorage.setItem(DRAW_BRACKET_KEY, JSON.stringify(drawState));
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        try {
+            await window.PSACloudStore.saveLocalStorageKeyToCloud(DRAW_BRACKET_KEY);
+        } catch (err) {
+            console.error("Error guardando cuadro en la nube:", err);
+        }
+    }
+    window.PSAOptimizations?.clearFetchCache?.();
 }
 
-function saveMatchResult() {
+async function saveMatchResult() {
     const selected = getSelectedMatch();
     if (!selected) return;
     const { match } = selected;
@@ -4597,7 +4605,7 @@ function saveMatchResult() {
     }
 
     autoAdvanceBracket(drawState);
-    saveDrawState();
+    await saveDrawState();
     populateRoundSelect();
     populateScheduleRoundSelect();
     updateDrawStatus("Resultado guardado y cuadro actualizado.");
@@ -4697,7 +4705,7 @@ function populateScheduleRoundSelect() {
     populateScheduleMatchSelect();
 }
 
-function saveMatchSchedule() {
+async function saveMatchSchedule() {
     const selected = getSelectedScheduleMatch();
     if (!selected) return;
 
@@ -4706,8 +4714,8 @@ function saveMatchSchedule() {
 
     selected.match.date = newDate;
 
-    saveDrawState();
-    updateScheduleStatus("Horario guardado correctamente.");
+    await saveDrawState();
+    updateScheduleStatus("Horario guardado correctamente y sincronizado en la nube.");
 }
 
 function updateProgrammingStatus(message) {
@@ -4778,12 +4786,20 @@ function readProgrammingCollection() {
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
-function saveProgrammingCollection(collection) {
+async function saveProgrammingCollection(collection) {
     const normalized = (Array.isArray(collection) ? collection : [])
         .map((item, index) => normalizeProgrammingItem(item, index))
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
     localStorage.setItem(PROGRAMMING_COLLECTION_KEY, JSON.stringify(normalized));
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        try {
+            await window.PSACloudStore.saveLocalStorageKeyToCloud(PROGRAMMING_COLLECTION_KEY);
+        } catch (err) {
+            console.error("Error guardando programación en la nube:", err);
+        }
+    }
+    window.PSAOptimizations?.clearFetchCache?.();
     return normalized;
 }
 
