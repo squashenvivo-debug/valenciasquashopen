@@ -402,19 +402,24 @@ function readPlayersCollection() {
         const raw = localStorage.getItem(PLAYERS_COLLECTION_KEY);
         if (!raw) return null;
 
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return null;
+        let parsed = JSON.parse(raw);
+        while (typeof parsed === "string") {
+            parsed = JSON.parse(parsed);
+        }
+        if (!Array.isArray(parsed) || parsed.length === 0) return null;
 
-        return parsed
+        const list = parsed
             .map((player) => ({
                 name: String(player?.name || "").trim(),
                 country: String(player?.country || "").trim().toUpperCase(),
-                ranking: Number(player?.ranking) || "",
+                ranking: player?.ranking ?? "",
                 image: String(player?.image || player?.imageSrc || "").trim(),
                 seed: String(player?.seed || "").trim(),
                 photoPosition: String(player?.photoPosition || "").trim()
             }))
-            .filter((player) => player.name && player.country && player.image);
+            .filter((player) => Boolean(player.name));
+
+        return list.length > 0 ? list : null;
     } catch (error) {
         return null;
     }

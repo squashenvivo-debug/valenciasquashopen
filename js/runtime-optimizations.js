@@ -164,8 +164,11 @@ window.PSAOptimizations = (() => {
         const now = Date.now();
         const cached = readJsonStorage(cacheKey, null);
 
-        if (!options.forceFresh && cached?.storedAt && now - cached.storedAt < ttlMs) {
-            return cached.data;
+        if (!options.forceFresh && cached?.storedAt && now - cached.storedAt < ttlMs && cached?.data) {
+            const hasData = Array.isArray(cached.data) ? cached.data.length > 0 : (typeof cached.data === "object" && Object.keys(cached.data).length > 0);
+            if (hasData) {
+                return cached.data;
+            }
         }
 
         const candidateUrls = [url];
