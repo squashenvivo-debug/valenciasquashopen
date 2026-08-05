@@ -688,7 +688,9 @@ async function loadProgramming() {
         list.innerHTML = collection.map((item) => {
             const title = getLocalizedText(item.title, lang);
             const subtitle = getLocalizedText(item.subtitle, lang);
-            const dateTime = escapeHtml(item.dateTime || "");
+            const rawDateTime = getLocalizedText(item.dateTime, lang) || item.dateTime || "";
+            const dateTimeStr = formatLocalizedDateTime(rawDateTime, lang);
+            const dateTime = escapeHtml(dateTimeStr);
 
             return `
                 <article class="programming-card">
@@ -1248,6 +1250,64 @@ function getLocalizedText(value, lang) {
     const localized = normalizeLocalizedText(value);
     const target = localized[lang] || localized.es || "";
     return extractStringFromLocalized(target);
+}
+
+const PROGRAMMING_DAY_MAP = {
+    lunes: { es: "Lunes", va: "Dilluns", en: "Monday", fr: "Lundi" },
+    martes: { es: "Martes", va: "Dimarts", en: "Tuesday", fr: "Mardi" },
+    miercoles: { es: "Miércoles", va: "Dimecres", en: "Wednesday", fr: "Mercredi" },
+    miércoles: { es: "Miércoles", va: "Dimecres", en: "Wednesday", fr: "Mercredi" },
+    jueves: { es: "Jueves", va: "Dijous", en: "Thursday", fr: "Jeudi" },
+    viernes: { es: "Viernes", va: "Divendres", en: "Friday", fr: "Vendredi" },
+    sabado: { es: "Sábado", va: "Dissabte", en: "Saturday", fr: "Samedi" },
+    sábado: { es: "Sábado", va: "Dissabte", en: "Saturday", fr: "Samedi" },
+    domingo: { es: "Domingo", va: "Diumenge", en: "Sunday", fr: "Dimanche" }
+};
+
+const PROGRAMMING_MONTH_MAP = {
+    enero: { es: "enero", va: "gener", en: "January", fr: "janvier" },
+    febrero: { es: "febrero", va: "febrer", en: "February", fr: "février" },
+    marzo: { es: "marzo", va: "març", en: "March", fr: "mars" },
+    abril: { es: "abril", va: "abril", en: "April", fr: "avril" },
+    mayo: { es: "mayo", va: "maig", en: "May", fr: "mai" },
+    junio: { es: "junio", va: "juny", en: "June", fr: "juin" },
+    julio: { es: "julio", va: "juliol", en: "July", fr: "juillet" },
+    agosto: { es: "agosto", va: "agost", en: "August", fr: "août" },
+    septiembre: { es: "septiembre", va: "setembre", en: "September", fr: "septembre" },
+    octubre: { es: "octubre", va: "octubre", en: "October", fr: "octobre" },
+    noviembre: { es: "noviembre", va: "novembre", en: "November", fr: "novembre" },
+    diciembre: { es: "diciembre", va: "desembre", en: "December", fr: "décembre" },
+    ago: { es: "AGO", va: "AGO", en: "AUG", fr: "AOÛT" }
+};
+
+function formatLocalizedDateTime(raw, lang) {
+    if (!raw) return "";
+
+    const locText = getLocalizedText(raw, lang);
+    if (locText && locText !== "[object Object]") {
+        raw = locText;
+    }
+
+    let text = String(raw || "").trim();
+    if (!text || lang === "es") return text;
+
+    Object.keys(PROGRAMMING_DAY_MAP).forEach((dayKey) => {
+        const regex = new RegExp(`\\b${dayKey}\\b`, "gi");
+        if (regex.test(text)) {
+            const replacement = PROGRAMMING_DAY_MAP[dayKey][lang] || PROGRAMMING_DAY_MAP[dayKey].es;
+            text = text.replace(regex, replacement);
+        }
+    });
+
+    Object.keys(PROGRAMMING_MONTH_MAP).forEach((monthKey) => {
+        const regex = new RegExp(`\\b${monthKey}\\b`, "gi");
+        if (regex.test(text)) {
+            const replacement = PROGRAMMING_MONTH_MAP[monthKey][lang] || PROGRAMMING_MONTH_MAP[monthKey].es;
+            text = text.replace(regex, replacement);
+        }
+    });
+
+    return text;
 }
 
 function formatNewsDate(value, lang) {
