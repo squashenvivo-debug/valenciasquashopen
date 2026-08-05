@@ -39,7 +39,8 @@ quick: {
 
     live: {
         title: "DIRECTO",
-        text: "Ver los partidos en vivo"
+        text: "Ver los partidos en vivo",
+        openScoreboard: "⚡ Abrir Marcador en Vivo"
     },
 
     liveScore: {
@@ -99,7 +100,8 @@ quick: {
 
     live: {
         title: "DIRECTE",
-        text: "Veure els partits en directe"
+        text: "Veure els partits en directe",
+        openScoreboard: "⚡ Obrir Marcador en Viu"
     },
 
     liveScore: {
@@ -158,7 +160,8 @@ quick: {
 
     live: {
         title: "LIVE",
-        text: "Watch matches live"
+        text: "Watch matches live",
+        openScoreboard: "⚡ Open Live Scoreboard"
     },
 
     liveScore: {
@@ -217,7 +220,8 @@ quick: {
 
     live: {
         title: "DIRECT",
-        text: "Regarder les matchs en direct"
+        text: "Regarder les matchs en direct",
+        openScoreboard: "⚡ Ouvrir le Tableau en Direct"
     },
 
     liveScore: {
@@ -694,7 +698,17 @@ function t(path){
 
     }
 
-    return value ?? "";
+    if (value !== undefined && value !== null && value !== "") return value;
+
+    let pageValue = pageTranslations?.[currentLanguage];
+
+    for(const key of keys){
+
+        pageValue = pageValue?.[key];
+
+    }
+
+    return pageValue ?? "";
 
 }
 
