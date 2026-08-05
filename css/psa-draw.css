@@ -186,7 +186,44 @@ body {
     flex-direction: column;
     justify-content: space-around;
     flex-grow: 1;
+    gap: 24px;
+}
+
+/* Match Pair and Bracket Connector Lines */
+.psa-match-pair {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
+}
+
+/* White bracket connector line ] connecting match 1 and match 2 of a pair */
+.psa-round-column:not(:last-child) .psa-match-pair::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 25%;
+    bottom: 25%;
+    width: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Horizontal line extending from the pair connector to the next round column */
+.psa-round-column:not(:last-child) .psa-match-pair::before {
+    content: '';
+    position: absolute;
+    right: -32px;
+    top: 50%;
+    width: 16px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.85);
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* Match Card Item */
