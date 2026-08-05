@@ -1,9 +1,11 @@
 /* ==========================================================
    CLOUD STORE (SUPABASE)
-   Tabla esperada: public.site_content
-   - content_key text primary key
-   - content_value jsonb not null
-   - updated_at timestamptz default now()
+   Tabla esperada: public.site_content (id = 1)
+   Mapeo de columnas:
+   - r1: drawBracketState
+   - intro: eventProgrammingCollection
+   - youtube_url: liveStreamYoutubeUrl
+   - headline: heroSettings
 ========================================================== */
 
 window.PSACloudStore = (() => {
@@ -13,6 +15,20 @@ window.PSACloudStore = (() => {
         { keyCol: "content_key", valueCol: "content_value" },
         { keyCol: "key", valueCol: "value" }
     ];
+
+    const COLUMN_MAP = {
+        drawBracketState: "r1",
+        eventProgrammingCollection: "intro",
+        liveStreamYoutubeUrl: "youtube_url",
+        heroSettings: "headline"
+    };
+
+    const REVERSE_COLUMN_MAP = {
+        r1: "drawBracketState",
+        intro: "eventProgrammingCollection",
+        youtube_url: "liveStreamYoutubeUrl",
+        headline: "heroSettings"
+    };
 
     function getClient() {
         return window.AdminSupabase?.getClient?.() || null;
@@ -24,8 +40,23 @@ window.PSACloudStore = (() => {
 
     function safeParseJson(raw) {
         if (typeof raw !== "string") return raw;
+        const trimmed = raw.trim();
+        if (!trimmed) return raw;
         try {
-            return JSON.parse(raw);
+            let parsed = JSON.parse(trimmed);
+            while (typeof parsed === "string") {
+                const s = parsed.trim();
+                if (s.startsWith("{") || s.startsWith("[")) {
+                    try {
+                        parsed = JSON.parse(s);
+                    } catch (e) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            return parsed;
         } catch (error) {
             return raw;
         }
@@ -54,6 +85,34 @@ window.PSACloudStore = (() => {
             return { ok: true, values: {} };
         }
 
+        const values = {};
+
+        // 1. Mapeo por columnas de fila única (site_content id = 1)
+        try {
+            const { data, error } = await client
+                .from(TABLE_NAME)
+                .select("*")
+                .eq("id", 1);
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+                const row = data[0];
+                Object.entries(REVERSE_COLUMN_MAP).forEach(([col, key]) => {
+                    if (keys.includes(key) && row[col] !== undefined && row[col] !== null && String(row[col]).trim() !== "") {
+                        const parsed = safeParseJson(row[col]);
+                        if (parsed !== null && parsed !== undefined) {
+                            values[key] = parsed;
+                        }
+                    }
+                });
+                if (Object.keys(values).length > 0) {
+                    return { ok: true, values };
+                }
+            }
+        } catch (err) {
+            // Fallback a esquema genérico
+        }
+
+        // 2. Fallback a esquema genérico clave-valor
         const uniqueKeys = Array.from(new Set(keys.filter(Boolean)));
         let lastError = "schema-not-detected";
 
@@ -69,7 +128,6 @@ window.PSACloudStore = (() => {
             }
 
             schemaCache = schema;
-            const values = {};
             (data || []).forEach((row) => {
                 if (!row || !row[schema.keyCol]) return;
                 values[row[schema.keyCol]] = row[schema.valueCol];
@@ -91,6 +149,25 @@ window.PSACloudStore = (() => {
             return { ok: false, reason: "missing-key" };
         }
 
+        // 1. Si la clave mapea a una columna de site_content (id = 1)
+        if (COLUMN_MAP[key]) {
+            const colName = COLUMN_MAP[key];
+            const parsed = safeParseJson(value);
+            const textToSave = typeof parsed === "string" ? parsed : safeStringify(parsed);
+            const { error } = await client
+                .from(TABLE_NAME)
+                .update({
+                    [colName]: textToSave,
+                    updated_at: new Date().toISOString()
+                })
+                .eq("id", 1);
+
+            if (!error) {
+                return { ok: true };
+            }
+        }
+
+        // 2. Fallback a esquema genérico clave-valor
         let lastError = "schema-not-detected";
 
         for (const schema of getSchemaCandidates()) {
@@ -152,7 +229,10 @@ window.PSACloudStore = (() => {
 
         const values = result.values || {};
         Object.entries(values).forEach(([key, value]) => {
-            localStorage.setItem(key, safeStringify(value));
+            if (value === undefined || value === null) return;
+            const parsed = safeParseJson(value);
+            const textToStore = typeof parsed === "string" ? parsed : safeStringify(parsed);
+            localStorage.setItem(key, textToStore);
         });
 
         return { ok: true, loaded: Object.keys(values).length };
