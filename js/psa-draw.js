@@ -119,7 +119,7 @@
 
         const avatarHtml = isPlaceholder 
             ? RED_SILHOUETTE_SVG 
-            : `<img class="psa-player-mugshot" src="${player.mugshot}" alt="${player.name}" onerror="this.outerHTML=\`${RED_SILHOUETTE_SVG.trim()}\`">`;
+            : `<img class="psa-player-mugshot" src="${player.mugshot}" alt="${player.name}" onerror="this.src='assets/images/players/player-01.jpg'">`;
 
         return `
             <div class="psa-player-row ${isPlaceholder ? 'is-placeholder-row' : ''}">
