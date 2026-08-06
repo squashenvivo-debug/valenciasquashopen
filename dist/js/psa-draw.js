@@ -383,7 +383,18 @@
         if (modal) modal.classList.remove("active");
     };
 
+    function getTournamentId() {
+        return (localStorage.getItem("psaTournamentId") || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
+    }
+
     function renderAllColumns() {
+        const mode = localStorage.getItem("tournamentContentMode") || "api";
+        const liveIndicators = document.querySelectorAll(".psa-live-indicator");
+        if (mode === "manual") {
+            liveIndicators.forEach((el) => { el.style.display = "none"; });
+            return;
+        }
+        liveIndicators.forEach((el) => { el.style.display = ""; });
         buildRound1Column();
         buildRound2Column();
         buildQFColumn();

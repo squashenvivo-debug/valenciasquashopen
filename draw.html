@@ -6,6 +6,7 @@
 <title>Cuadro Oficial PSA | PSA Valencia Open 2026</title>
 <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
 <link rel="stylesheet" href="css/psa-draw.css?v=20260806-v5">
+<link rel="stylesheet" href="css/draw.css?v=20260806-v5">
 </head>
 <body>
 
@@ -28,7 +29,7 @@
         </div>
     </section>
 
-    <!-- Scrollable Bracket Viewport -->
+    <!-- Scrollable Bracket Viewport (API mode) -->
     <main class="psa-bracket-viewport">
         <div class="psa-bracket-tree">
 
@@ -85,6 +86,11 @@
         </div>
     </main>
 
+    <!-- Manual Bracket Viewport (Manual mode) -->
+    <main class="draw-bracket-wrapper draw-page-wrapper" id="manualDrawWrapper" style="display: none; padding: 20px; max-width: 1200px; margin: 0 auto;">
+        <div class="draw-bracket" id="drawPageBracket" aria-live="polite"></div>
+    </main>
+
 </div>
 
 <!-- Head to Head Modal -->
@@ -125,6 +131,28 @@
 <script src="config.js"></script>
 <script src="supabase.js"></script>
 <script src="js/cloud-store.js?v=20260806-v12"></script>
+<script src="js/draw-viewer.js?v=20260806-v12"></script>
 <script src="js/psa-draw.js?v=20260806-v12"></script>
+<script>
+(function() {
+    function applyDrawMode() {
+        const mode = localStorage.getItem("tournamentContentMode") || "api";
+        const psaViewport = document.querySelector(".psa-bracket-viewport");
+        const manualWrapper = document.getElementById("manualDrawWrapper");
+        const liveIndicator = document.querySelector(".psa-live-indicator");
+
+        if (mode === "manual") {
+            if (psaViewport) psaViewport.style.display = "none";
+            if (liveIndicator) liveIndicator.style.display = "none";
+            if (manualWrapper) manualWrapper.style.display = "block";
+        } else {
+            if (psaViewport) psaViewport.style.display = "block";
+            if (liveIndicator) liveIndicator.style.display = "";
+            if (manualWrapper) manualWrapper.style.display = "none";
+        }
+    }
+    document.addEventListener("DOMContentLoaded", applyDrawMode);
+})();
+</script>
 </body>
 </html>

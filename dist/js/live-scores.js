@@ -103,9 +103,10 @@
     async function fetchRealPsaMatches() {
         const apiKey = getApiKey();
         const proxyUrl = getProxyUrl();
+        const tournamentId = (localStorage.getItem("psaTournamentId") || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
 
         try {
-            let url = `${proxyUrl}?tournament=12711&expanded=true`;
+            let url = `${proxyUrl}?tournament=${encodeURIComponent(tournamentId)}&expanded=true`;
             let res = await fetch(url).catch(() => null);
 
             let data = null;
@@ -114,7 +115,7 @@
             }
 
             if (!data?.divisions || data?.divisions?.length === 0) {
-                const directUrl = `${PSA_DIRECT_API_URL}/api/v1/tournaments/12711/expanded`;
+                const directUrl = `${PSA_DIRECT_API_URL}/api/v1/tournaments/${encodeURIComponent(tournamentId)}/expanded`;
                 const directRes = await fetch(directUrl, {
                     headers: { "X-Api-Key": apiKey, "Accept": "application/json" }
                 }).catch(() => null);

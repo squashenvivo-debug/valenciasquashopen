@@ -4,6 +4,8 @@
 
 const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
+const PSA_TOURNAMENT_ID_KEY = "psaTournamentId";
+const PSA_API_KEY_KEY = "psaApiKey";
 const DRAW_BRACKET_KEY = "drawBracketState";
 const LIVE_STREAM_URL_KEY = "liveStreamYoutubeUrl";
 const LIVE_STREAM_HISTORY_KEY = "liveStreamYoutubeHistory";
@@ -23,6 +25,8 @@ const LANGS = ["es", "va", "en", "fr"];
 const CLOUD_SYNC_KEYS = [
     TOURNAMENT_MODE_KEY,
     TOURNAMENT_API_URL_KEY,
+    PSA_TOURNAMENT_ID_KEY,
+    PSA_API_KEY_KEY,
     DRAW_BRACKET_KEY,
     LIVE_STREAM_URL_KEY,
     LIVE_STREAM_HISTORY_KEY,
@@ -1194,7 +1198,7 @@ async function initAdminAuth() {
 
 function getSavedTournamentMode() {
     const mode = localStorage.getItem(TOURNAMENT_MODE_KEY);
-    return mode === "api" ? "api" : "manual";
+    return mode === "manual" ? "manual" : "api";
 }
 
 function setStatus(message) {
@@ -1206,6 +1210,8 @@ function setStatus(message) {
 function loadTournamentSettings() {
     const mode = getSavedTournamentMode();
     const apiUrl = localStorage.getItem(TOURNAMENT_API_URL_KEY) || "";
+    const psaId = localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || (window.PSA_CONFIG?.psaTournamentId || "12711");
+    const psaToken = localStorage.getItem(PSA_API_KEY_KEY) || (window.PSA_CONFIG?.psaApiKey || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f");
 
     const selectedInput = document.querySelector(
         `input[name="tournamentMode"][value="${mode}"]`
@@ -1218,13 +1224,34 @@ function loadTournamentSettings() {
         urlInput.value = apiUrl;
         urlInput.disabled = mode !== "api";
     }
+
+    const idInput = document.getElementById("tournamentPsaId");
+    if (idInput) {
+        idInput.value = psaId;
+        idInput.disabled = mode !== "api";
+    }
+
+    const tokenInput = document.getElementById("tournamentPsaToken");
+    if (tokenInput) {
+        tokenInput.value = psaToken;
+        tokenInput.disabled = mode !== "api";
+    }
+
+    const configGroup = document.getElementById("tournamentApiConfigGroup");
+    if (configGroup) {
+        configGroup.style.display = mode === "api" ? "block" : "none";
+    }
 }
 
-function saveTournamentSettings() {
+async function saveTournamentSettings() {
     const checked = document.querySelector("input[name='tournamentMode']:checked");
-    const mode = checked ? checked.value : "manual";
+    const mode = checked ? checked.value : "api";
     const urlInput = document.getElementById("tournamentApiUrl");
     const apiUrl = (urlInput?.value || "").trim();
+    const idInput = document.getElementById("tournamentPsaId");
+    const psaId = (idInput?.value || "").trim();
+    const tokenInput = document.getElementById("tournamentPsaToken");
+    const psaToken = (tokenInput?.value || "").trim();
 
     localStorage.setItem(TOURNAMENT_MODE_KEY, mode);
 
@@ -1234,18 +1261,46 @@ function saveTournamentSettings() {
         localStorage.removeItem(TOURNAMENT_API_URL_KEY);
     }
 
+    if (psaId) {
+        localStorage.setItem(PSA_TOURNAMENT_ID_KEY, psaId);
+    } else {
+        localStorage.removeItem(PSA_TOURNAMENT_ID_KEY);
+    }
+
+    if (psaToken) {
+        localStorage.setItem(PSA_API_KEY_KEY, psaToken);
+    } else {
+        localStorage.removeItem(PSA_API_KEY_KEY);
+    }
+
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_MODE_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_API_URL_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_TOURNAMENT_ID_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_API_KEY_KEY);
+    }
+
     setStatus(
         mode === "api"
-            ? "Guardado: modo API activado."
-            : "Guardado: modo manual activado."
+            ? `Guardado: modo API activado (ID: ${psaId || "12711"}).`
+            : "Guardado: modo manual (sin livescore) activado."
     );
 }
 
 function bindTournamentSettings() {
     document.querySelectorAll("input[name='tournamentMode']").forEach((input) => {
         input.addEventListener("change", () => {
+            const isApi = input.value === "api" && input.checked;
+            const configGroup = document.getElementById("tournamentApiConfigGroup");
+            if (configGroup) {
+                configGroup.style.display = isApi ? "block" : "none";
+            }
             const urlInput = document.getElementById("tournamentApiUrl");
-            if (urlInput) urlInput.disabled = input.value !== "api" || !input.checked;
+            if (urlInput) urlInput.disabled = !isApi;
+            const idInput = document.getElementById("tournamentPsaId");
+            if (idInput) idInput.disabled = !isApi;
+            const tokenInput = document.getElementById("tournamentPsaToken");
+            if (tokenInput) tokenInput.disabled = !isApi;
         });
     });
 

@@ -1,5 +1,5 @@
 (function () {
-    const DEFAULT_TOURNAMENT_ID = "12711";
+    const DEFAULT_TOURNAMENT_ID = localStorage.getItem("psaTournamentId") || window.PSA_CONFIG?.psaTournamentId || "12711";
     const PSA_TEST_SUPABASE_FALLBACK_URL = "https://texjzaanugmssmolzwgb.supabase.co";
     const PSA_DIRECT_API_URL = "https://data.psasquashtour.com";
     const PSA_DIRECT_API_KEY = "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f";

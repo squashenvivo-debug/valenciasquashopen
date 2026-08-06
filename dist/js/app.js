@@ -19,6 +19,8 @@ const PROGRAMMING_COLLECTION_KEY = "eventProgrammingCollection";
 const HERO_SETTINGS_KEY = "heroSettings";
 const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
+const PSA_TOURNAMENT_ID_KEY = "psaTournamentId";
+const PSA_API_KEY_KEY = "psaApiKey";
 const TOURNAMENT_MANUAL_CONTENT_KEY = "tournamentManualContent";
 const DRAW_BRACKET_KEY = "drawBracketState";
 const DYNAMIC_LANGS = ["es", "va", "en", "fr"];
@@ -34,6 +36,8 @@ const CLOUD_PUBLIC_KEYS = [
     HERO_SETTINGS_KEY,
     TOURNAMENT_MODE_KEY,
     TOURNAMENT_API_URL_KEY,
+    PSA_TOURNAMENT_ID_KEY,
+    PSA_API_KEY_KEY,
     TOURNAMENT_MANUAL_CONTENT_KEY,
     DRAW_BRACKET_KEY
 ];
@@ -757,6 +761,24 @@ DRAWS
 ========================================================== */
 
 async function loadDraws(){
+    const mode = localStorage.getItem(TOURNAMENT_MODE_KEY) || "api";
+    const psaViewport = document.querySelector(".psa-bracket-viewport");
+    const legacyContainer = document.getElementById("legacyDrawBackupContainer");
+
+    if (mode === "manual") {
+        if (psaViewport) psaViewport.style.display = "none";
+        if (legacyContainer) {
+            legacyContainer.style.display = "block";
+            legacyContainer.setAttribute("aria-hidden", "false");
+        }
+    } else {
+        if (psaViewport) psaViewport.style.display = "block";
+        if (legacyContainer) {
+            legacyContainer.style.display = "none";
+            legacyContainer.setAttribute("aria-hidden", "true");
+        }
+        return;
+    }
 
     const bracket = document.querySelector(".draw-bracket");
     if(!bracket) return;

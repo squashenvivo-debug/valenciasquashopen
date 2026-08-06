@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -91,24 +91,32 @@
         </div>
 
         <section class="admin-card" id="tournament-mode-panel">
-            <h2>Contenido Torneo</h2>
-            <p class="admin-muted">Elige la version manual o la version conectada por API.</p>
+            <h2>Contenido y Cuadro del Torneo</h2>
+            <p class="admin-muted">Elige el modo del cuadro/torneo: manual (cuadro guardado en web sin livescore) o API oficial PSA Squash Tour.</p>
 
             <div class="option-group">
                 <label>
                     <input type="radio" name="tournamentMode" value="manual">
-                    Version manual (texto fijo)
+                    Versión manual (sin livescore - cuadro guardado)
                 </label>
                 <label>
                     <input type="radio" name="tournamentMode" value="api">
-                    Version API (contenido remoto)
+                    Versión API (PSA Squash Tour)
                 </label>
             </div>
 
-            <label for="tournamentApiUrl" class="field-label">URL API (opcional)</label>
-            <input id="tournamentApiUrl" type="url" placeholder="https://tu-api.com/tournament-content">
+            <div id="tournamentApiConfigGroup" style="margin-top: 16px; display: none;">
+                <label for="tournamentPsaId" class="field-label">ID del Torneo PSA (ej: 12711)</label>
+                <input id="tournamentPsaId" type="text" placeholder="12711">
 
-            <button id="saveTournamentSettings" type="button">Guardar configuracion</button>
+                <label for="tournamentPsaToken" class="field-label" style="margin-top: 12px;">Token / API Key del Torneo PSA</label>
+                <input id="tournamentPsaToken" type="text" placeholder="854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f">
+
+                <label for="tournamentApiUrl" class="field-label" style="margin-top: 12px;">URL API secundaria (opcional)</label>
+                <input id="tournamentApiUrl" type="url" placeholder="https://tu-api.com/tournament-content">
+            </div>
+
+            <button id="saveTournamentSettings" type="button" style="margin-top: 16px;">Guardar configuración</button>
             <p id="adminStatus" class="admin-status" aria-live="polite"></p>
         </section>
 
