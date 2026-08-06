@@ -61,6 +61,17 @@ function reportPublicError(scope, error) {
     window.PSAOptimizations?.logError?.(scope, message);
 }
 
+async function syncPublicStateFromCloud() {
+    try {
+        if (window.PSACloudStore && window.PSACloudStore.isReady()) {
+            await window.PSACloudStore.syncLocalStorageFromCloud(CLOUD_PUBLIC_KEYS);
+            console.log("[CloudSync] Successfully synced public state from Supabase cloud.");
+        }
+    } catch (err) {
+        console.warn("[CloudSync] Could not sync from Supabase cloud:", err);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     await syncPublicStateFromCloud();

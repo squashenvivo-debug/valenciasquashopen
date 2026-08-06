@@ -35,6 +35,25 @@ const CLOUD_SYNC_KEYS = [
     HERO_SETTINGS_KEY
 ];
 
+// Automatic Supabase Cloud Sync for all admin save operations
+(function installCloudSyncHook() {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function (key, value) {
+        originalSetItem(key, value);
+        if (CLOUD_SYNC_KEYS.includes(key) && window.PSACloudStore && window.PSACloudStore.isReady()) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(key).then(res => {
+                if (res && res.ok) {
+                    console.log(`[CloudSync] Successfully synced '${key}' to Supabase cloud database.`);
+                } else {
+                    console.warn(`[CloudSync] Cloud sync for '${key}' deferred/failed:`, res?.reason);
+                }
+            }).catch(err => {
+                console.error(`[CloudSync] Error syncing '${key}':`, err);
+            });
+        }
+    };
+})();
+
 let drawState = null;
 let pendingGalleryPhotos = [];
 const GALLERY_UPLOAD_RESUME_KEY = "psa_gallery_tus_resumes";
