@@ -86,11 +86,28 @@
         return `${baseUrl}/functions/v1/psa-proxy`;
     }
 
+    const RED_SILHOUETTE_SVG = `
+        <svg class="psa-player-mugshot psa-red-silhouette" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="psaRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FF5252"/>
+                    <stop offset="100%" stop-color="#B71C1C"/>
+                </linearGradient>
+            </defs>
+            <circle cx="18" cy="18" r="18" fill="url(#psaRedGrad)"/>
+            <circle cx="18" cy="13" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+            <path d="M 9 29 C 9 22, 12 20, 18 20 C 24 20, 27 22, 27 29 Z" fill="#FFFFFF" opacity="0.95"/>
+        </svg>
+    `;
+
     function renderPlayerRow(player) {
-        if (!player || !player.name || player.name === "BYE") {
+        const isPlaceholder = !player || !player.mugshot || player.name === "BYE" || 
+            /^(Ganador|Guanyador|Winner|Vainqueur|Semifinalist|Semifinalista)/i.test(player.name || "");
+
+        if (!player || player.name === "BYE") {
             return `
                 <div class="psa-player-row">
-                    <div class="psa-player-mugshot" style="display:flex;align-items:center;justify-content:center;color:#666;font-size:0.8rem;">-</div>
+                    ${RED_SILHOUETTE_SVG}
                     <span class="psa-player-name-box psa-bye-label">BYE</span>
                 </div>
             `;
@@ -99,13 +116,16 @@
         const seedHtml = player.seed ? `<span class="psa-seed-tag">${player.seed}</span>` : "";
         const flagUrl = player.country ? `assets/images/flags/${player.country}.svg` : "";
         const flagHtml = player.country ? `<img class="psa-player-flag" src="${flagUrl}" alt="${player.country}" onerror="this.style.display='none'">` : "";
-        const mugshotSrc = player.mugshot || "assets/images/players/player-01.jpg";
+
+        const avatarHtml = isPlaceholder 
+            ? RED_SILHOUETTE_SVG 
+            : `<img class="psa-player-mugshot" src="${player.mugshot}" alt="${player.name}" onerror="this.outerHTML=\`${RED_SILHOUETTE_SVG.trim()}\`">`;
 
         return `
-            <div class="psa-player-row">
-                <img class="psa-player-mugshot" src="${mugshotSrc}" alt="${player.name}" onerror="this.src='assets/images/players/player-01.jpg'">
+            <div class="psa-player-row ${isPlaceholder ? 'is-placeholder-row' : ''}">
+                ${avatarHtml}
                 ${flagHtml}
-                <span class="psa-player-name-box">
+                <span class="psa-player-name-box ${isPlaceholder ? 'psa-placeholder-name' : ''}">
                     ${player.name} ${seedHtml}
                 </span>
             </div>
