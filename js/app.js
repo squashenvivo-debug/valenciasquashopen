@@ -685,22 +685,39 @@ function getProgrammingDefaultCollection() {
             id: "program_demo_2",
             dateTime: "Martes 12 agosto · 11:00",
             title: {
-                es: "Inicio primeras rondas",
-                va: "Inici primeres rondes",
-                en: "Start of first rounds",
-                fr: "Début des premiers tours"
+                es: "Primeras rondas",
+                va: "Primeres rondes",
+                en: "First rounds",
+                fr: "Premiers tours"
             },
             subtitle: {
                 es: "Apertura de pistas y primeros enfrentamientos",
                 va: "Obertura de pistes i primers enfrontaments",
                 en: "Courts open and first matchups",
-                fr: "Ouverture des courts et premiers affrontements"
+                fr: "Ouverture des courts et premiers enfrentaments"
             },
             order: 2
         },
         {
             id: "program_demo_3",
             dateTime: "Miércoles 13 agosto · 17:00",
+            title: {
+                es: "Octavos de final",
+                va: "Vuitens de final",
+                en: "Round of 16",
+                fr: "Huitièmes de finale"
+            },
+            subtitle: {
+                es: "Jornada de partidos de octavos",
+                va: "Jornada de partits de vuitens",
+                en: "Round of 16 match day",
+                fr: "Journée de matchs des huitièmes"
+            },
+            order: 3
+        },
+        {
+            id: "program_demo_4",
+            dateTime: "Jueves 14 agosto · 18:00",
             title: {
                 es: "Cuartos de final",
                 va: "Quarts de final",
@@ -713,11 +730,11 @@ function getProgrammingDefaultCollection() {
                 en: "Decisive matches for semi-finals qualification",
                 fr: "Matchs décisifs pour la qualification en demi-finales"
             },
-            order: 3
+            order: 4
         },
         {
-            id: "program_demo_4",
-            dateTime: "Jueves 14 agosto · 18:00",
+            id: "program_demo_5",
+            dateTime: "Viernes 15 agosto · 19:00",
             title: {
                 es: "Semifinales",
                 va: "Semifinals",
@@ -730,11 +747,11 @@ function getProgrammingDefaultCollection() {
                 en: "High-level battles for a spot in the grand final",
                 fr: "Combats de haut niveau pour une place en grande finale"
             },
-            order: 4
+            order: 5
         },
         {
-            id: "program_demo_5",
-            dateTime: "Viernes 15 agosto · 19:30",
+            id: "program_demo_6",
+            dateTime: "Sábado 16 agosto · 18:30",
             title: {
                 es: "Gran Final y Entrega de Trofeos",
                 va: "Gran Final i Lliurament de Trofeus",
@@ -747,7 +764,7 @@ function getProgrammingDefaultCollection() {
                 en: "Championship match and awards ceremony",
                 fr: "Match pour le titre et cérémonie des récompenses"
             },
-            order: 5
+            order: 6
         }
     ];
 }
