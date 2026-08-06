@@ -178,44 +178,32 @@ body.ig-demo-body {
 
 /* Real Embeds Grid */
 .ig-embeds-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 25px;
-    justify-items: center;
 }
 
 .ig-embed-card {
     width: 100%;
-    max-width: 380px;
+    max-width: 500px;
     background: #0d1b2a;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgba(0, 230, 118, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.ig-embed-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--psa-green);
-    box-shadow: 0 15px 35px rgba(0, 230, 118, 0.25);
-}
-
-.ig-embed-iframe {
-    width: 100%;
-    height: 480px;
-    border: none;
-    background: #000;
-    display: block;
+    padding: 16px;
+    box-sizing: border-box;
 }
 
 .ig-card-footer-bar {
-    padding: 10px 14px;
-    background: #07111e;
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .ig-card-footer-tag {
@@ -281,9 +269,9 @@ body.ig-demo-body {
 <div class="ig-demo-container">
 
     <div class="ig-header">
-        <span class="ig-header-badge">VISOR DIRECTO SIN BLOQUEOS DE INSTAGRAM</span>
+        <span class="ig-header-badge">REPRODUCTOR OFICIAL DE INSTAGRAM</span>
         <h1>Instagram & Reels Directos</h1>
-        <p>Haz clic en cualquiera de los 4 hashtags superiores para filtrar y mostrar en la propia web los Reels e imágenes reales sin errores de rechazo.</p>
+        <p>Utiliza el componente oficial de Instagram para cargar la miniatura, portada y vídeo real del Reel <code>DbeA50hgqLH</code> sin bloqueos de navegador.</p>
     </div>
 
     <!-- Stories / Hashtags Bar -->
@@ -323,7 +311,7 @@ body.ig-demo-body {
     <!-- Reels Section Header -->
     <div class="ig-section-title">
         <h2>
-            📹 Publicaciones e Incrustados
+            📹 Reel Oficial (DbeA50hgqLH)
             <span id="activeFilterBadge" class="ig-active-filter-badge">Filtrado: Todos</span>
         </h2>
         <div class="ig-hashtag-pills">
@@ -334,15 +322,19 @@ body.ig-demo-body {
         </div>
     </div>
 
-    <!-- Real Embeds Grid -->
+    <!-- Real Embeds Container -->
     <div class="ig-embeds-grid" id="igEmbedsGrid">
 
-        <!-- Reel 1: DbeA50hgqLH -->
-        <div class="ig-embed-card" data-tags="valenciasquashopen psavalenciaopen copper">
-            <iframe class="ig-embed-iframe" src="https://www.instagram.com/p/DbeA50hgqLH/embed/" allowtransparency="true" frameborder="0" scrolling="no" allow="encrypted-media"></iframe>
+        <!-- Reel Official Blockquote -->
+        <div class="ig-embed-card" data-tags="valenciasquashopen psavalenciaopen copper psavalencia">
+            <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DbeA50hgqLH/" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
+                <div style="padding:16px; text-align:center;">
+                    <a href="https://www.instagram.com/reel/DbeA50hgqLH/" style="background:#00E676; border-radius:4px; color:#05101A; display:block; font-family:Arial,sans-serif; font-size:14px; font-weight:bold; height:40px; line-height:40px; margin:0 auto; text-align:center; text-decoration:none; width:100%;" target="_blank">Ver este Reel en Instagram ↗</a>
+                </div>
+            </blockquote>
             <div class="ig-card-footer-bar">
-                <span class="ig-card-footer-tag">#valenciasquashopen #copper</span>
-                <a class="ig-card-footer-link" href="https://www.instagram.com/reel/DbeA50hgqLH/" target="_blank">Abrir en Instagram ↗</a>
+                <span class="ig-card-footer-tag">#valenciasquashopen #copper #psavalencia</span>
+                <a class="ig-card-footer-link" href="https://www.instagram.com/reel/DbeA50hgqLH/" target="_blank">Instagram Directo ↗</a>
             </div>
         </div>
 
@@ -351,7 +343,7 @@ body.ig-demo-body {
     <!-- Admin Quick Demo Tester Box -->
     <div class="ig-admin-demo-box">
         <h3>⚡ Añadir Reel Directo con su Miniatura Real</h3>
-        <p>Pega la URL de cualquier Reel de Instagram etiquetado con vuestros hashtags y se cargará automáticamente en la web sin bloqueos:</p>
+        <p>Pega la URL de cualquier Reel de Instagram etiquetado con vuestros hashtags y se cargará en la web:</p>
         <div class="ig-input-group">
             <input id="demoIgInput" type="url" value="https://www.instagram.com/reel/DbeA50hgqLH/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" placeholder="https://www.instagram.com/reel/CODE/">
             <button type="button" onclick="addNewDemoEmbed()">Cargar en la Web</button>
@@ -359,6 +351,9 @@ body.ig-demo-body {
     </div>
 
 </div>
+
+<!-- Official Instagram Embed Script -->
+<script async src="https://www.instagram.com/embed.js"></script>
 
 <script>
 function filterByHashtag(tag) {
@@ -382,14 +377,10 @@ function filterByHashtag(tag) {
     });
 }
 
-function parseInstagramEmbedUrl(rawUrl) {
+function extractReelCode(rawUrl) {
     if (!rawUrl) return "";
     const match = String(rawUrl).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
-    if (match && match[1]) {
-        const code = match[1];
-        return `https://www.instagram.com/p/${code}/embed/`;
-    }
-    return rawUrl;
+    return (match && match[1]) ? match[1] : "";
 }
 
 function addNewDemoEmbed() {
@@ -399,21 +390,31 @@ function addNewDemoEmbed() {
         alert("Por favor pega un enlace de Instagram Reel o publicación.");
         return;
     }
-    const cleanEmbedUrl = parseInstagramEmbedUrl(rawUrl);
+    const code = extractReelCode(rawUrl);
+    const cleanUrl = code ? `https://www.instagram.com/reel/${code}/` : rawUrl;
+    
     const grid = document.getElementById("igEmbedsGrid");
     const card = document.createElement("div");
     card.className = "ig-embed-card";
     card.setAttribute("data-tags", "valenciasquashopen copper psavalencia psavalenciaopen");
     card.innerHTML = `
-        <iframe class="ig-embed-iframe" src="${cleanEmbedUrl}" allowtransparency="true" frameborder="0" scrolling="no" allow="encrypted-media"></iframe>
+        <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="${cleanUrl}" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
+            <div style="padding:16px; text-align:center;">
+                <a href="${cleanUrl}" style="background:#00E676; border-radius:4px; color:#05101A; display:block; font-family:Arial,sans-serif; font-size:14px; font-weight:bold; height:40px; line-height:40px; margin:0 auto; text-align:center; text-decoration:none; width:100%;" target="_blank">Ver este Reel en Instagram ↗</a>
+            </div>
+        </blockquote>
         <div class="ig-card-footer-bar">
             <span class="ig-card-footer-tag">#valenciasquashopen</span>
-            <a class="ig-card-footer-link" href="${rawUrl}" target="_blank">Abrir en Instagram ↗</a>
+            <a class="ig-card-footer-link" href="${cleanUrl}" target="_blank">Instagram Directo ↗</a>
         </div>
     `;
     grid.insertBefore(card, grid.firstChild);
     input.value = "";
-    alert("¡Reel cargado con su portada y vídeo real oficial de Instagram!");
+    
+    if (window.instgrm?.Embeds?.process) {
+        window.instgrm.Embeds.process();
+    }
+    alert("¡Reel añadido! Instagram procesará la miniatura y vídeo oficial.");
 }
 </script>
 
