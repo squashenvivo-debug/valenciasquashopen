@@ -4900,6 +4900,57 @@ function getProgrammingDefaultCollection() {
                 fr: "Ouverture des courts et premiers affrontements"
             },
             order: 2
+        },
+        {
+            id: createId("program"),
+            dateTime: "Miércoles 13 agosto · 17:00",
+            title: {
+                es: "Cuartos de final",
+                va: "Quarts de final",
+                en: "Quarter-finals",
+                fr: "Quarts de finale"
+            },
+            subtitle: {
+                es: "Partidos decisivos por el pase a semifinales",
+                va: "Partits decisius pel pas a semifinals",
+                en: "Decisive matches for semi-finals qualification",
+                fr: "Matchs décisifs pour la qualification en demi-finales"
+            },
+            order: 3
+        },
+        {
+            id: createId("program"),
+            dateTime: "Jueves 14 agosto · 18:00",
+            title: {
+                es: "Semifinales",
+                va: "Semifinals",
+                en: "Semi-finals",
+                fr: "Demi-finales"
+            },
+            subtitle: {
+                es: "Batallas de alto nivel por un puesto en la gran final",
+                va: "Batalles d'alt nivell per un lloc a la gran final",
+                en: "High-level battles for a spot in the grand final",
+                fr: "Combats de haut niveau pour une place en grande finale"
+            },
+            order: 4
+        },
+        {
+            id: createId("program"),
+            dateTime: "Viernes 15 agosto · 19:30",
+            title: {
+                es: "Gran Final y Entrega de Trofeos",
+                va: "Gran Final i Lliurament de Trofeus",
+                en: "Grand Final & Trophy Ceremony",
+                fr: "Grande Finale et Cérémonie de Remise des Prix"
+            },
+            subtitle: {
+                es: "Partido por el título y ceremonia de premios",
+                va: "Partit pel títol i cerimònia de premis",
+                en: "Championship match and awards ceremony",
+                fr: "Match pour le titre et cérémonie des récompenses"
+            },
+            order: 5
         }
     ];
 }
