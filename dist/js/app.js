@@ -21,6 +21,7 @@ const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
 const PSA_TOURNAMENT_ID_KEY = "psaTournamentId";
 const PSA_API_KEY_KEY = "psaApiKey";
+const INSTAGRAM_WIDGET_KEY = "instagramWidgetCode";
 const TOURNAMENT_MANUAL_CONTENT_KEY = "tournamentManualContent";
 const DRAW_BRACKET_KEY = "drawBracketState";
 const DYNAMIC_LANGS = ["es", "va", "en", "fr"];
@@ -38,6 +39,7 @@ const CLOUD_PUBLIC_KEYS = [
     TOURNAMENT_API_URL_KEY,
     PSA_TOURNAMENT_ID_KEY,
     PSA_API_KEY_KEY,
+    INSTAGRAM_WIDGET_KEY,
     TOURNAMENT_MANUAL_CONTENT_KEY,
     DRAW_BRACKET_KEY
 ];

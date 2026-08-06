@@ -6,6 +6,7 @@ const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
 const PSA_TOURNAMENT_ID_KEY = "psaTournamentId";
 const PSA_API_KEY_KEY = "psaApiKey";
+const INSTAGRAM_WIDGET_KEY = "instagramWidgetCode";
 const DRAW_BRACKET_KEY = "drawBracketState";
 const LIVE_STREAM_URL_KEY = "liveStreamYoutubeUrl";
 const LIVE_STREAM_HISTORY_KEY = "liveStreamYoutubeHistory";
@@ -27,6 +28,7 @@ const CLOUD_SYNC_KEYS = [
     TOURNAMENT_API_URL_KEY,
     PSA_TOURNAMENT_ID_KEY,
     PSA_API_KEY_KEY,
+    INSTAGRAM_WIDGET_KEY,
     DRAW_BRACKET_KEY,
     LIVE_STREAM_URL_KEY,
     LIVE_STREAM_HISTORY_KEY,
@@ -1212,6 +1214,7 @@ function loadTournamentSettings() {
     const apiUrl = localStorage.getItem(TOURNAMENT_API_URL_KEY) || "";
     const psaId = localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || (window.PSA_CONFIG?.psaTournamentId || "12711");
     const psaToken = localStorage.getItem(PSA_API_KEY_KEY) || (window.PSA_CONFIG?.psaApiKey || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f");
+    const igWidgetCode = localStorage.getItem(INSTAGRAM_WIDGET_KEY) || "";
 
     const selectedInput = document.querySelector(
         `input[name="tournamentMode"][value="${mode}"]`
@@ -1237,6 +1240,11 @@ function loadTournamentSettings() {
         tokenInput.disabled = mode !== "api";
     }
 
+    const igWidgetInput = document.getElementById("instagramWidgetCode");
+    if (igWidgetInput) {
+        igWidgetInput.value = igWidgetCode;
+    }
+
     const configGroup = document.getElementById("tournamentApiConfigGroup");
     if (configGroup) {
         configGroup.style.display = mode === "api" ? "block" : "none";
@@ -1252,6 +1260,8 @@ async function saveTournamentSettings() {
     const psaId = (idInput?.value || "").trim();
     const tokenInput = document.getElementById("tournamentPsaToken");
     const psaToken = (tokenInput?.value || "").trim();
+    const igWidgetInput = document.getElementById("instagramWidgetCode");
+    const igWidgetCode = (igWidgetInput?.value || "").trim();
 
     localStorage.setItem(TOURNAMENT_MODE_KEY, mode);
 
@@ -1273,11 +1283,18 @@ async function saveTournamentSettings() {
         localStorage.removeItem(PSA_API_KEY_KEY);
     }
 
+    if (igWidgetCode) {
+        localStorage.setItem(INSTAGRAM_WIDGET_KEY, igWidgetCode);
+    } else {
+        localStorage.removeItem(INSTAGRAM_WIDGET_KEY);
+    }
+
     if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
         await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_MODE_KEY);
         await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_API_URL_KEY);
         await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_TOURNAMENT_ID_KEY);
         await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_API_KEY_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(INSTAGRAM_WIDGET_KEY);
     }
 
     setStatus(
