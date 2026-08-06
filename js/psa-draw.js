@@ -383,11 +383,14 @@
         if (modal) modal.classList.remove("active");
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function renderAllColumns() {
         buildRound1Column();
         buildRound2Column();
         buildQFColumn();
         buildSFColumn();
         buildFinalColumn();
-    });
+    }
+
+    document.addEventListener("DOMContentLoaded", renderAllColumns);
+    document.addEventListener("app-language-changed", renderAllColumns);
 })();

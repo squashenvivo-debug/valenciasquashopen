@@ -618,7 +618,42 @@ async function loadSchedule() {
         reportPublicError("schedule", error);
         list.innerHTML = "";
     }
+}
 
+function getCurrentLanguage() {
+    return localStorage.getItem("language") || "es";
+}
+
+function normalizeLocalizedText(value) {
+    if (typeof value === "string") {
+        const s = value.trim();
+        return { es: s, va: s, en: s, fr: s };
+    }
+    if (value && typeof value === "object") {
+        const es = String(value.es || value.va || value.en || value.fr || "").trim();
+        return {
+            es,
+            va: String(value.va || es).trim(),
+            en: String(value.en || es).trim(),
+            fr: String(value.fr || es).trim()
+        };
+    }
+    return { es: "", va: "", en: "", fr: "" };
+}
+
+function getLocalizedText(obj, lang = "es") {
+    if (typeof obj === "string") return obj;
+    if (!obj || typeof obj !== "object") return "";
+    return obj[lang] || obj.es || obj.en || obj.va || obj.fr || "";
+}
+
+function escapeHtml(str) {
+    if (typeof str !== "string") return str || "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function formatLocalizedDateTime(str, lang) {
+    return str || "";
 }
 
 function getProgrammingDefaultCollection() {
