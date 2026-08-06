@@ -115,6 +115,12 @@
     function renderMatchCard(match) {
         const isLive = match.status === "in_progress";
         const metaDate = match.dateTime || "11 Aug 2026";
+        const p1Name = match.player1?.name || "";
+        const p2Name = match.player2?.name || "";
+        const showH2H = p1Name && p1Name !== "BYE" && p2Name && p2Name !== "BYE";
+
+        const p1Safe = p1Name.replace(/'/g, "\\'");
+        const p2Safe = p2Name.replace(/'/g, "\\'");
 
         return `
             <div class="psa-match-item ${isLive ? 'is-live' : ''}">
@@ -122,8 +128,8 @@
                 ${renderPlayerRow(match.player2)}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
-                    ${(match.player1?.name && match.player1.name !== "BYE" && match.player2?.name && match.player2.name !== "BYE") 
-                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${match.player1.name}', '${match.player2.name}')">Head-to-head</button>` 
+                    ${showH2H 
+                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}')">Head-to-head</button>` 
                         : ''}
                 </div>
             </div>

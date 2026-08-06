@@ -920,7 +920,40 @@ FOOTER
 
     </div>
 
-</footer> 
+<!-- Head to Head Modal -->
+<div class="psa-modal-overlay" id="h2hModal" onclick="if(event.target === this) closeH2HModal()">
+    <div class="psa-modal-card">
+        <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
+        <div class="psa-h2h-header">
+            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
+            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
+        </div>
+
+        <div class="psa-h2h-versus">
+            <div class="psa-h2h-player-box">
+                <div id="h2hP1Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 1</div>
+            </div>
+            <div class="psa-h2h-vs-badge">VS</div>
+            <div class="psa-h2h-player-box">
+                <div id="h2hP2Name" style="font-weight: 800; font-size: 0.95rem;">Jugador 2</div>
+            </div>
+        </div>
+
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Enfrentamientos directos:</span>
+            <strong style="color: var(--psa-green);">0 - 0</strong>
+        </div>
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Último duelo:</span>
+            <strong>Primer enfrentamiento oficial</strong>
+        </div>
+        <div class="psa-h2h-stat-row">
+            <span style="color: var(--psa-text-muted);">Porcentaje de victorias:</span>
+            <strong>50% - 50%</strong>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="supabase.js"></script>
@@ -933,7 +966,7 @@ FOOTER
 <script src="js/hero.js?v=20260805-7"></script>
 <script src="js/news.js?v=20260805-7"></script>
 <script src="js/app.js?v=20260805-7"></script>
-<script src="js/psa-draw.js?v=20260805-1"></script>
+<script src="js/psa-draw.js?v=20260806-v4"></script>
 
 </body>
 </html>
