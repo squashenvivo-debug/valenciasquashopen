@@ -32,7 +32,7 @@
             dateTime: "11 Aug 2026 • 17:45",
             status: "scheduled",
             player1: { name: "Marwan Tamer", country: "EGY", ranking: "#114", seed: "", mugshot: "assets/images/players/player-16.jpg" },
-            player2: { name: "Aqeel Rehman", country: "AUT", ranking: "#146", seed: "", mugshot: "assets/images/players/player-01.jpg" },
+            player2: { name: "Aqeel Rehman", country: "AUT", ranking: "#146", seed: "", mugshot: "assets/images/players/aqeel-rehman.jpg" },
             scores: []
         },
         {
