@@ -209,7 +209,7 @@
                 round: "Round 2",
                 dateTime: "12 Aug 2026 • 16:00",
                 player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
-                player2: { name: "Ganador R1", seed: "", country: "", mugshot: "" }
+                player2: { name: "TBD", seed: "", country: "", mugshot: "" }
             });
         }
         listContainer.innerHTML = html;
@@ -224,8 +224,8 @@
             html += renderMatchCard({
                 round: "Cuarto de Final",
                 dateTime: "13 Aug 2026",
-                player1: { name: `Ganador Octavo ${i*2-1}` },
-                player2: { name: `Ganador Octavo ${i*2}` }
+                player1: { name: "TBD" },
+                player2: { name: "TBD" }
             });
         }
         listContainer.innerHTML = html;
@@ -240,8 +240,8 @@
             html += renderMatchCard({
                 round: "Semifinal",
                 dateTime: "14 Aug 2026",
-                player1: { name: `Ganador Cuarto ${i*2-1}` },
-                player2: { name: `Ganador Cuarto ${i*2}` }
+                player1: { name: "TBD" },
+                player2: { name: "TBD" }
             });
         }
         listContainer.innerHTML = html;
@@ -254,8 +254,8 @@
         listContainer.innerHTML = renderMatchCard({
             round: "Gran Final",
             dateTime: "15 Aug 2026 • 18:30",
-            player1: { name: "Semifinalista 1" },
-            player2: { name: "Semifinalista 2" }
+            player1: { name: "TBD" },
+            player2: { name: "TBD" }
         });
     }
 
