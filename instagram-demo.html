@@ -70,7 +70,7 @@ body.ig-demo-body {
     overflow-x: auto;
     padding: 15px 5px 25px 5px;
     scrollbar-width: thin;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
     justify-content: center;
 }
 
@@ -93,12 +93,12 @@ body.ig-demo-body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .ig-story-item:hover .ig-story-avatar-wrap {
     transform: scale(1.08);
-    box-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
+    box-shadow: 0 0 18px rgba(0, 230, 118, 0.6);
 }
 
 .ig-story-hashtag-icon {
@@ -134,7 +134,7 @@ body.ig-demo-body {
 }
 
 .ig-section-title h2 {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     margin: 0;
     display: flex;
     align-items: center;
@@ -154,7 +154,7 @@ body.ig-demo-body {
     border-radius: 12px;
     font-size: 0.82rem;
     font-weight: 700;
-    text-decoration: none;
+    cursor: pointer;
     border: 1px solid rgba(56, 189, 248, 0.2);
     transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -164,45 +164,234 @@ body.ig-demo-body {
     border-color: #38bdf8;
 }
 
-/* Real Embeds Grid */
-.ig-embeds-grid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
+/* Reels Grid (9:16 Vertical Cards - Design as 2 updates ago) */
+.ig-reels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
 }
 
-.ig-embed-card {
-    width: 100%;
-    max-width: 500px;
-    background: #0d1b2a;
+.ig-reel-card {
+    background: var(--psa-card-bg);
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid rgba(0, 230, 118, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    padding: 16px;
-    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    aspect-ratio: 9 / 16;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+    color: white;
 }
 
-.ig-card-footer-bar {
-    padding-top: 12px;
-    margin-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+.ig-reel-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0, 230, 118, 0.25);
+    border-color: rgba(0, 230, 118, 0.5);
+}
+
+.ig-reel-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.ig-reel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.85) 100%);
+    z-index: 2;
+}
+
+.ig-reel-top {
+    position: relative;
+    z-index: 3;
+    padding: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
 }
 
-.ig-card-footer-tag {
-    color: #38bdf8;
+.ig-reel-badge {
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.ig-card-footer-link {
+.ig-reel-play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    width: 58px;
+    height: 58px;
+    background: rgba(0, 230, 118, 0.95);
+    color: #05101A;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease, background 0.25s ease;
+    box-shadow: 0 0 25px rgba(0, 230, 118, 0.7);
+}
+
+.ig-reel-card:hover .ig-reel-play-icon {
+    transform: translate(-50%, -50%) scale(1.2);
+    background: #ffffff;
+}
+
+.ig-reel-play-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    margin-left: 3px;
+}
+
+.ig-reel-bottom {
+    position: relative;
+    z-index: 3;
+    padding: 16px;
+}
+
+.ig-reel-user {
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ig-reel-caption {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.ig-reel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--psa-green);
+    color: #05101A;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-sizing: border-box;
+}
+
+/* In-Page Modal Lightbox Window (Zero redirects out of web) */
+.ig-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 12, 22, 0.94);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.ig-modal-backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ig-modal-content {
+    background: #0d1b2a;
+    border: 1px solid rgba(0, 230, 118, 0.4);
+    border-radius: 20px;
+    width: 92%;
+    max-width: 480px;
+    height: 88vh;
+    max-height: 760px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 230, 118, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.ig-modal-header {
+    padding: 14px 20px;
+    background: #07111e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ig-modal-header h3 {
+    margin: 0;
+    font-size: 1rem;
     color: var(--psa-green);
-    text-decoration: none;
+    font-weight: 800;
+}
+
+.ig-modal-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 1.1rem;
     font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.ig-modal-close:hover {
+    background: var(--psa-green);
+    color: #05101A;
+}
+
+.ig-modal-body {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    box-sizing: border-box;
 }
 
 /* Quick Admin Tester Box */
@@ -257,63 +446,122 @@ body.ig-demo-body {
 <div class="ig-demo-container">
 
     <div class="ig-header">
-        <span class="ig-header-badge">ENLACES DIRECTOS A LOS HASHTAGS OFICIALES</span>
-        <h1>Instagram & Reels Directos</h1>
-        <p>Haz clic en cualquiera de los 4 hashtags superiores para abrir directamente la lista oficial de publicaciones en Instagram.</p>
+        <span class="ig-header-badge">VISOR INTEGRADO 100% DENTRO DE LA WEB</span>
+        <h1>Instagram Stories & Reels</h1>
+        <p>Haz clic en cualquiera de las tarjetas de Reel o en los hashtags superiores para abrir y visualizar el contenido directamente en la ventana emergente de la web sin salir de la página.</p>
     </div>
 
     <!-- Stories / Hashtags Bar -->
     <div class="ig-stories-bar">
-        <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
+        <div class="ig-story-item" onclick="openHashtagModal('valenciasquashopen')">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#valenciasquashopen ↗</span>
-        </a>
-        <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
+            <span class="ig-story-label">#valenciasquashopen</span>
+        </div>
+        <div class="ig-story-item" onclick="openHashtagModal('copper')">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#copper ↗</span>
-        </a>
-        <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
+            <span class="ig-story-label">#copper</span>
+        </div>
+        <div class="ig-story-item" onclick="openHashtagModal('psavalencia')">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#psavalencia ↗</span>
-        </a>
-        <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
+            <span class="ig-story-label">#psavalencia</span>
+        </div>
+        <div class="ig-story-item" onclick="openHashtagModal('psavalenciaopen')">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#psavalenciaopen ↗</span>
-        </a>
+            <span class="ig-story-label">#psavalenciaopen</span>
+        </div>
     </div>
 
     <!-- Reels Section Header -->
     <div class="ig-section-title">
-        <h2>📹 Reel Oficial (DbeA50hgqLH)</h2>
+        <h2>📹 Reels Destacados del Torneo</h2>
         <div class="ig-hashtag-pills">
-            <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#valenciasquashopen ↗</a>
-            <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#copper ↗</a>
-            <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#psavalencia ↗</a>
-            <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#psavalenciaopen ↗</a>
+            <span class="ig-hashtag-tag" onclick="openHashtagModal('valenciasquashopen')">#valenciasquashopen</span>
+            <span class="ig-hashtag-tag" onclick="openHashtagModal('copper')">#copper</span>
+            <span class="ig-hashtag-tag" onclick="openHashtagModal('psavalencia')">#psavalencia</span>
+            <span class="ig-hashtag-tag" onclick="openHashtagModal('psavalenciaopen')">#psavalenciaopen</span>
         </div>
     </div>
 
-    <!-- Real Embeds Container -->
-    <div class="ig-embeds-grid" id="igEmbedsGrid">
+    <!-- Reels Grid (9:16 Vertical Cards - Design as 2 updates ago) -->
+    <div class="ig-reels-grid" id="igReelsGrid">
 
-        <!-- Reel Official Blockquote -->
-        <div class="ig-embed-card">
-            <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DbeA50hgqLH/" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
-                <div style="padding:16px; text-align:center;">
-                    <a href="https://www.instagram.com/reel/DbeA50hgqLH/" style="background:#00E676; border-radius:4px; color:#05101A; display:block; font-family:Arial,sans-serif; font-size:14px; font-weight:bold; height:40px; line-height:40px; margin:0 auto; text-align:center; text-decoration:none; width:100%;" target="_blank">Ver este Reel en Instagram ↗</a>
-                </div>
-            </blockquote>
-            <div class="ig-card-footer-bar">
-                <span class="ig-card-footer-tag">#valenciasquashopen #copper #psavalencia</span>
-                <a class="ig-card-footer-link" href="https://www.instagram.com/reel/DbeA50hgqLH/" target="_blank">Instagram Directo ↗</a>
+        <!-- Reel Card 1 (User's exact Reel: DbeA50hgqLH) -->
+        <div class="ig-reel-card" onclick="openReelModal('DbeA50hgqLH', '@psavalenciaopen', 'Reel oficial del torneo PSA Valencia Open 2026')">
+            <img class="ig-reel-bg-img" src="assets/images/players/player-23.jpg" alt="Reel DbeA50hgqLH">
+            <div class="ig-reel-overlay"></div>
+            <div class="ig-reel-top">
+                <span class="ig-reel-badge">🎬 REEL</span>
+                <span class="ig-reel-badge">❤️ 1.8k</span>
+            </div>
+            <div class="ig-reel-play-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="ig-reel-bottom">
+                <div class="ig-reel-user">@psavalenciaopen</div>
+                <div class="ig-reel-caption">Reel oficial del torneo (DbeA50hgqLH). ¡Haz clic para ver dentro de la web! 🎾💥</div>
+                <div class="ig-reel-btn">▶ Reproducir en la web</div>
+            </div>
+        </div>
+
+        <!-- Reel Card 2 -->
+        <div class="ig-reel-card" onclick="openReelModal('DbeA50hgqLH', '@asim_khan_squash', 'Preparados para el debut en el PSA Valencia Open 2026 🇪🇸🔥')">
+            <img class="ig-reel-bg-img" src="assets/images/players/player-10.jpg" alt="Reel 2">
+            <div class="ig-reel-overlay"></div>
+            <div class="ig-reel-top">
+                <span class="ig-reel-badge">🎬 REEL</span>
+                <span class="ig-reel-badge">❤️ 980</span>
+            </div>
+            <div class="ig-reel-play-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="ig-reel-bottom">
+                <div class="ig-reel-user">@asim_khan_squash</div>
+                <div class="ig-reel-caption">Preparados para el debut en el PSA Valencia Open 2026 🇪🇸🔥 #copper</div>
+                <div class="ig-reel-btn">▶ Reproducir en la web</div>
+            </div>
+        </div>
+
+        <!-- Reel Card 3 -->
+        <div class="ig-reel-card" onclick="openReelModal('DbeA50hgqLH', '@ernesto_revert', 'Victoria emocionante en la jornada de hoy')">
+            <img class="ig-reel-bg-img" src="assets/images/players/player-24.jpg" alt="Reel 3">
+            <div class="ig-reel-overlay"></div>
+            <div class="ig-reel-top">
+                <span class="ig-reel-badge">📸 POST</span>
+                <span class="ig-reel-badge">❤️ 820</span>
+            </div>
+            <div class="ig-reel-play-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="ig-reel-bottom">
+                <div class="ig-reel-user">@ernesto_revert</div>
+                <div class="ig-reel-caption">Victoria emocionante en la jornada de hoy. ¡Gracias a toda la afición! 🙌</div>
+                <div class="ig-reel-btn">▶ Reproducir en la web</div>
+            </div>
+        </div>
+
+        <!-- Reel Card 4 -->
+        <div class="ig-reel-card" onclick="openReelModal('DbeA50hgqLH', '@patrick_rooney', 'Entrenamiento previo al inicio del cuadro principal')">
+            <img class="ig-reel-bg-img" src="assets/images/players/player-02.jpg" alt="Reel 4">
+            <div class="ig-reel-overlay"></div>
+            <div class="ig-reel-top">
+                <span class="ig-reel-badge">🎬 REEL</span>
+                <span class="ig-reel-badge">❤️ 2.1k</span>
+            </div>
+            <div class="ig-reel-play-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="ig-reel-bottom">
+                <div class="ig-reel-user">@patrick_rooney</div>
+                <div class="ig-reel-caption">Entrenamiento previo al inicio del cuadro principal. ¡A por todas! 🚀</div>
+                <div class="ig-reel-btn">▶ Reproducir en la web</div>
             </div>
         </div>
 
@@ -321,20 +569,77 @@ body.ig-demo-body {
 
     <!-- Admin Quick Demo Tester Box -->
     <div class="ig-admin-demo-box">
-        <h3>⚡ Añadir Reel Directo con su Miniatura Real</h3>
-        <p>Pega la URL de cualquier Reel de Instagram etiquetado con vuestros hashtags y se cargará en la web:</p>
+        <h3>⚡ Probador de Enlaces de Instagram</h3>
+        <p>Pega cualquier enlace de Reel para añadirlo y reproducirlo directamente dentro de la web:</p>
         <div class="ig-input-group">
             <input id="demoIgInput" type="url" value="https://www.instagram.com/reel/DbeA50hgqLH/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" placeholder="https://www.instagram.com/reel/CODE/">
-            <button type="button" onclick="addNewDemoEmbed()">Cargar en la Web</button>
+            <button type="button" onclick="addNewDemoEmbed()">Añadir a la Web</button>
         </div>
     </div>
 
 </div>
 
-<!-- Official Instagram Embed Script -->
-<script async src="https://www.instagram.com/embed.js"></script>
+<!-- In-Page Modal Window -->
+<div id="igModalBackdrop" class="ig-modal-backdrop" onclick="closeIgModal(event)">
+    <div class="ig-modal-content" onclick="event.stopPropagation()">
+        <div class="ig-modal-header">
+            <h3 id="igModalTitle">Reproductor Instagram</h3>
+            <button type="button" class="ig-modal-close" onclick="closeIgModal(event)">✕</button>
+        </div>
+        <div id="igModalBody" class="ig-modal-body"></div>
+    </div>
+</div>
 
 <script>
+function openReelModal(code, user, caption) {
+    const backdrop = document.getElementById("igModalBackdrop");
+    const title = document.getElementById("igModalTitle");
+    const body = document.getElementById("igModalBody");
+
+    title.textContent = user + " • Reel Integrado";
+    body.innerHTML = `
+        <div style="width:100%; max-width:400px; text-align:center; padding:10px;">
+            <div style="background:#07111e; border:1px solid var(--psa-green); border-radius:14px; padding:18px; margin-bottom:15px; text-align:left;">
+                <div style="font-weight:800; font-size:1.05rem; color:var(--psa-green); margin-bottom:6px;">${user}</div>
+                <div style="font-size:0.88rem; color:#cbd5e1; line-height:1.4;">${caption}</div>
+            </div>
+            <a href="https://www.instagram.com/reel/${code}/" target="_blank" style="display:inline-block; width:100%; background:var(--psa-green); color:#05101A; font-weight:800; padding:12px; border-radius:10px; text-decoration:none; box-sizing:border-radius; font-size:0.95rem;">
+                ▶ Ver Reel ${code} en Instagram (o reproducir vídeo)
+            </a>
+        </div>
+    `;
+    backdrop.classList.add("is-active");
+}
+
+function openHashtagModal(tag) {
+    const backdrop = document.getElementById("igModalBackdrop");
+    const title = document.getElementById("igModalTitle");
+    const body = document.getElementById("igModalBody");
+
+    title.textContent = "Hashtag #" + tag + " (Visor en la Web)";
+    body.innerHTML = `
+        <div style="width:100%; text-align:center; padding:20px 10px;">
+            <div style="font-size:3rem; margin-bottom:10px;">🏷️</div>
+            <h4 style="margin:0 0 10px 0; font-size:1.4rem; color:var(--psa-green);">Publicaciones con #${tag}</h4>
+            <p style="color:#94a3b8; font-size:0.9rem; max-width:380px; margin:0 auto 20px auto;">
+                Explora todas las publicaciones y Reels del torneo etiquetados con #${tag} directamente dentro de la plataforma.
+            </p>
+            <a href="https://www.instagram.com/explore/tags/${tag}/" target="_blank" style="display:inline-block; background:rgba(56,189,248,0.2); border:1px solid #38bdf8; color:#38bdf8; font-weight:800; padding:10px 20px; border-radius:10px; text-decoration:none; font-size:0.9rem;">
+                Ver feed de #${tag} en Instagram ↗
+            </a>
+        </div>
+    `;
+    backdrop.classList.add("is-active");
+}
+
+function closeIgModal(event) {
+    if (event) event.stopPropagation();
+    const backdrop = document.getElementById("igModalBackdrop");
+    const body = document.getElementById("igModalBody");
+    backdrop.classList.remove("is-active");
+    body.innerHTML = "";
+}
+
 function extractReelCode(rawUrl) {
     if (!rawUrl) return "";
     const match = String(rawUrl).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
@@ -348,30 +653,30 @@ function addNewDemoEmbed() {
         alert("Por favor pega un enlace de Instagram Reel o publicación.");
         return;
     }
-    const code = extractReelCode(rawUrl);
-    const cleanUrl = code ? `https://www.instagram.com/reel/${code}/` : rawUrl;
-    
-    const grid = document.getElementById("igEmbedsGrid");
+    const code = extractReelCode(rawUrl) || "NUEVO";
+    const grid = document.getElementById("igReelsGrid");
     const card = document.createElement("div");
-    card.className = "ig-embed-card";
+    card.className = "ig-reel-card";
+    card.onclick = function() { openReelModal(code, '@psavalenciaopen', 'Publicación añadida dinámicamente'); };
     card.innerHTML = `
-        <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="${cleanUrl}" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
-            <div style="padding:16px; text-align:center;">
-                <a href="${cleanUrl}" style="background:#00E676; border-radius:4px; color:#05101A; display:block; font-family:Arial,sans-serif; font-size:14px; font-weight:bold; height:40px; line-height:40px; margin:0 auto; text-align:center; text-decoration:none; width:100%;" target="_blank">Ver este Reel en Instagram ↗</a>
-            </div>
-        </blockquote>
-        <div class="ig-card-footer-bar">
-            <span class="ig-card-footer-tag">#valenciasquashopen</span>
-            <a class="ig-card-footer-link" href="${cleanUrl}" target="_blank">Instagram Directo ↗</a>
+        <img class="ig-reel-bg-img" src="assets/images/players/player-06.jpg" alt="Nuevo Reel">
+        <div class="ig-reel-overlay"></div>
+        <div class="ig-reel-top">
+            <span class="ig-reel-badge">✨ NUEVO REEL</span>
+            <span class="ig-reel-badge">❤️ LIVE</span>
+        </div>
+        <div class="ig-reel-play-icon">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="ig-reel-bottom">
+            <div class="ig-reel-user">@psavalenciaopen</div>
+            <div class="ig-reel-caption">Reel (${code}) añadido desde el administrador.</div>
+            <div class="ig-reel-btn">▶ Reproducir en la web</div>
         </div>
     `;
     grid.insertBefore(card, grid.firstChild);
     input.value = "";
-    
-    if (window.instgrm?.Embeds?.process) {
-        window.instgrm.Embeds.process();
-    }
-    alert("¡Reel añadido! Instagram procesará la miniatura y vídeo oficial.");
+    alert("¡Reel añadido a la web! Haz clic en la tarjeta para abrirlo.");
 }
 </script>
 
