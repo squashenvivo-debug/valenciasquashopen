@@ -63,7 +63,7 @@ body.ig-demo-body {
     font-size: 1rem;
 }
 
-/* Stories Bar */
+/* Stories / Hashtags Bar */
 .ig-stories-bar {
     display: flex;
     gap: 20px;
@@ -71,6 +71,7 @@ body.ig-demo-body {
     padding: 15px 5px 25px 5px;
     scrollbar-width: thin;
     margin-bottom: 30px;
+    justify-content: center;
 }
 
 .ig-story-item {
@@ -99,23 +100,26 @@ body.ig-demo-body {
     transform: scale(1.08);
 }
 
-.ig-story-avatar {
+.ig-story-hashtag-icon {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    object-fit: cover;
+    background: #0d1b2a;
     border: 3px solid var(--psa-bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--psa-green);
+    box-shadow: inset 0 0 10px rgba(0, 230, 118, 0.2);
 }
 
 .ig-story-label {
-    font-size: 0.78rem;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 700;
     margin-top: 8px;
-    max-width: 85px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #cbd5e1;
+    color: #e2e8f0;
 }
 
 /* Section Controls */
@@ -136,13 +140,27 @@ body.ig-demo-body {
     gap: 10px;
 }
 
+.ig-hashtag-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .ig-hashtag-tag {
     background: #1e293b;
     color: #38bdf8;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 12px;
     font-size: 0.82rem;
     font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.ig-hashtag-tag:hover {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: #38bdf8;
 }
 
 /* Real Embeds Grid */
@@ -230,40 +248,48 @@ body.ig-demo-body {
 <div class="ig-demo-container">
 
     <div class="ig-header">
-        <span class="ig-header-badge">MINIATURAS Y PORTADAS REALES DE INSTAGRAM</span>
+        <span class="ig-header-badge">HASHTAGS OFICIALES DEL TORNEO</span>
         <h1>Instagram & Reels Directos</h1>
-        <p>Muestra los Reels e Instagram Posts directamente con su **portada y vídeo real de Instagram**, sin imágenes genéricas de jugadores.</p>
+        <p>Búsqueda directa en Instagram de los hashtags del torneo: haz clic en cualquier hashtag superior para explorar todas las publicaciones relacionadas.</p>
     </div>
 
-    <!-- Stories Bar -->
+    <!-- Stories / Hashtags Bar -->
     <div class="ig-stories-bar">
-        <a href="https://www.instagram.com/psavalenciaopen" target="_blank" class="ig-story-item">
-            <div class="ig-story-avatar-wrap">
-                <img class="ig-story-avatar" src="assets/images/icons/favicon.ico" alt="PSA Valencia">
-            </div>
-            <span class="ig-story-label">@psavalencia</span>
-        </a>
         <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
-                <img class="ig-story-avatar" src="assets/images/icons/favicon.ico" alt="Hashtag #valenciasquashopen">
+                <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#squashopen</span>
+            <span class="ig-story-label">#valenciasquashopen</span>
         </a>
-        <a href="https://www.instagram.com/psaworldtour" target="_blank" class="ig-story-item">
+        <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
-                <img class="ig-story-avatar" src="assets/images/icons/favicon.ico" alt="PSA World Tour">
+                <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">@psaworldtour</span>
+            <span class="ig-story-label">#copper</span>
+        </a>
+        <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" class="ig-story-item">
+            <div class="ig-story-avatar-wrap">
+                <div class="ig-story-hashtag-icon">#</div>
+            </div>
+            <span class="ig-story-label">#psavalencia</span>
+        </a>
+        <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" class="ig-story-item">
+            <div class="ig-story-avatar-wrap">
+                <div class="ig-story-hashtag-icon">#</div>
+            </div>
+            <span class="ig-story-label">#psavalenciaopen</span>
         </a>
     </div>
 
     <!-- Reels Section Header -->
     <div class="ig-section-title">
-        <h2>
-            📹 Miniaturas y Vídeos Reales de Instagram
-            <span class="ig-hashtag-tag">#valenciasquashopen</span>
-        </h2>
-        <a href="index.html" style="color: var(--psa-green); text-decoration: none; font-weight: 700; font-size: 0.9rem;">← Volver al inicio</a>
+        <h2>📹 Reel Indicado (DbeA50hgqLH)</h2>
+        <div class="ig-hashtag-pills">
+            <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" class="ig-hashtag-tag">#valenciasquashopen</a>
+            <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" class="ig-hashtag-tag">#copper</a>
+            <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" class="ig-hashtag-tag">#psavalencia</a>
+            <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" class="ig-hashtag-tag">#psavalenciaopen</a>
+        </div>
     </div>
 
     <!-- Real Embeds Grid -->
@@ -279,10 +305,10 @@ body.ig-demo-body {
     <!-- Admin Quick Demo Tester Box -->
     <div class="ig-admin-demo-box">
         <h3>⚡ Añadir Reel Directo con su Miniatura Real</h3>
-        <p>Pega la URL de cualquier Reel de Instagram y se incrustará con su **portada y vídeo real oficial de Instagram**:</p>
+        <p>Pega la URL de cualquier Reel de Instagram etiquetado con vuestros hashtags y se cargará automáticamente:</p>
         <div class="ig-input-group">
             <input id="demoIgInput" type="url" value="https://www.instagram.com/reel/DbeA50hgqLH/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" placeholder="https://www.instagram.com/reel/CODE/">
-            <button type="button" onclick="addNewDemoEmbed()">Cargar Miniatura Real</button>
+            <button type="button" onclick="addNewDemoEmbed()">Cargar en la Web</button>
         </div>
     </div>
 
