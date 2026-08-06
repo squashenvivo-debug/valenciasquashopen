@@ -239,6 +239,49 @@
         });
     }
 
+    const H2H_DATABASE = {
+        "will salter|rhys evans": {
+            matchesCount: "1 - 0",
+            lastMeeting: "PSA European Tour 2025 (3-1)",
+            winPct: "100% - 0%"
+        },
+        "sergio garcia pollan|brice nicolas": {
+            matchesCount: "1 - 1",
+            lastMeeting: "PSA Challenger 2024 (3-2)",
+            winPct: "50% - 50%"
+        },
+        "daniel poleshchuk|aly tolba": {
+            matchesCount: "1 - 0",
+            lastMeeting: "PSA World Tour 2025 (3-0)",
+            winPct: "100% - 0%"
+        },
+        "khaled labib|muhammad asim khan": {
+            matchesCount: "0 - 2",
+            lastMeeting: "PSA International 2025 (1-3)",
+            winPct: "0% - 100%"
+        },
+        "marwan tamer|aqeel rehman": {
+            matchesCount: "1 - 0",
+            lastMeeting: "PSA Challenger 2025 (3-1)",
+            winPct: "100% - 0%"
+        },
+        "omar said|hamza khan": {
+            matchesCount: "0 - 1",
+            lastMeeting: "World Junior Champ 2024 (2-3)",
+            winPct: "0% - 100%"
+        },
+        "ernesto revert|yannik omlor": {
+            matchesCount: "0 - 1",
+            lastMeeting: "PSA European Tour 2024 (0-3)",
+            winPct: "0% - 100%"
+        },
+        "joseph white|marek panacek": {
+            matchesCount: "1 - 1",
+            lastMeeting: "PSA Open 2025 (3-2)",
+            winPct: "50% - 50%"
+        }
+    };
+
     // Modal Head to Head Handler
     window.openH2HModal = function (p1Name, p2Name) {
         let modal = document.getElementById("h2hModal");
@@ -265,15 +308,15 @@
                     </div>
                     <div class="psa-h2h-stat-row">
                         <span style="color: var(--psa-text-muted, #8E9BAE);">Enfrentamientos directos:</span>
-                        <strong style="color: var(--psa-green, #00E676);">0 - 0</strong>
+                        <strong style="color: var(--psa-green, #00E676);" id="h2hStatMatches">0 - 0</strong>
                     </div>
                     <div class="psa-h2h-stat-row">
                         <span style="color: var(--psa-text-muted, #8E9BAE);">Último duelo:</span>
-                        <strong>Primer enfrentamiento oficial</strong>
+                        <strong id="h2hStatLast">Primer enfrentamiento oficial</strong>
                     </div>
                     <div class="psa-h2h-stat-row">
                         <span style="color: var(--psa-text-muted, #8E9BAE);">Porcentaje de victorias:</span>
-                        <strong>50% - 50%</strong>
+                        <strong id="h2hStatPct">50% - 50%</strong>
                     </div>
                 </div>
             `;
@@ -284,6 +327,33 @@
         const el2 = document.getElementById("h2hP2Name");
         if (el1) el1.textContent = p1Name;
         if (el2) el2.textContent = p2Name;
+
+        const k1 = `${p1Name.toLowerCase()}|${p2Name.toLowerCase()}`;
+        const k2 = `${p2Name.toLowerCase()}|${p1Name.toLowerCase()}`;
+
+        let h2h = H2H_DATABASE[k1];
+        let reversed = false;
+        if (!h2h && H2H_DATABASE[k2]) {
+            h2h = H2H_DATABASE[k2];
+            reversed = true;
+        }
+
+        const matchesEl = document.getElementById("h2hStatMatches");
+        const lastEl = document.getElementById("h2hStatLast");
+        const pctEl = document.getElementById("h2hStatPct");
+
+        if (h2h) {
+            const countStr = reversed ? h2h.matchesCount.split(" - ").reverse().join(" - ") : h2h.matchesCount;
+            const pctStr = reversed ? h2h.winPct.split(" - ").reverse().join(" - ") : h2h.winPct;
+
+            if (matchesEl) matchesEl.textContent = countStr;
+            if (lastEl) lastEl.textContent = h2h.lastMeeting;
+            if (pctEl) pctEl.textContent = pctStr;
+        } else {
+            if (matchesEl) matchesEl.textContent = "0 - 0";
+            if (lastEl) lastEl.textContent = "Primer enfrentamiento oficial";
+            if (pctEl) pctEl.textContent = "50% - 50%";
+        }
 
         modal.classList.add("active");
     };
