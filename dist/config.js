@@ -1,4 +1,6 @@
 /*
+ * PSA Valencia Open - Global Config
+ * Updated: 2026-08-06
  * Runtime configuration injected by the hosting environment.
  * Do not add a service_role key here. For local development, create a
  * non-versioned config.local.js that assigns these public values.
