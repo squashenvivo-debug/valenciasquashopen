@@ -313,10 +313,10 @@ body.ig-demo-body {
     background: #0d1b2a;
     border: 1px solid rgba(0, 230, 118, 0.4);
     border-radius: 20px;
-    width: 90%;
-    max-width: 420px;
-    height: 85vh;
-    max-height: 740px;
+    width: 92%;
+    max-width: 440px;
+    height: 88vh;
+    max-height: 760px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 230, 118, 0.2);
@@ -326,10 +326,10 @@ body.ig-demo-body {
 
 .ig-modal-close {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 12px;
+    right: 12px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
     width: 38px;
@@ -416,32 +416,32 @@ body.ig-demo-body {
 <div class="ig-demo-container">
 
     <div class="ig-header">
-        <span class="ig-header-badge">REPRODUCTOR INTEGRADO EN LA WEB (SIN SALIR)</span>
+        <span class="ig-header-badge">REPRODUCTOR INTEGRADO (LIMPIO Y FORMATEADO)</span>
         <h1>Instagram Stories & Reels</h1>
-        <p>Haz clic en cualquier Reel para reproducir el vídeo directamente en una ventana emergente dentro de la web, ¡sin abrir la aplicación ni salir de la página!</p>
+        <p>Haz clic en el Reel introducido o prueba a pegar cualquier enlace directo (con o sin parámetros de copia) para reproducirlo dentro de la web sin salir de la página.</p>
     </div>
 
     <!-- Stories Bar -->
     <div class="ig-stories-bar">
-        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/p/C123456789/embed/')">
+        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <div class="ig-story-avatar-wrap">
                 <img class="ig-story-avatar" src="assets/images/players/player-01.jpg" alt="PSA Valencia">
             </div>
             <span class="ig-story-label">@psavalencia</span>
         </div>
-        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/p/C987654321/embed/')">
+        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <div class="ig-story-avatar-wrap">
                 <img class="ig-story-avatar" src="assets/images/players/player-02.jpg" alt="Hashtag #valenciasquashopen">
             </div>
             <span class="ig-story-label">#squashopen</span>
         </div>
-        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/p/C456789123/embed/')">
+        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <div class="ig-story-avatar-wrap">
                 <img class="ig-story-avatar" src="assets/images/players/player-03.jpg" alt="PSA World Tour">
             </div>
             <span class="ig-story-label">@psaworldtour</span>
         </div>
-        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/p/C654321987/embed/')">
+        <div class="ig-story-item" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <div class="ig-story-avatar-wrap">
                 <img class="ig-story-avatar" src="assets/images/players/player-04.jpg" alt="Olympia Hotel">
             </div>
@@ -452,7 +452,7 @@ body.ig-demo-body {
     <!-- Reels Section Header -->
     <div class="ig-section-title">
         <h2>
-            📹 Reproduce en Directo (Haz clic para ver)
+            📹 Reel Indicado (DbeA50hgqLH)
             <span class="ig-hashtag-tag">#valenciasquashopen</span>
         </h2>
         <a href="index.html" style="color: var(--psa-green); text-decoration: none; font-weight: 700; font-size: 0.9rem;">← Volver al inicio</a>
@@ -461,26 +461,26 @@ body.ig-demo-body {
     <!-- Reels Grid -->
     <div class="ig-reels-grid" id="igReelsGrid">
 
-        <!-- Reel Card 1 -->
-        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/C123456789/embed/')">
-            <img class="ig-reel-bg-img" src="assets/images/players/player-23.jpg" alt="Reel 1">
+        <!-- Reel Card 1 (User's Reel!) -->
+        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
+            <img class="ig-reel-bg-img" src="assets/images/players/player-23.jpg" alt="Reel DbeA50hgqLH">
             <div class="ig-reel-overlay"></div>
             <div class="ig-reel-top">
-                <span class="ig-reel-badge">🎬 REEL</span>
-                <span class="ig-reel-badge">❤️ 1.4k</span>
+                <span class="ig-reel-badge">🎬 REEL DbeA50hgqLH</span>
+                <span class="ig-reel-badge">❤️ LIVE</span>
             </div>
             <div class="ig-reel-play-icon">
                 <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
             <div class="ig-reel-bottom">
                 <div class="ig-reel-user">@psavalenciaopen</div>
-                <div class="ig-reel-caption">¡Gran punto en la pista central de la primera ronda del torneo! 🎾💥</div>
+                <div class="ig-reel-caption">Reel oficial del torneo (DbeA50hgqLH). Haz clic para reproducir en la web.</div>
                 <div class="ig-reel-btn">▶ Reproducir en la web</div>
             </div>
         </div>
 
         <!-- Reel Card 2 -->
-        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/C987654321/embed/')">
+        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <img class="ig-reel-bg-img" src="assets/images/players/player-10.jpg" alt="Reel 2">
             <div class="ig-reel-overlay"></div>
             <div class="ig-reel-top">
@@ -498,7 +498,7 @@ body.ig-demo-body {
         </div>
 
         <!-- Reel Card 3 -->
-        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/p/C456789123/embed/')">
+        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <img class="ig-reel-bg-img" src="assets/images/players/player-24.jpg" alt="Reel 3">
             <div class="ig-reel-overlay"></div>
             <div class="ig-reel-top">
@@ -516,7 +516,7 @@ body.ig-demo-body {
         </div>
 
         <!-- Reel Card 4 -->
-        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/C654321987/embed/')">
+        <div class="ig-reel-card" onclick="openReelModal('https://www.instagram.com/reel/DbeA50hgqLH/')">
             <img class="ig-reel-bg-img" src="assets/images/players/player-02.jpg" alt="Reel 4">
             <div class="ig-reel-overlay"></div>
             <div class="ig-reel-top">
@@ -537,10 +537,10 @@ body.ig-demo-body {
 
     <!-- Admin Quick Demo Tester Box -->
     <div class="ig-admin-demo-box">
-        <h3>⚡ Prueba Rápida de Administración</h3>
-        <p>Prueba a pegar cualquier enlace de Instagram Reel o publicación para ver cómo se añadiría al reproductor de la web:</p>
+        <h3>⚡ Probador de Enlaces de Instagram</h3>
+        <p>Pega cualquier enlace (como <code>https://www.instagram.com/reel/DbeA50hgqLH/?utm_source=ig_web_copy_link</code>) y el sistema limpiará el código para reproducirlo inmediatamente:</p>
         <div class="ig-input-group">
-            <input id="demoIgInput" type="url" placeholder="https://www.instagram.com/reel/C123456789/">
+            <input id="demoIgInput" type="url" value="https://www.instagram.com/reel/DbeA50hgqLH/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" placeholder="https://www.instagram.com/reel/CODE/">
             <button type="button" onclick="addNewDemoReel()">Añadir a la Web</button>
         </div>
     </div>
@@ -558,7 +558,18 @@ body.ig-demo-body {
 </div>
 
 <script>
-function openReelModal(embedUrl) {
+function parseInstagramEmbedUrl(rawUrl) {
+    if (!rawUrl) return "";
+    const match = String(rawUrl).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+    if (match && match[1]) {
+        const code = match[1];
+        return `https://www.instagram.com/p/${code}/embed/captioned/`;
+    }
+    return rawUrl;
+}
+
+function openReelModal(rawUrl) {
+    const embedUrl = parseInstagramEmbedUrl(rawUrl);
     const backdrop = document.getElementById("igModalBackdrop");
     const iframe = document.getElementById("igModalIframe");
     iframe.src = embedUrl;
@@ -580,30 +591,30 @@ function addNewDemoReel() {
         alert("Por favor pega un enlace de Instagram Reel o publicación.");
         return;
     }
-    const cleanUrl = rawUrl.replace(/\/$/, '') + '/embed/';
+    const cleanEmbedUrl = parseInstagramEmbedUrl(rawUrl);
     const grid = document.getElementById("igReelsGrid");
     const card = document.createElement("div");
     card.className = "ig-reel-card";
-    card.onclick = function() { openReelModal(cleanUrl); };
+    card.onclick = function() { openReelModal(cleanEmbedUrl); };
     card.innerHTML = `
         <img class="ig-reel-bg-img" src="assets/images/players/player-06.jpg" alt="Nuevo Reel">
         <div class="ig-reel-overlay"></div>
         <div class="ig-reel-top">
-            <span class="ig-reel-badge">✨ NUEVO REEL</span>
-            <span class="ig-reel-badge">❤️ NEW</span>
+            <span class="ig-reel-badge">✨ REEL AÑADIDO</span>
+            <span class="ig-reel-badge">❤️ LIVE</span>
         </div>
         <div class="ig-reel-play-icon">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </div>
         <div class="ig-reel-bottom">
-            <div class="ig-reel-user">@instagram_user</div>
-            <div class="ig-reel-caption">Publicación añadida dinámicamente desde la administración.</div>
+            <div class="ig-reel-user">@psavalenciaopen</div>
+            <div class="ig-reel-caption">Reel introducido desde el probador de administración.</div>
             <div class="ig-reel-btn">▶ Reproducir en la web</div>
         </div>
     `;
     grid.insertBefore(card, grid.firstChild);
-    input.value = "";
-    alert("¡Reel añadido! Haz clic en la tarjeta para reproducirlo dentro de la web.");
+    alert("¡Reel formateado y añadido! Haz clic en la tarjeta para reproducirlo dentro de la web.");
+    openReelModal(cleanEmbedUrl);
 }
 </script>
 
