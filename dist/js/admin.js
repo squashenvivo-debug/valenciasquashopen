@@ -1304,6 +1304,66 @@ async function saveTournamentSettings() {
     );
 }
 
+async function fetchPsaTournamentsList() {
+    const select = document.getElementById("psaTournamentSelect");
+    if (!select) return;
+
+    select.innerHTML = '<option value="">⏳ Cargando lista de torneos PSA...</option>';
+
+    try {
+        const proxyUrl = "https://texjzaanugmssmolzwgb.supabase.co/functions/v1/psa-proxy?show_past=true&limit=50";
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+
+        const payload = await response.json();
+        const items = Array.isArray(payload?.tournaments) ? payload.tournaments : (Array.isArray(payload) ? payload : []);
+
+        const currentPsaId = (document.getElementById("tournamentPsaId")?.value || "").trim();
+
+        let html = '<option value="">-- Seleccionar torneo oficial de la PSA --</option>';
+        html += `<option value="12711" ${currentPsaId === "12711" ? "selected" : ""}>12711 - PSA Valencia Open 2026</option>`;
+
+        items.forEach((item) => {
+            const id = String(item.id || item.slug || "").trim();
+            if (!id || id === "12711") return;
+            const name = item.name || item.title || "Torneo PSA";
+            const dates = item.dates || item.start_date || "";
+            const isSel = id === currentPsaId ? "selected" : "";
+            html += `<option value="${id}" ${isSel}>${id} - ${escapeHtml(name)} ${dates ? "(" + escapeHtml(dates) + ")" : ""}</option>`;
+        });
+
+        select.innerHTML = html;
+    } catch (err) {
+        console.warn("No se pudo cargar el listado automático de torneos PSA:", err);
+        select.innerHTML = `
+            <option value="">-- Escribe el ID del torneo manualmente abajo --</option>
+            <option value="12711">12711 - PSA Valencia Open 2026</option>
+        `;
+    }
+}
+
+function bindPsaTournamentSelector() {
+    const select = document.getElementById("psaTournamentSelect");
+    if (select) {
+        select.addEventListener("change", (e) => {
+            const chosenId = (e.target.value || "").trim();
+            if (chosenId) {
+                const idInput = document.getElementById("tournamentPsaId");
+                if (idInput) {
+                    idInput.value = chosenId;
+                }
+            }
+        });
+    }
+
+    const btn = document.getElementById("fetchPsaTournamentsBtn");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            fetchPsaTournamentsList();
+        });
+    }
+}
+
 function bindTournamentSettings() {
     document.querySelectorAll("input[name='tournamentMode']").forEach((input) => {
         input.addEventListener("change", () => {
@@ -1325,6 +1385,8 @@ function bindTournamentSettings() {
     if (saveButton) {
         saveButton.addEventListener("click", saveTournamentSettings);
     }
+
+    bindPsaTournamentSelector();
 }
 
 function updateLiveStatus(message) {

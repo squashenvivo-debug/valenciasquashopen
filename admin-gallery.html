@@ -106,7 +106,16 @@
             </div>
 
             <div id="tournamentApiConfigGroup" style="margin-top: 16px; display: none;">
-                <label for="tournamentPsaId" class="field-label">ID del Torneo PSA (ej: 12711)</label>
+                <label for="psaTournamentSelect" class="field-label">🔍 Buscador / Lista Desplegable de Torneos PSA</label>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                    <select id="psaTournamentSelect" style="flex: 1; padding: 10px; font-weight: 700;">
+                        <option value="">-- Clic en el botón para cargar torneos PSA --</option>
+                        <option value="12711">12711 - PSA Valencia Open 2026</option>
+                    </select>
+                    <button id="fetchPsaTournamentsBtn" type="button" class="btn-secondary-admin" style="padding: 10px 14px; white-space: nowrap;">⚡ Cargar Lista PSA</button>
+                </div>
+
+                <label for="tournamentPsaId" class="field-label">ID del Torneo PSA (ej: 12711 o slug)</label>
                 <input id="tournamentPsaId" type="text" placeholder="12711">
 
                 <label for="tournamentPsaToken" class="field-label" style="margin-top: 12px;">Token / API Key del Torneo PSA</label>
