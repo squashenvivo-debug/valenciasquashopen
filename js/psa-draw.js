@@ -7,77 +7,77 @@
             round: "Round 1",
             dateTime: "11 Aug 2026 • 12:00",
             status: "scheduled",
-            player1: { name: "Sergio Garcia Pollan", country: "ESP", ranking: "#151", seed: "WC", mugshot: "https://secure.psasquashtour.com/players/cf4742efbc/headshot" },
-            player2: { name: "Brice Nicolas", country: "FRA", ranking: "#136", seed: "", mugshot: "https://secure.psasquashtour.com/players/9fc0265926/headshot" },
+            player1: { name: "Sergio Garcia Pollan", country: "ESP", ranking: "#151", seed: "WC", mugshot: "assets/images/players/player-23.jpg" },
+            player2: { name: "Brice Nicolas", country: "FRA", ranking: "#136", seed: "", mugshot: "assets/images/players/player-17.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 12:45",
             status: "scheduled",
-            player1: { name: "Daniel Poleshchuk", country: "ISR", ranking: "#099", seed: "", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Daniel-Poleshchuk-1024x991.png" },
-            player2: { name: "Aly Tolba", country: "EGY", ranking: "#122", seed: "", mugshot: "https://secure.psasquashtour.com/players/00637c76cf/headshot" },
+            player1: { name: "Daniel Poleshchuk", country: "ISR", ranking: "#099", seed: "", mugshot: "assets/images/players/player-14.jpg" },
+            player2: { name: "Aly Tolba", country: "EGY", ranking: "#122", seed: "", mugshot: "assets/images/players/player-18.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 17:00",
             status: "scheduled",
-            player1: { name: "Khaled Labib", country: "EGY", ranking: "#137", seed: "", mugshot: "https://secure.psasquashtour.com/players/a7359e8a67/headshot" },
-            player2: { name: "Muhammad Asim Khan", country: "PAK", ranking: "#077", seed: "", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Muhammad-Asim-Khan-1024x977.png" },
+            player1: { name: "Khaled Labib", country: "EGY", ranking: "#137", seed: "", mugshot: "assets/images/players/player-21.jpg" },
+            player2: { name: "Muhammad Asim Khan", country: "PAK", ranking: "#077", seed: "", mugshot: "assets/images/players/player-10.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 17:45",
             status: "scheduled",
-            player1: { name: "Marwan Tamer", country: "EGY", ranking: "#114", seed: "", mugshot: "https://secure.psasquashtour.com/players/0393163130/headshot" },
-            player2: { name: "Aqeel Rehman", country: "AUT", ranking: "#146", seed: "", mugshot: "https://secure.psasquashtour.com/players/101e27f7e5/headshot" },
+            player1: { name: "Marwan Tamer", country: "EGY", ranking: "#114", seed: "", mugshot: "assets/images/players/player-16.jpg" },
+            player2: { name: "Aqeel Rehman", country: "AUT", ranking: "#146", seed: "", mugshot: "assets/images/players/player-01.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 18:30",
             status: "scheduled",
-            player1: { name: "Omar Said", country: "EGY", ranking: "#105", seed: "", mugshot: "https://secure.psasquashtour.com/players/44f3ebd9cb/headshot" },
-            player2: { name: "Hamza Khan", country: "PAK", ranking: "#169", seed: "", mugshot: "https://secure.psasquashtour.com/players/cb8b286bef/headshot" },
+            player1: { name: "Omar Said", country: "EGY", ranking: "#105", seed: "", mugshot: "assets/images/players/player-13.jpg" },
+            player2: { name: "Hamza Khan", country: "PAK", ranking: "#169", seed: "", mugshot: "assets/images/players/player-20.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 19:15",
             status: "scheduled",
-            player1: { name: "Ernesto Revert", country: "ESP", ranking: "#866", seed: "WC", mugshot: "https://secure.psasquashtour.com/players/a29ff8048d/headshot" },
-            player2: { name: "Yannik Omlor", country: "GER", ranking: "#112", seed: "", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Yannik-Omlor-1024x995.png" },
+            player1: { name: "Ernesto Revert", country: "ESP", ranking: "#866", seed: "WC", mugshot: "assets/images/players/player-24.jpg" },
+            player2: { name: "Yannik Omlor", country: "GER", ranking: "#112", seed: "", mugshot: "assets/images/players/player-15.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 13:30",
             status: "scheduled",
-            player1: { name: "Will Salter", country: "ENG", ranking: "#120", seed: "", mugshot: "https://secure.psasquashtour.com/players/3a5e840a1b/headshot" },
-            player2: { name: "Rhys Evans", country: "WAL", ranking: "#128", seed: "", mugshot: "https://secure.psasquashtour.com/players/7b2e910c2d/headshot" },
+            player1: { name: "Will Salter", country: "ENG", ranking: "#120", seed: "", mugshot: "assets/images/players/player-19.jpg" },
+            player2: { name: "Rhys Evans", country: "WAL", ranking: "#128", seed: "", mugshot: "assets/images/players/player-12.jpg" },
             scores: []
         },
         {
             round: "Round 1",
             dateTime: "11 Aug 2026 • 14:15",
             status: "scheduled",
-            player1: { name: "Joseph White", country: "AUS", ranking: "#108", seed: "", mugshot: "https://secure.psasquashtour.com/players/1c2a3d4e5f/headshot" },
-            player2: { name: "Marek Panacek", country: "CZE", ranking: "#115", seed: "", mugshot: "https://secure.psasquashtour.com/players/6f5e4d3c2b/headshot" },
+            player1: { name: "Joseph White", country: "AUS", ranking: "#108", seed: "", mugshot: "assets/images/players/player-11.jpg" },
+            player2: { name: "Marek Panacek", country: "CZE", ranking: "#115", seed: "", mugshot: "assets/images/players/player-22.jpg" },
             scores: []
         }
     ];
 
     const SEEDED_BYES = [
-        { name: "Samuel Osborne - Wylde", seed: "(2)", country: "ENG", ranking: "#051", mugshot: "https://secure.psasquashtour.com/players/5aef440b5a/headshot" },
-        { name: "Mohamed Nasser", seed: "(7)", country: "EGY", ranking: "#065", mugshot: "https://secure.psasquashtour.com/players/e45ea8af88/headshot" },
-        { name: "Simon Herbert", seed: "(5)", country: "ENG", ranking: "#058", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Simon-Herbert-1024x1024.png" },
-        { name: "Ivan Perez", seed: "(3)", country: "ESP", ranking: "#052", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2025/10/Ivan-Perez.png" },
-        { name: "Balazs Farkas", seed: "(4)", country: "HUN", ranking: "#055", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2026/06/Balazs-Farkas-1024x1024.png" },
-        { name: "Abdulla Al-Tamimi", seed: "(6)", country: "QAT", ranking: "#060", mugshot: "https://www.psasquashtour.com/wp-content/uploads/2025/08/PSA-Rankings-Headshots-%E2%80%93-_0007_Abdullah-Al-Tamimi.png" },
-        { name: "Yassin Elshafei", seed: "(8)", country: "EGY", ranking: "#070", mugshot: "https://secure.psasquashtour.com/players/01a2b3c4d5/headshot" },
-        { name: "Patrick Rooney", seed: "(1)", country: "ENG", ranking: "#045", mugshot: "https://secure.psasquashtour.com/players/9e8d7c6b5a/headshot" }
+        { name: "Samuel Osborne - Wylde", seed: "(2)", country: "ENG", ranking: "#051", mugshot: "assets/images/players/player-03.jpg" },
+        { name: "Mohamed Nasser", seed: "(7)", country: "EGY", ranking: "#065", mugshot: "assets/images/players/player-08.jpg" },
+        { name: "Simon Herbert", seed: "(5)", country: "ENG", ranking: "#058", mugshot: "assets/images/players/player-06.jpg" },
+        { name: "Ivan Perez", seed: "(3)", country: "ESP", ranking: "#052", mugshot: "assets/images/players/player-04.jpg" },
+        { name: "Balazs Farkas", seed: "(4)", country: "HUN", ranking: "#055", mugshot: "assets/images/players/player-05.jpg" },
+        { name: "Abdulla Al-Tamimi", seed: "(6)", country: "QAT", ranking: "#060", mugshot: "assets/images/players/player-07.jpg" },
+        { name: "Yassin Elshafei", seed: "(8)", country: "EGY", ranking: "#070", mugshot: "assets/images/players/player-09.jpg" },
+        { name: "Patrick Rooney", seed: "(1)", country: "ENG", ranking: "#045", mugshot: "assets/images/players/player-02.jpg" }
     ];
 
     function getProxyUrl() {
@@ -99,11 +99,11 @@
         const seedHtml = player.seed ? `<span class="psa-seed-tag">${player.seed}</span>` : "";
         const flagUrl = player.country ? `assets/images/flags/${player.country}.svg` : "";
         const flagHtml = player.country ? `<img class="psa-player-flag" src="${flagUrl}" alt="${player.country}" onerror="this.style.display='none'">` : "";
-        const mugshotSrc = player.mugshot || "https://www.psasquashtour.com/wp-content/uploads/2025/11/default-player-img.png";
+        const mugshotSrc = player.mugshot || "assets/images/players/player-01.jpg";
 
         return `
             <div class="psa-player-row">
-                <img class="psa-player-mugshot" src="${mugshotSrc}" alt="${player.name}" onerror="this.src='https://www.psasquashtour.com/wp-content/uploads/2025/11/default-player-img.png'">
+                <img class="psa-player-mugshot" src="${mugshotSrc}" alt="${player.name}" onerror="this.src='assets/images/players/player-01.jpg'">
                 ${flagHtml}
                 <span class="psa-player-name-box">
                     ${player.name} ${seedHtml}
