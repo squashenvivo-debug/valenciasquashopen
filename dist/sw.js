@@ -1,4 +1,4 @@
-const STATIC_CACHE = "psa-static-v2";
+const STATIC_CACHE = "psa-static-v20260806-10";
 const RUNTIME_CACHE = "psa-runtime-v2";
 const STATIC_EXTENSIONS = /\.(?:css|js|json|png|jpe?g|webp|svg|ico|woff2?)$/i;
 
@@ -56,12 +56,6 @@ self.addEventListener("fetch", (event) => {
 
     if (request.mode === "navigate") {
         event.respondWith(networkFirst(request));
-        return;
-    }
-
-    // Runtime config must always be fetched fresh to avoid stale cross-device behavior.
-    if (url.pathname === "/config.js") {
-        event.respondWith(fetch(request));
         return;
     }
 

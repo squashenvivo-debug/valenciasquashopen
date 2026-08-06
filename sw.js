@@ -1,4 +1,4 @@
-const STATIC_CACHE = "psa-static-v2";
+const STATIC_CACHE = "psa-static-v20260806-10";
 const RUNTIME_CACHE = "psa-runtime-v2";
 const STATIC_EXTENSIONS = /\.(?:css|js|json|png|jpe?g|webp|svg|ico|woff2?)$/i;
 
