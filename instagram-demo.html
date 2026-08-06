@@ -96,8 +96,7 @@ body.ig-demo-body {
     transition: transform 0.25s ease;
 }
 
-.ig-story-item:hover .ig-story-avatar-wrap,
-.ig-story-item.is-active .ig-story-avatar-wrap {
+.ig-story-item:hover .ig-story-avatar-wrap {
     transform: scale(1.08);
     box-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
 }
@@ -142,16 +141,6 @@ body.ig-demo-body {
     gap: 10px;
 }
 
-.ig-active-filter-badge {
-    background: rgba(0, 230, 118, 0.2);
-    color: var(--psa-green);
-    border: 1px solid var(--psa-green);
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.82rem;
-    font-weight: 700;
-}
-
 .ig-hashtag-pills {
     display: flex;
     gap: 8px;
@@ -165,13 +154,12 @@ body.ig-demo-body {
     border-radius: 12px;
     font-size: 0.82rem;
     font-weight: 700;
-    cursor: pointer;
+    text-decoration: none;
     border: 1px solid rgba(56, 189, 248, 0.2);
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.ig-hashtag-tag:hover,
-.ig-hashtag-tag.is-active {
+.ig-hashtag-tag:hover {
     background: rgba(56, 189, 248, 0.25);
     border-color: #38bdf8;
 }
@@ -269,56 +257,47 @@ body.ig-demo-body {
 <div class="ig-demo-container">
 
     <div class="ig-header">
-        <span class="ig-header-badge">REPRODUCTOR OFICIAL DE INSTAGRAM</span>
+        <span class="ig-header-badge">ENLACES DIRECTOS A LOS HASHTAGS OFICIALES</span>
         <h1>Instagram & Reels Directos</h1>
-        <p>Utiliza el componente oficial de Instagram para cargar la miniatura, portada y vídeo real del Reel <code>DbeA50hgqLH</code> sin bloqueos de navegador.</p>
+        <p>Haz clic en cualquiera de los 4 hashtags superiores para abrir directamente la lista oficial de publicaciones en Instagram.</p>
     </div>
 
     <!-- Stories / Hashtags Bar -->
     <div class="ig-stories-bar">
-        <div class="ig-story-item" onclick="filterByHashtag('all')">
-            <div class="ig-story-avatar-wrap">
-                <div class="ig-story-hashtag-icon" style="font-size: 1.2rem;">TODOS</div>
-            </div>
-            <span class="ig-story-label">Mostrar Todos</span>
-        </div>
-        <div class="ig-story-item" onclick="filterByHashtag('valenciasquashopen')">
+        <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#valenciasquashopen</span>
-        </div>
-        <div class="ig-story-item" onclick="filterByHashtag('copper')">
+            <span class="ig-story-label">#valenciasquashopen ↗</span>
+        </a>
+        <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#copper</span>
-        </div>
-        <div class="ig-story-item" onclick="filterByHashtag('psavalencia')">
+            <span class="ig-story-label">#copper ↗</span>
+        </a>
+        <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#psavalencia</span>
-        </div>
-        <div class="ig-story-item" onclick="filterByHashtag('psavalenciaopen')">
+            <span class="ig-story-label">#psavalencia ↗</span>
+        </a>
+        <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" rel="noopener noreferrer" class="ig-story-item">
             <div class="ig-story-avatar-wrap">
                 <div class="ig-story-hashtag-icon">#</div>
             </div>
-            <span class="ig-story-label">#psavalenciaopen</span>
-        </div>
+            <span class="ig-story-label">#psavalenciaopen ↗</span>
+        </a>
     </div>
 
     <!-- Reels Section Header -->
     <div class="ig-section-title">
-        <h2>
-            📹 Reel Oficial (DbeA50hgqLH)
-            <span id="activeFilterBadge" class="ig-active-filter-badge">Filtrado: Todos</span>
-        </h2>
+        <h2>📹 Reel Oficial (DbeA50hgqLH)</h2>
         <div class="ig-hashtag-pills">
-            <span class="ig-hashtag-tag" onclick="filterByHashtag('valenciasquashopen')">#valenciasquashopen</span>
-            <span class="ig-hashtag-tag" onclick="filterByHashtag('copper')">#copper</span>
-            <span class="ig-hashtag-tag" onclick="filterByHashtag('psavalencia')">#psavalencia</span>
-            <span class="ig-hashtag-tag" onclick="filterByHashtag('psavalenciaopen')">#psavalenciaopen</span>
+            <a href="https://www.instagram.com/explore/tags/valenciasquashopen/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#valenciasquashopen ↗</a>
+            <a href="https://www.instagram.com/explore/tags/copper/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#copper ↗</a>
+            <a href="https://www.instagram.com/explore/tags/psavalencia/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#psavalencia ↗</a>
+            <a href="https://www.instagram.com/explore/tags/psavalenciaopen/" target="_blank" rel="noopener noreferrer" class="ig-hashtag-tag">#psavalenciaopen ↗</a>
         </div>
     </div>
 
@@ -326,7 +305,7 @@ body.ig-demo-body {
     <div class="ig-embeds-grid" id="igEmbedsGrid">
 
         <!-- Reel Official Blockquote -->
-        <div class="ig-embed-card" data-tags="valenciasquashopen psavalenciaopen copper psavalencia">
+        <div class="ig-embed-card">
             <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DbeA50hgqLH/" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
                 <div style="padding:16px; text-align:center;">
                     <a href="https://www.instagram.com/reel/DbeA50hgqLH/" style="background:#00E676; border-radius:4px; color:#05101A; display:block; font-family:Arial,sans-serif; font-size:14px; font-weight:bold; height:40px; line-height:40px; margin:0 auto; text-align:center; text-decoration:none; width:100%;" target="_blank">Ver este Reel en Instagram ↗</a>
@@ -356,27 +335,6 @@ body.ig-demo-body {
 <script async src="https://www.instagram.com/embed.js"></script>
 
 <script>
-function filterByHashtag(tag) {
-    const badge = document.getElementById("activeFilterBadge");
-    const cards = document.querySelectorAll(".ig-embed-card");
-
-    if (tag === "all") {
-        badge.textContent = "Filtrado: Todos";
-        cards.forEach(card => card.style.display = "block");
-        return;
-    }
-
-    badge.textContent = "Filtrado: #" + tag;
-    cards.forEach(card => {
-        const tags = (card.getAttribute("data-tags") || "").toLowerCase();
-        if (tags.includes(tag.toLowerCase())) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
-    });
-}
-
 function extractReelCode(rawUrl) {
     if (!rawUrl) return "";
     const match = String(rawUrl).match(/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
@@ -396,7 +354,6 @@ function addNewDemoEmbed() {
     const grid = document.getElementById("igEmbedsGrid");
     const card = document.createElement("div");
     card.className = "ig-embed-card";
-    card.setAttribute("data-tags", "valenciasquashopen copper psavalencia psavalenciaopen");
     card.innerHTML = `
         <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="${cleanUrl}" data-instgrm-version="14" style="background:#0d1b2a; border:0; border-radius:12px; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%;">
             <div style="padding:16px; text-align:center;">
