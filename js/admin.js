@@ -2383,6 +2383,54 @@ function insertFormatTag(targetInputId, tagBefore, tagAfter = "") {
 }
 window.insertFormatTag = insertFormatTag;
 
+function formatNewsPreviewHtml(text) {
+    if (!text) return "";
+    let str = String(text || "").trim();
+    if (/<[a-z][\s\S]*>/i.test(str)) {
+        return str;
+    }
+    str = str.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
+    str = str.replace(/(\*|_)(.*?)\1/g, "<em>$2</em>");
+    const paragraphs = str.split(/\n\s*\n/);
+    return paragraphs.map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+}
+
+function toggleHtmlPreview(textareaId, previewBtnId, previewBoxId) {
+    const textarea = document.getElementById(textareaId);
+    const btn = document.getElementById(previewBtnId);
+    if (!textarea || !btn) return;
+
+    let box = document.getElementById(previewBoxId);
+    if (!box) {
+        box = document.createElement("div");
+        box.id = previewBoxId;
+        box.className = "news-content-body news-preview-box";
+        box.style.cssText = "display:none; margin-top:10px; padding:16px; background:#06121e; border:1px dashed #C78C32; border-radius:8px; color:#fff;";
+        textarea.parentNode.insertBefore(box, textarea.nextSibling);
+
+        textarea.addEventListener("input", () => {
+            if (box.style.display !== "none") {
+                box.innerHTML = formatNewsPreviewHtml(textarea.value);
+            }
+        });
+    }
+
+    const isShowingPreview = box.style.display !== "none";
+    if (isShowingPreview) {
+        box.style.display = "none";
+        textarea.style.display = "block";
+        btn.innerHTML = "👁️ Ver resultado (Vista previa)";
+        btn.style.background = "#2e7d32";
+    } else {
+        box.innerHTML = formatNewsPreviewHtml(textarea.value) || "<p style='color:#aaa;font-style:italic;'>Escribe o inserta HTML arriba para ver el resultado...</p>";
+        box.style.display = "block";
+        textarea.style.display = "none";
+        btn.innerHTML = "✏️ Volver a editar código";
+        btn.style.background = "#d84315";
+    }
+}
+window.toggleHtmlPreview = toggleHtmlPreview;
+
 function saveNewsCollection(collection) {
     try {
         localStorage.setItem(NEWS_COLLECTION_KEY, JSON.stringify(collection));
@@ -3450,6 +3498,7 @@ function renderNewsAdminList() {
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<img src=&quot;', '&quot; alt=&quot;Imagen&quot; style=&quot;width:100%; border-radius:8px; margin:15px 0;&quot;>')" style="padding:4px 10px; background:#122b42; color:#81C784; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Imagen HTML">🖼️ Imagen HTML</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<p>', '</p>')" style="padding:4px 10px; background:#1e3a5f; color:#81D4FA; border:1px solid #29b6f6; border-radius:4px; font-weight:bold; cursor:pointer;" title="Etiqueta HTML Párrafo">&lt;&gt; HTML</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<div style=&quot;margin:20px 0;padding:16px 20px;background:rgba(199,140,50,0.12);border-left:4px solid #C78C32;border-radius:10px;color:#fff;&quot;><h3 style=&quot;margin-top:0;color:#F0D7A2;&quot;>🏆 Título destacado</h3><p style=&quot;margin-bottom:0;&quot;>', '</p></div>')" style="padding:4px 10px; background:#C78C32; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" title="Cuadro Destacado">🏆 Cuadro Destacado</button>
+                <button type="button" id="previewBtn_newsArticle_${item.id}_es" class="wysiwyg-btn" onclick="toggleHtmlPreview('newsArticle_${item.id}_es', 'previewBtn_newsArticle_${item.id}_es', 'previewBox_newsArticle_${item.id}_es')" style="padding:4px 12px; background:#2e7d32; color:#fff; border:1px solid #4caf50; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:auto;" title="Ver resultado de cómo quedará">👁️ Ver resultado (Vista previa)</button>
             </div>
             <textarea id="newsArticle_${item.id}_es" rows="6">${escapeHtml(item.article?.es || "")}</textarea>
 
