@@ -3683,12 +3683,12 @@ async function saveNewNews() {
         const tagsField = document.getElementById("newNewsTags");
         const seoTitleField = document.getElementById("newNewsSeoTitle_es");
         const seoDescriptionField = document.getElementById("newNewsSeoDescription_es");
-        if (statusInput) statusInput.value = "draft";
+        if (statusInput) statusInput.value = "published";
         if (publishInput) publishInput.value = "";
         if (slugField) slugField.value = "";
         if (categoryField) categoryField.value = "";
         if (playerField) playerField.value = "";
-        if (tagsField) tagsField.value = "";
+        if (tagsField) tagsField.value = "squash, psavalencia, psasquashtour";
         if (seoTitleField) seoTitleField.value = "";
         if (seoDescriptionField) seoDescriptionField.value = "";
         pendingNewsImageSrc = "";
@@ -3752,6 +3752,11 @@ function initNewsAdmin() {
             slugInput.dataset.edited = slugInput.value ? "1" : "";
         });
     }
+
+    const statusSelect = document.getElementById("newNewsStatus");
+    const tagsField = document.getElementById("newNewsTags");
+    if (statusSelect) statusSelect.value = "published";
+    if (tagsField && !tagsField.value) tagsField.value = "squash, psavalencia, psasquashtour";
 
     renderNewsDeleteSelect();
     renderNewsAdminList();

@@ -273,8 +273,8 @@
                 <div>
                     <label for="newNewsStatus" class="field-label">Estado</label>
                     <select id="newNewsStatus">
+                        <option value="published" selected>Publicar ahora</option>
                         <option value="draft">Borrador</option>
-                        <option value="published">Publicar ahora</option>
                         <option value="scheduled">Programar publicación</option>
                     </select>
                 </div>
@@ -309,7 +309,7 @@
             <input id="newNewsCategory" type="text" placeholder="Torneo, Jugadores, Resultados...">
 
             <label for="newNewsTags" class="field-label">Etiquetas</label>
-            <input id="newNewsTags" type="text" placeholder="squash, valencia, semifinales">
+            <input id="newNewsTags" type="text" value="squash, psavalencia, psasquashtour" placeholder="squash, psavalencia, psasquashtour">
 
             <label for="newNewsSeoTitle_es" class="field-label">SEO title ES</label>
             <input id="newNewsSeoTitle_es" type="text" placeholder="Título SEO para buscadores">
@@ -475,7 +475,7 @@
 window.ADMIN_DEFAULT_SECTION = "news-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260807-v11"></script>
+<script src="js/admin.js?v=20260807-v14"></script>
 
 </body>
 
