@@ -1,0 +1,12 @@
+# Este despliegue en Vercel solo existe para /api/generate-news (Centro de Prensa IA).
+# El sitio público real se sirve desde GitHub Pages; no hace falta duplicar aquí
+# los assets pesados ni las carpetas que no usa la función serverless.
+dist/
+assets/
+docker/
+supabase/
+.github/
+backups/
+*.mp4
+*.mov
+*.zip

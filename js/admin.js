@@ -97,11 +97,13 @@ const ADMIN_SECTION_IDS = [
     "programming-admin-panel",
     "draw-schedule-panel",
     "draw-builder-panel",
-    "draw-results-panel"
+    "draw-results-panel",
+    "ai-news-panel"
 ];
 const ADMIN_SECTION_TO_PAGE = {
     dashboard: "admin-dashboard.html",
     "news-admin-panel": "admin-news.html",
+    "ai-news-panel": "admin-ai-news.html",
     "live-settings-panel": "admin-streaming.html",
     "sponsors-admin-panel": "admin-sponsors.html",
     "gallery-admin-panel": "admin-gallery.html",
@@ -216,6 +218,30 @@ function ensureProgrammingAdminPanel() {
 function ensureProgrammingAdminUi() {
     ensureProgrammingAdminMenuLink();
     ensureProgrammingAdminPanel();
+}
+
+// Inyecta el enlace del Centro de Prensa IA en el menú de todas las páginas admin
+// sin tener que editar el <nav> de cada admin-*.html a mano (mismo patrón que Programación).
+function ensureAiNewsAdminMenuLink() {
+    const nav = document.querySelector(".sidebar nav");
+    if (!nav) return;
+
+    const existing = nav.querySelector('a[data-section="ai-news-panel"]');
+    if (existing) return;
+
+    const link = document.createElement("a");
+    link.setAttribute("href", "#ai-news-panel");
+    link.setAttribute("data-section", "ai-news-panel");
+    link.textContent = "📰 Centro de Prensa IA";
+
+    const newsLink = nav.querySelector('a[data-section="news-admin-panel"]');
+    if (newsLink && newsLink.nextSibling) {
+        nav.insertBefore(link, newsLink.nextSibling);
+    } else if (newsLink) {
+        nav.appendChild(link);
+    } else {
+        nav.insertBefore(link, nav.firstChild);
+    }
 }
 
 function parseStorageJson(key, fallbackValue) {
@@ -1047,6 +1073,7 @@ async function startAdminModulesOnce() {
     adminStartPromise = (async () => {
         bindAdminErrorLogging();
         ensureProgrammingAdminUi();
+        ensureAiNewsAdminMenuLink();
         bindAdminSectionView();
 
         if (window.PSACloudStore?.isReady?.()) {
@@ -1078,6 +1105,7 @@ async function startAdminModulesOnce() {
         await safeRun(async () => initGalleryAdmin());
         await safeRun(async () => initProgrammingAdmin());
         await safeRun(async () => initDrawAdmin());
+        await safeRun(async () => { if (typeof initAiNewsAdmin === "function") initAiNewsAdmin(); });
     })();
 
     return adminStartPromise;

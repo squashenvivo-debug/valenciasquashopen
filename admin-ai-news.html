@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PSA Valencia Open | Admin</title>
+
+<link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+
+<link rel="stylesheet" href="css/admin.css">
+
+</head>
+
+<body>
+
+<section id="admin-auth" class="admin-auth-screen">
+    <div class="admin-auth-card">
+        <h1>Acceso Admin</h1>
+        <p class="admin-muted">Inicia sesión con tu cuenta de Supabase para acceder al panel.</p>
+
+        <label for="adminEmail" class="field-label">Email</label>
+        <input id="adminEmail" type="email" placeholder="admin@tu-dominio.com" autocomplete="username">
+
+        <label for="adminPassword" class="field-label">Contraseña</label>
+        <input id="adminPassword" type="password" placeholder="********" autocomplete="current-password">
+
+        <div class="results-actions">
+            <button id="adminLoginBtn" type="button">Entrar</button>
+        </div>
+
+        <p id="adminAuthStatus" class="admin-status" aria-live="polite"></p>
+    </div>
+</section>
+
+<div class="admin" id="adminApp" hidden>
+
+    <aside class="sidebar">
+
+        <h2>ADMIN</h2>
+
+        <nav>
+
+            <a href="#dashboard" data-section="dashboard">Dashboard</a>
+
+            <a href="#news-admin-panel" data-section="news-admin-panel">Noticias</a>
+
+            <a href="#live-settings-panel" data-section="live-settings-panel">Streaming</a>
+
+            <a href="#sponsors-admin-panel" data-section="sponsors-admin-panel">Sponsors</a>
+
+            <a href="#gallery-admin-panel" data-section="gallery-admin-panel">Galería</a>
+
+            <a href="#hero-admin-panel" data-section="hero-admin-panel">Hero</a>
+
+            <a href="#tournament-mode-panel" data-section="tournament-mode-panel">Configuración</a>
+
+            <a href="#tournament-mode-panel" data-section="tournament-mode-panel">Torneo</a>
+
+            <a href="#tournament-text-panel" data-section="tournament-text-panel">Texto Torneo</a>
+
+            <a href="#players-admin-panel" data-section="players-admin-panel">Jugadores</a>
+
+            <a href="#draw-schedule-panel" data-section="draw-schedule-panel">Cuadro</a>
+
+            <a href="#draw-builder-panel" data-section="draw-builder-panel">Cruces</a>
+
+            <a href="#draw-results-panel" data-section="draw-results-panel">Resultados</a>
+
+            <button id="adminLogoutBtn" type="button" class="sidebar-logout-btn">Cerrar sesión</button>
+
+            <a href="index.html" class="menu-exit-link">Salir a Inicio</a>
+
+        </nav>
+
+    </aside>
+
+    <main class="content">
+
+        <section class="admin-card ai-news-card" id="ai-news-panel">
+
+            <h2>📰 Centro de Prensa IA</h2>
+            <p class="admin-muted">
+                Consulta los partidos disputados desde la última noticia publicada, detecta automáticamente la
+                historia de la jornada y genera 3 versiones del artículo. No se publica nada sin tu revisión.
+            </p>
+
+            <div class="ai-news-controls">
+                <div>
+                    <label for="aiNewsTone" class="field-label">Tono</label>
+                    <select id="aiNewsTone">
+                        <option value="objetivo">Objetivo</option>
+                        <option value="periodistico" selected>Periodístico</option>
+                        <option value="emocionante">Emocionante</option>
+                        <option value="sensacionalista">Sensacionalista</option>
+                        <option value="formal-psa">Formal PSA</option>
+                        <option value="seo">SEO</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="aiNewsLength" class="field-label">Longitud</label>
+                    <select id="aiNewsLength">
+                        <option value="200">200 palabras</option>
+                        <option value="500" selected>500 palabras</option>
+                        <option value="800">800 palabras</option>
+                        <option value="1200">1200 palabras</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="aiNewsLanguage" class="field-label">Idioma</label>
+                    <select id="aiNewsLanguage">
+                        <option value="es" selected>Español</option>
+                        <option value="en">Inglés</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-actions">
+                <button id="generateAiNewsBtn" type="button">📰 Generar noticia IA</button>
+            </div>
+
+            <p id="aiNewsStatus" class="admin-status" aria-live="polite"></p>
+
+            <div id="aiNewsStoryBox" class="ai-news-story-box" hidden></div>
+
+            <div id="aiNewsResults" class="ai-news-results"></div>
+
+            <section id="aiNewsPublishPanel" class="ai-news-publish-panel" hidden>
+                <h3 class="gallery-admin-subtitle">Publicar versión seleccionada</h3>
+                <p class="admin-muted">Revisa los datos, sube una foto y publica. Se guarda igual que una noticia manual.</p>
+
+                <label for="aiNewsPublishImage" class="field-label">Foto de la noticia</label>
+                <input id="aiNewsPublishImage" type="file" accept="image/*">
+
+                <label for="aiNewsPublishCategory" class="field-label">Categoría</label>
+                <input id="aiNewsPublishCategory" type="text" placeholder="Resultados, Crónica...">
+
+                <label for="aiNewsPublishPlayer" class="field-label">Jugador destacado (opcional)</label>
+                <input id="aiNewsPublishPlayer" type="text">
+
+                <label for="aiNewsPublishTags" class="field-label">Etiquetas (separadas por coma)</label>
+                <input id="aiNewsPublishTags" type="text" value="squash, psavalencia, psasquashtour">
+
+                <label for="aiNewsPublishStatus" class="field-label">Estado</label>
+                <select id="aiNewsPublishStatus">
+                    <option value="published" selected>Publicar ahora</option>
+                    <option value="draft">Guardar como borrador</option>
+                    <option value="scheduled">Programar</option>
+                </select>
+
+                <label for="aiNewsPublishAt" class="field-label">Fecha de publicación (si programada)</label>
+                <input id="aiNewsPublishAt" type="datetime-local">
+
+                <div class="results-actions">
+                    <button id="aiNewsConfirmPublishBtn" type="button">Publicar noticia</button>
+                    <button id="aiNewsCancelPublishBtn" type="button" class="btn-secondary-admin">Cancelar</button>
+                </div>
+
+                <p id="aiNewsPublishStatusMsg" class="admin-status" aria-live="polite"></p>
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
+<script>
+window.ADMIN_DEFAULT_SECTION = "ai-news-panel";
+window.ADMIN_MULTI_PAGE_MODE = true;
+</script>
+<script src="js/admin.js?v=20260803-9"></script>
+<script src="js/ai-news.js?v=20260807-1"></script>
+
+</body>
+
+</html>

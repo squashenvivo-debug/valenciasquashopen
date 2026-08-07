@@ -18,5 +18,7 @@ window.PSA_CONFIG = Object.assign({
     supabaseAnonKey: "sb_publishable_lTEaFAp9lgMMInv-0TjeCA_ViWtDg2J",
     psaApiKey: localStorage.getItem("psaApiKey") || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f",
     psaTournamentId: localStorage.getItem("psaTournamentId") || "12711",
-    assetCdnBase: getLocalhostCdnFallback()
+    assetCdnBase: getLocalhostCdnFallback(),
+    // URL base del despliegue de Vercel que expone /api/generate-news (Centro de Prensa IA).
+    aiNewsApiBase: localStorage.getItem("aiNewsApiBase") || "https://valenciasquashopen.vercel.app"
 }, window.PSA_CONFIG || {});
