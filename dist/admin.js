@@ -4,6 +4,9 @@
 
 const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
+const PSA_TOURNAMENT_ID_KEY = "psaTournamentId";
+const PSA_API_KEY_KEY = "psaApiKey";
+const INSTAGRAM_WIDGET_KEY = "instagramWidgetCode";
 const DRAW_BRACKET_KEY = "drawBracketState";
 const LIVE_STREAM_URL_KEY = "liveStreamYoutubeUrl";
 const LIVE_STREAM_HISTORY_KEY = "liveStreamYoutubeHistory";
@@ -23,6 +26,9 @@ const LANGS = ["es", "va", "en", "fr"];
 const CLOUD_SYNC_KEYS = [
     TOURNAMENT_MODE_KEY,
     TOURNAMENT_API_URL_KEY,
+    PSA_TOURNAMENT_ID_KEY,
+    PSA_API_KEY_KEY,
+    INSTAGRAM_WIDGET_KEY,
     DRAW_BRACKET_KEY,
     LIVE_STREAM_URL_KEY,
     LIVE_STREAM_HISTORY_KEY,
@@ -34,6 +40,25 @@ const CLOUD_SYNC_KEYS = [
     TOURNAMENT_MANUAL_CONTENT_KEY,
     HERO_SETTINGS_KEY
 ];
+
+// Automatic Supabase Cloud Sync for all admin save operations
+(function installCloudSyncHook() {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function (key, value) {
+        originalSetItem(key, value);
+        if (CLOUD_SYNC_KEYS.includes(key) && window.PSACloudStore && window.PSACloudStore.isReady()) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(key).then(res => {
+                if (res && res.ok) {
+                    console.log(`[CloudSync] Successfully synced '${key}' to Supabase cloud database.`);
+                } else {
+                    console.warn(`[CloudSync] Cloud sync for '${key}' deferred/failed:`, res?.reason);
+                }
+            }).catch(err => {
+                console.error(`[CloudSync] Error syncing '${key}':`, err);
+            });
+        }
+    };
+})();
 
 let drawState = null;
 let pendingGalleryPhotos = [];
@@ -945,6 +970,9 @@ function bindAdminSectionView() {
 function installCloudStorageAutosync() {
     if (storageCloudPatchInstalled) return;
 
+    const cloud = window.PSACloudStore;
+    if (!cloud?.isReady?.()) return;
+
     const syncKeys = new Set(CLOUD_SYNC_KEYS);
     const originalSetItem = localStorage.setItem.bind(localStorage);
     const originalRemoveItem = localStorage.removeItem.bind(localStorage);
@@ -953,12 +981,9 @@ function installCloudStorageAutosync() {
         originalSetItem(key, value);
 
         if (syncKeys.has(key)) {
-            const cloud = window.PSACloudStore;
-            if (cloud?.isReady?.()) {
-                cloud.saveLocalStorageKeyToCloud(key).catch(() => {
-                    // No interrumpimos UX de admin si la nube falla.
-                });
-            }
+            cloud.saveLocalStorageKeyToCloud(key).catch(() => {
+                // No interrumpimos UX de admin si la nube falla.
+            });
         }
     };
 
@@ -966,12 +991,9 @@ function installCloudStorageAutosync() {
         originalRemoveItem(key);
 
         if (syncKeys.has(key)) {
-            const cloud = window.PSACloudStore;
-            if (cloud?.isReady?.()) {
-                cloud.removeLocalStorageKeyFromCloud(key).catch(() => {
-                    // No interrumpimos UX de admin si la nube falla.
-                });
-            }
+            cloud.removeLocalStorageKeyFromCloud(key).catch(() => {
+                // No interrumpimos UX de admin si la nube falla.
+            });
         }
     };
 
@@ -983,29 +1005,6 @@ async function hydrateAdminStateFromCloud() {
     if (!cloud?.isReady?.()) return;
 
     await cloud.syncLocalStorageFromCloud(CLOUD_SYNC_KEYS);
-}
-
-async function backfillCloudFromLocalStorage() {
-    const cloud = window.PSACloudStore;
-    if (!cloud?.isReady?.()) return;
-
-    try {
-        const pulled = await cloud.pullKeys(CLOUD_SYNC_KEYS);
-        if (!pulled?.ok) return;
-
-        const remoteValues = pulled.values || {};
-        for (const key of CLOUD_SYNC_KEYS) {
-            const hasRemoteValue = Object.prototype.hasOwnProperty.call(remoteValues, key);
-            if (hasRemoteValue) continue;
-
-            const localRaw = localStorage.getItem(key);
-            if (localRaw === null || localRaw === undefined) continue;
-
-            await cloud.saveLocalStorageKeyToCloud(key);
-        }
-    } catch (error) {
-        // No bloqueamos el inicio del admin por un backfill puntual.
-    }
 }
 
 function setAdminAuthStatus(message, isError = false) {
@@ -1050,10 +1049,9 @@ async function startAdminModulesOnce() {
         ensureProgrammingAdminUi();
         bindAdminSectionView();
 
-        installCloudStorageAutosync();
         if (window.PSACloudStore?.isReady?.()) {
             await hydrateAdminStateFromCloud();
-            await backfillCloudFromLocalStorage();
+            installCloudStorageAutosync();
         }
 
         adminModulesStarted = true;
@@ -1202,7 +1200,7 @@ async function initAdminAuth() {
 
 function getSavedTournamentMode() {
     const mode = localStorage.getItem(TOURNAMENT_MODE_KEY);
-    return mode === "api" ? "api" : "manual";
+    return mode === "manual" ? "manual" : "api";
 }
 
 function setStatus(message) {
@@ -1214,6 +1212,9 @@ function setStatus(message) {
 function loadTournamentSettings() {
     const mode = getSavedTournamentMode();
     const apiUrl = localStorage.getItem(TOURNAMENT_API_URL_KEY) || "";
+    const psaId = localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || (window.PSA_CONFIG?.psaTournamentId || "12711");
+    const psaToken = localStorage.getItem(PSA_API_KEY_KEY) || (window.PSA_CONFIG?.psaApiKey || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f");
+    const igWidgetCode = localStorage.getItem(INSTAGRAM_WIDGET_KEY) || "";
 
     const selectedInput = document.querySelector(
         `input[name="tournamentMode"][value="${mode}"]`
@@ -1226,13 +1227,41 @@ function loadTournamentSettings() {
         urlInput.value = apiUrl;
         urlInput.disabled = mode !== "api";
     }
+
+    const idInput = document.getElementById("tournamentPsaId");
+    if (idInput) {
+        idInput.value = psaId;
+        idInput.disabled = mode !== "api";
+    }
+
+    const tokenInput = document.getElementById("tournamentPsaToken");
+    if (tokenInput) {
+        tokenInput.value = psaToken;
+        tokenInput.disabled = mode !== "api";
+    }
+
+    const igWidgetInput = document.getElementById("instagramWidgetCode");
+    if (igWidgetInput) {
+        igWidgetInput.value = igWidgetCode;
+    }
+
+    const configGroup = document.getElementById("tournamentApiConfigGroup");
+    if (configGroup) {
+        configGroup.style.display = mode === "api" ? "block" : "none";
+    }
 }
 
-function saveTournamentSettings() {
+async function saveTournamentSettings() {
     const checked = document.querySelector("input[name='tournamentMode']:checked");
-    const mode = checked ? checked.value : "manual";
+    const mode = checked ? checked.value : "api";
     const urlInput = document.getElementById("tournamentApiUrl");
     const apiUrl = (urlInput?.value || "").trim();
+    const idInput = document.getElementById("tournamentPsaId");
+    const psaId = (idInput?.value || "").trim();
+    const tokenInput = document.getElementById("tournamentPsaToken");
+    const psaToken = (tokenInput?.value || "").trim();
+    const igWidgetInput = document.getElementById("instagramWidgetCode");
+    const igWidgetCode = (igWidgetInput?.value || "").trim();
 
     localStorage.setItem(TOURNAMENT_MODE_KEY, mode);
 
@@ -1242,18 +1271,113 @@ function saveTournamentSettings() {
         localStorage.removeItem(TOURNAMENT_API_URL_KEY);
     }
 
+    if (psaId) {
+        localStorage.setItem(PSA_TOURNAMENT_ID_KEY, psaId);
+    } else {
+        localStorage.removeItem(PSA_TOURNAMENT_ID_KEY);
+    }
+
+    if (psaToken) {
+        localStorage.setItem(PSA_API_KEY_KEY, psaToken);
+    } else {
+        localStorage.removeItem(PSA_API_KEY_KEY);
+    }
+
+    if (igWidgetCode) {
+        localStorage.setItem(INSTAGRAM_WIDGET_KEY, igWidgetCode);
+    } else {
+        localStorage.removeItem(INSTAGRAM_WIDGET_KEY);
+    }
+
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_MODE_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(TOURNAMENT_API_URL_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_TOURNAMENT_ID_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(PSA_API_KEY_KEY);
+        await window.PSACloudStore.saveLocalStorageKeyToCloud(INSTAGRAM_WIDGET_KEY);
+    }
+
     setStatus(
         mode === "api"
-            ? "Guardado: modo API activado."
-            : "Guardado: modo manual activado."
+            ? `Guardado: modo API activado (ID: ${psaId || "12711"}).`
+            : "Guardado: modo manual (sin livescore) activado."
     );
+}
+
+async function fetchPsaTournamentsList() {
+    const select = document.getElementById("psaTournamentSelect");
+    if (!select) return;
+
+    select.innerHTML = '<option value="">⏳ Cargando lista de torneos PSA...</option>';
+
+    try {
+        const proxyUrl = "https://texjzaanugmssmolzwgb.supabase.co/functions/v1/psa-proxy?show_past=true&limit=50";
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+
+        const payload = await response.json();
+        const items = Array.isArray(payload?.tournaments) ? payload.tournaments : (Array.isArray(payload) ? payload : []);
+
+        const currentPsaId = (document.getElementById("tournamentPsaId")?.value || "").trim();
+
+        let html = '<option value="">-- Seleccionar torneo oficial de la PSA --</option>';
+        html += `<option value="12711" ${currentPsaId === "12711" ? "selected" : ""}>12711 - PSA Valencia Open 2026</option>`;
+
+        items.forEach((item) => {
+            const id = String(item.id || item.slug || "").trim();
+            if (!id || id === "12711") return;
+            const name = item.name || item.title || "Torneo PSA";
+            const dates = item.dates || item.start_date || "";
+            const isSel = id === currentPsaId ? "selected" : "";
+            html += `<option value="${id}" ${isSel}>${id} - ${escapeHtml(name)} ${dates ? "(" + escapeHtml(dates) + ")" : ""}</option>`;
+        });
+
+        select.innerHTML = html;
+    } catch (err) {
+        console.warn("No se pudo cargar el listado automático de torneos PSA:", err);
+        select.innerHTML = `
+            <option value="">-- Escribe el ID del torneo manualmente abajo --</option>
+            <option value="12711">12711 - PSA Valencia Open 2026</option>
+        `;
+    }
+}
+
+function bindPsaTournamentSelector() {
+    const select = document.getElementById("psaTournamentSelect");
+    if (select) {
+        select.addEventListener("change", (e) => {
+            const chosenId = (e.target.value || "").trim();
+            if (chosenId) {
+                const idInput = document.getElementById("tournamentPsaId");
+                if (idInput) {
+                    idInput.value = chosenId;
+                }
+            }
+        });
+    }
+
+    const btn = document.getElementById("fetchPsaTournamentsBtn");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            fetchPsaTournamentsList();
+        });
+    }
 }
 
 function bindTournamentSettings() {
     document.querySelectorAll("input[name='tournamentMode']").forEach((input) => {
         input.addEventListener("change", () => {
+            const isApi = input.value === "api" && input.checked;
+            const configGroup = document.getElementById("tournamentApiConfigGroup");
+            if (configGroup) {
+                configGroup.style.display = isApi ? "block" : "none";
+            }
             const urlInput = document.getElementById("tournamentApiUrl");
-            if (urlInput) urlInput.disabled = input.value !== "api" || !input.checked;
+            if (urlInput) urlInput.disabled = !isApi;
+            const idInput = document.getElementById("tournamentPsaId");
+            if (idInput) idInput.disabled = !isApi;
+            const tokenInput = document.getElementById("tournamentPsaToken");
+            if (tokenInput) tokenInput.disabled = !isApi;
         });
     });
 
@@ -1261,6 +1385,8 @@ function bindTournamentSettings() {
     if (saveButton) {
         saveButton.addEventListener("click", saveTournamentSettings);
     }
+
+    bindPsaTournamentSelector();
 }
 
 function updateLiveStatus(message) {
@@ -1303,12 +1429,22 @@ function persistLiveHistory(history) {
     if (normalized.length === 0) {
         localStorage.removeItem(LIVE_STREAM_URL_KEY);
         localStorage.removeItem(LIVE_STREAM_HISTORY_KEY);
+        if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+        }
+        window.PSAOptimizations?.clearFetchCache?.();
         return;
     }
 
     const latest = normalized[normalized.length - 1];
-    localStorage.setItem(LIVE_STREAM_URL_KEY, String(latest.url || "").trim());
+    const latestUrl = String(latest.url || "").trim();
+    localStorage.setItem(LIVE_STREAM_URL_KEY, latestUrl);
     localStorage.setItem(LIVE_STREAM_HISTORY_KEY, JSON.stringify(normalized));
+
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+    }
+    window.PSAOptimizations?.clearFetchCache?.();
 }
 
 function renderLiveHistoryAdminList(history = readLiveHistory()) {
@@ -1547,18 +1683,66 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
+function extractStringFromLocalized(val) {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string") {
+        const trimmed = val.trim();
+        if (trimmed.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && typeof parsed === "object") {
+                    return extractStringFromLocalized(parsed);
+                }
+            } catch (e) {}
+        }
+        return val;
+    }
+    if (typeof val === "number" || typeof val === "boolean") return String(val);
+    if (typeof val === "object") {
+        if (typeof val.es === "string") return val.es;
+        if (typeof val.va === "string") return val.va;
+        if (typeof val.en === "string") return val.en;
+        if (typeof val.fr === "string") return val.fr;
+        for (const k in val) {
+            if (typeof val[k] === "string") return val[k];
+            if (typeof val[k] === "object" && val[k] !== null) {
+                const sub = extractStringFromLocalized(val[k]);
+                if (sub) return sub;
+            }
+        }
+    }
+    return "";
+}
+
 function normalizeLocalizedText(value) {
-    if (value && typeof value === "object") {
-        const base = value.es || value.va || value.en || value.fr || "";
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && typeof parsed === "object") {
+                    value = parsed;
+                }
+            } catch (e) {}
+        }
+    }
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+        const esStr = extractStringFromLocalized(value.es);
+        const vaStr = extractStringFromLocalized(value.va);
+        const enStr = extractStringFromLocalized(value.en);
+        const frStr = extractStringFromLocalized(value.fr);
+        const base = esStr || vaStr || enStr || frStr || "";
+
         return {
-            es: String(value.es ?? base),
-            va: String(value.va ?? base),
-            en: String(value.en ?? base),
-            fr: String(value.fr ?? base)
+            es: esStr || base,
+            va: vaStr || base,
+            en: enStr || base,
+            fr: frStr || base
         };
     }
 
-    const text = String(value || "");
+    const text = extractStringFromLocalized(value);
     return { es: text, va: text, en: text, fr: text };
 }
 
@@ -2183,9 +2367,33 @@ function readNewsCollection() {
     return [];
 }
 
+function insertFormatTag(targetInputId, tagBefore, tagAfter = "") {
+    const el = document.getElementById(targetInputId);
+    if (!el) return;
+
+    const start = el.selectionStart || 0;
+    const end = el.selectionEnd || 0;
+    const selectedText = el.value.substring(start, end) || "Texto";
+    const replacement = tagBefore + selectedText + tagAfter;
+
+    el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
+    el.focus();
+    el.selectionStart = start + tagBefore.length;
+    el.selectionEnd = start + tagBefore.length + selectedText.length;
+}
+window.insertFormatTag = insertFormatTag;
+
 function saveNewsCollection(collection) {
     try {
         localStorage.setItem(NEWS_COLLECTION_KEY, JSON.stringify(collection));
+
+        const cloud = window.PSACloudStore;
+        if (cloud?.isReady?.()) {
+            cloud.saveLocalStorageKeyToCloud(NEWS_COLLECTION_KEY).catch(() => {
+                // Mantenemos al menos la copia local.
+            });
+        }
+
         return true;
     } catch (error) {
         return false;
@@ -3232,6 +3440,17 @@ function renderNewsAdminList() {
             <textarea id="newsSeoDescription_${item.id}_es" rows="3">${escapeHtml(item.seo?.description?.es || "")}</textarea>
 
             <label class="field-label" for="newsArticle_${item.id}_es">Artículo ES</label>
+            <div class="wysiwyg-toolbar" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:6px; background:#081a2a; border:1px solid #1a2a3a; border-radius:6px;">
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<strong>', '</strong>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; font-weight:bold; cursor:pointer;" title="Negrita"><b>B</b> Negrita</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<em>', '</em>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; font-style:italic; cursor:pointer;" title="Cursiva"><i>I</i> Cursiva</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<h2>', '</h2>')" style="padding:4px 10px; background:#122b42; color:#F0D7A2; border:1px solid #234567; border-radius:4px; font-weight:bold; cursor:pointer;" title="Subtítulo">H2 Subtítulo</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<span style=&quot;font-size:1.25em;&quot;>', '</span>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Aumentar tamaño">A+ Tamaño</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<ul>\n  <li>', '</li>\n</ul>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Lista">• Lista</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<a href=&quot;https://&quot; target=&quot;_blank&quot;>', '</a>')" style="padding:4px 10px; background:#122b42; color:#64B5F6; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Enlace">🔗 Enlace</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<img src=&quot;', '&quot; alt=&quot;Imagen&quot; style=&quot;width:100%; border-radius:8px; margin:15px 0;&quot;>')" style="padding:4px 10px; background:#122b42; color:#81C784; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Imagen HTML">🖼️ Imagen HTML</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<p>', '</p>')" style="padding:4px 10px; background:#1e3a5f; color:#81D4FA; border:1px solid #29b6f6; border-radius:4px; font-weight:bold; cursor:pointer;" title="Etiqueta HTML Párrafo">&lt;&gt; HTML</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<div style=&quot;margin:20px 0;padding:16px 20px;background:rgba(199,140,50,0.12);border-left:4px solid #C78C32;border-radius:10px;color:#fff;&quot;><h3 style=&quot;margin-top:0;color:#F0D7A2;&quot;>🏆 Título destacado</h3><p style=&quot;margin-bottom:0;&quot;>', '</p></div>')" style="padding:4px 10px; background:#C78C32; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" title="Cuadro Destacado">🏆 Cuadro Destacado</button>
+            </div>
             <textarea id="newsArticle_${item.id}_es" rows="6">${escapeHtml(item.article?.es || "")}</textarea>
 
             <p class="admin-muted">URL pública: <a href="${escapeHtml(getNewsPublicUrl(item))}" target="_blank" rel="noopener noreferrer">${escapeHtml(getNewsPublicUrl(item))}</a></p>
@@ -3642,6 +3861,10 @@ function readPlayersFromStorage() {
 function savePlayersToStorage(collection) {
     try {
         localStorage.setItem(PLAYERS_COLLECTION_KEY, JSON.stringify(collection));
+        if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+            window.PSACloudStore.saveLocalStorageKeyToCloud(PLAYERS_COLLECTION_KEY);
+        }
+        window.PSAOptimizations?.clearFetchCache?.();
         return true;
     } catch (error) {
         return false;
@@ -4310,7 +4533,6 @@ function buildDrawBuilderSelect(selectId, currentName, players) {
         const selected = matchedPlayer?.id === player.id ? "selected" : "";
         options.push(`<option value="${escapeHtml(player.id)}" ${selected}>${escapeHtml(label)}</option>`);
     });
-
     if (!isBye && !isTbd && !matchedPlayer) {
         options.unshift(`<option value="__KEEP__" selected>${escapeHtml(cleanName)}</option>`);
     }
@@ -4329,19 +4551,12 @@ async function renderDrawBuilder() {
 
     const players = await getDrawBuilderPlayers();
     const roundOneMatches = drawState.rounds[0].matches;
-    const forced = getForcedSeedAssignments(players, roundOneMatches.length);
 
     host.innerHTML = roundOneMatches.map((match, index) => {
         const p1SelectId = `drawBuilder_${index}_p1`;
         const p2SelectId = `drawBuilder_${index}_p2`;
-        const forcedP1 = forced.bySlot[`${index}_p1`] || "";
-        const forcedP2 = forced.bySlot[`${index}_p2`] || "";
-        const p1CurrentName = forcedP1
-            ? (formatDrawPlayerName(players.find((entry) => entry.id === forcedP1)) || match?.p1?.name)
-            : match?.p1?.name;
-        const p2CurrentName = forcedP2
-            ? (formatDrawPlayerName(players.find((entry) => entry.id === forcedP2)) || match?.p2?.name)
-            : match?.p2?.name;
+        const p1CurrentName = match?.p1?.name;
+        const p2CurrentName = match?.p2?.name;
 
         return `
             <article class="draw-builder-card" data-match-index="${index}">
@@ -4354,21 +4569,7 @@ async function renderDrawBuilder() {
         `;
     }).join("");
 
-    const topSelect = document.getElementById("drawBuilder_0_p1");
-    const bottomSelect = document.getElementById(`drawBuilder_${Math.max(0, roundOneMatches.length - 1)}_p2`);
-
-    if (topSelect && forced.seed1?.id) {
-        topSelect.value = forced.seed1.id;
-        topSelect.disabled = true;
-    }
-    if (bottomSelect && forced.seed2?.id) {
-        bottomSelect.value = forced.seed2.id;
-        bottomSelect.disabled = true;
-    }
-
-    if (forced.seed1?.id && forced.seed2?.id) {
-        updateDrawBuilderStatus("Seed 1 fijado arriba y seed 2 fijado abajo automáticamente.");
-    }
+    updateDrawBuilderStatus("Selecciona libremente cada jugador para los cruces.");
 }
 
 function buildDrawSlotFromSelection(selectedValue, existingSlot, players) {
@@ -4386,7 +4587,9 @@ function buildDrawSlotFromSelection(selectedValue, existingSlot, players) {
     }
 
     const player = players.find((entry) => entry.id === selectedValue);
-    if (!player) return { name: "TBD" };
+    if (!player) {
+        return { name: "TBD" };
+    }
 
     return {
         name: formatDrawPlayerName(player) || player.name,
@@ -4400,17 +4603,11 @@ async function saveDrawBuilderAssignments() {
 
     const players = await getDrawBuilderPlayers();
     const roundOneMatches = drawState.rounds[0].matches;
-    const forced = getForcedSeedAssignments(players, roundOneMatches.length);
     const selections = [];
 
     roundOneMatches.forEach((match, index) => {
-        let p1Value = document.getElementById(`drawBuilder_${index}_p1`)?.value || "__TBD__";
-        let p2Value = document.getElementById(`drawBuilder_${index}_p2`)?.value || "__TBD__";
-
-        const forcedP1 = forced.bySlot[`${index}_p1`];
-        const forcedP2 = forced.bySlot[`${index}_p2`];
-        if (forcedP1) p1Value = forcedP1;
-        if (forcedP2) p2Value = forcedP2;
+        const p1Value = document.getElementById(`drawBuilder_${index}_p1`)?.value || "__TBD__";
+        const p2Value = document.getElementById(`drawBuilder_${index}_p2`)?.value || "__TBD__";
 
         selections.push({
             index,
@@ -4456,7 +4653,7 @@ async function saveDrawBuilderAssignments() {
     populateScheduleRoundSelect();
     fillMatchEditor();
     fillScheduleEditor();
-    updateDrawBuilderStatus("Cruces guardados correctamente (seed 1 arriba, seed 2 abajo, sin duplicados).");
+    updateDrawBuilderStatus("Cruces guardados correctamente.");
 }
 
 function initDrawBuilder() {
@@ -4595,13 +4792,20 @@ function populateRoundSelect() {
 
 async function saveDrawState() {
     localStorage.setItem(DRAW_BRACKET_KEY, JSON.stringify(drawState));
-    if (window.PSACloudStore?.isReady?.()) {
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
         try {
-            await window.PSACloudStore.saveLocalStorageKeyToCloud(DRAW_BRACKET_KEY);
-        } catch (error) {
-            console.error("Error guardando cuadro en la nube:", error);
+            const res = await window.PSACloudStore.saveLocalStorageKeyToCloud(DRAW_BRACKET_KEY);
+            if (res && res.ok) {
+                updateScheduleStatus("Horario guardado y sincronizado online.");
+                updateDrawStatus("Cuadro guardado y sincronizado online.");
+            } else {
+                updateScheduleStatus("Horario guardado en este navegador.");
+            }
+        } catch (err) {
+            console.error("Error guardando cuadro en la nube:", err);
         }
     }
+    window.PSAOptimizations?.clearFetchCache?.();
 }
 
 async function saveMatchResult() {
@@ -4634,7 +4838,7 @@ async function saveMatchResult() {
     await saveDrawState();
     populateRoundSelect();
     populateScheduleRoundSelect();
-    updateDrawStatus("Resultado guardado y cuadro actualizado online.");
+    updateDrawStatus("Resultado guardado y cuadro actualizado.");
 }
 
 function getSelectedScheduleMatch() {
@@ -4686,12 +4890,18 @@ function populateScheduleMatchSelect() {
     if (!drawState || !roundSelect || !matchSelect) return;
 
     const roundIndex = Number(roundSelect.value);
-    const round = drawState.rounds[roundIndex];
-
+    const round = drawState?.rounds?.[roundIndex];
     matchSelect.innerHTML = "";
+
+    if (!round || !Array.isArray(round.matches)) {
+        matchSelect.innerHTML = '<option value="" selected>Sin partidos programables</option>';
+        fillScheduleEditor();
+        return;
+    }
 
     const schedulableMatches = [];
     round.matches.forEach((match, i) => {
+        if (!match) return;
         const hasBye = isByePlayer(match.p1?.name) || isByePlayer(match.p2?.name);
         if (!hasBye) {
             schedulableMatches.push(i);
@@ -4704,22 +4914,24 @@ function populateScheduleMatchSelect() {
         return;
     }
 
-    schedulableMatches.forEach((matchIndex) => {
-        matchSelect.innerHTML += `<option value="${matchIndex}">Partido ${matchIndex + 1}</option>`;
-    });
+    const options = schedulableMatches.map((matchIndex) => `<option value="${matchIndex}">Partido ${matchIndex + 1}</option>`);
+    matchSelect.innerHTML = options.join("");
 
     fillScheduleEditor();
 }
 
 function populateScheduleRoundSelect() {
     const roundSelect = document.getElementById("scheduleRoundSelect");
-    if (!drawState || !roundSelect) return;
+    if (!drawState || !Array.isArray(drawState.rounds) || !roundSelect) return;
 
-    roundSelect.innerHTML = "";
+    const options = [];
     drawState.rounds.forEach((round, i) => {
-        roundSelect.innerHTML += `<option value="${i}">${round.title}</option>`;
+        if (round && round.title) {
+            options.push(`<option value="${i}">${round.title}</option>`);
+        }
     });
 
+    roundSelect.innerHTML = options.join("");
     populateScheduleMatchSelect();
 }
 
@@ -4733,7 +4945,7 @@ async function saveMatchSchedule() {
     selected.match.date = newDate;
 
     await saveDrawState();
-    updateScheduleStatus("Horario guardado correctamente y actualizado online.");
+    updateScheduleStatus("Horario guardado correctamente y sincronizado en la nube.");
 }
 
 function updateProgrammingStatus(message) {
@@ -4746,12 +4958,7 @@ function getProgrammingDefaultCollection() {
     return [
         {
             id: createId("program"),
-            dateTime: {
-                es: "Lunes 11 agosto · 20:00",
-                va: "Dilluns 11 agost · 20:00",
-                en: "Monday August 11 · 20:00",
-                fr: "Lundi 11 août · 20:00"
-            },
+            dateTime: "Lunes 11 agosto · 20:00",
             title: {
                 es: "Presentación oficial",
                 va: "Presentació oficial",
@@ -4768,25 +4975,88 @@ function getProgrammingDefaultCollection() {
         },
         {
             id: createId("program"),
-            dateTime: {
-                es: "Martes 12 agosto · 11:00",
-                va: "Dimarts 12 agost · 11:00",
-                en: "Tuesday August 12 · 11:00",
-                fr: "Mardi 12 août · 11:00"
-            },
+            dateTime: "Martes 12 agosto · 11:00",
             title: {
-                es: "Inicio primeras rondas",
-                va: "Inici primeres rondes",
-                en: "Start of first rounds",
-                fr: "Début des premiers tours"
+                es: "Primeras rondas",
+                va: "Primeres rondes",
+                en: "First rounds",
+                fr: "Premiers tours"
             },
             subtitle: {
                 es: "Apertura de pistas y primeros enfrentamientos",
                 va: "Obertura de pistes i primers enfrontaments",
                 en: "Courts open and first matchups",
-                fr: "Ouverture des courts et premiers enfrentements"
+                fr: "Ouverture des courts et premiers affrontements"
             },
             order: 2
+        },
+        {
+            id: createId("program"),
+            dateTime: "Miércoles 13 agosto · 17:00",
+            title: {
+                es: "Octavos de final",
+                va: "Vuitens de final",
+                en: "Round of 16",
+                fr: "Huitièmes de finale"
+            },
+            subtitle: {
+                es: "Jornada de partidos de octavos",
+                va: "Jornada de partits de vuitens",
+                en: "Round of 16 match day",
+                fr: "Journée de matchs des huitièmes"
+            },
+            order: 3
+        },
+        {
+            id: createId("program"),
+            dateTime: "Jueves 14 agosto · 18:00",
+            title: {
+                es: "Cuartos de final",
+                va: "Quarts de final",
+                en: "Quarter-finals",
+                fr: "Quarts de finale"
+            },
+            subtitle: {
+                es: "Partidos decisivos por el pase a semifinales",
+                va: "Partits decisius pel pas a semifinals",
+                en: "Decisive matches for semi-finals qualification",
+                fr: "Matchs décisifs pour la qualification en demi-finales"
+            },
+            order: 4
+        },
+        {
+            id: createId("program"),
+            dateTime: "Viernes 15 agosto · 19:00",
+            title: {
+                es: "Semifinales",
+                va: "Semifinals",
+                en: "Semi-finals",
+                fr: "Demi-finales"
+            },
+            subtitle: {
+                es: "Batallas de alto nivel por un puesto en la gran final",
+                va: "Batalles d'alt nivell per un lloc a la gran final",
+                en: "High-level battles for a spot in the grand final",
+                fr: "Combats de haut niveau pour une place en grande finale"
+            },
+            order: 5
+        },
+        {
+            id: createId("program"),
+            dateTime: "Sábado 16 agosto · 18:30",
+            title: {
+                es: "Gran Final y Entrega de Trofeos",
+                va: "Gran Final i Lliurament de Trofeus",
+                en: "Grand Final & Trophy Ceremony",
+                fr: "Grande Finale et Cérémonie de Remise des Prix"
+            },
+            subtitle: {
+                es: "Partido por el título y ceremonia de premios",
+                va: "Partit pel títol i cerimònia de premis",
+                en: "Championship match and awards ceremony",
+                fr: "Match pour le titre et cérémonie des récompenses"
+            },
+            order: 6
         }
     ];
 }
@@ -4794,14 +5064,9 @@ function getProgrammingDefaultCollection() {
 function normalizeProgrammingItem(item, index = 0) {
     const title = normalizeLocalizedText(item?.title || "");
     const subtitle = normalizeLocalizedText(item?.subtitle || "");
-    const rawDate = item?.dateTime || item?.date || "";
-    const dateTime = typeof rawDate === "object" && rawDate !== null
-        ? normalizeLocalizedText(rawDate)
-        : String(rawDate).trim();
-
     return {
         id: String(item?.id || createId("program")).trim(),
-        dateTime,
+        dateTime: String(item?.dateTime || item?.date || "").trim(),
         title,
         subtitle,
         order: Number(item?.order) || index + 1
@@ -4819,17 +5084,20 @@ function readProgrammingCollection() {
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
-function saveProgrammingCollection(collection) {
+async function saveProgrammingCollection(collection) {
     const normalized = (Array.isArray(collection) ? collection : [])
         .map((item, index) => normalizeProgrammingItem(item, index))
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 
     localStorage.setItem(PROGRAMMING_COLLECTION_KEY, JSON.stringify(normalized));
-    if (window.PSACloudStore?.isReady?.()) {
-        window.PSACloudStore.saveLocalStorageKeyToCloud(PROGRAMMING_COLLECTION_KEY).catch((err) => {
+    if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
+        try {
+            await window.PSACloudStore.saveLocalStorageKeyToCloud(PROGRAMMING_COLLECTION_KEY);
+        } catch (err) {
             console.error("Error guardando programación en la nube:", err);
-        });
+        }
     }
+    window.PSAOptimizations?.clearFetchCache?.();
     return normalized;
 }
 
@@ -5041,16 +5309,9 @@ async function initProgrammingAdmin() {
     }
 }
 
-async function resetDrawState() {
+function resetDrawState() {
     localStorage.removeItem(DRAW_BRACKET_KEY);
-    if (window.PSACloudStore?.isReady?.()) {
-        try {
-            await window.PSACloudStore.removeLocalStorageKeyFromCloud(DRAW_BRACKET_KEY);
-        } catch (err) {
-            console.error("Error al borrar cuadro de la nube:", err);
-        }
-    }
-    updateDrawStatus("Cuadro reseteado en local y en la nube. Recarga para tomar el JSON base.");
+    updateDrawStatus("Cuadro reseteado. Recarga para tomar el JSON base.");
 }
 
 async function createDrawFromZero() {
@@ -5060,27 +5321,49 @@ async function createDrawFromZero() {
     drawState = baseBracket;
     normalizeBracket(drawState);
     autoAdvanceBracket(drawState);
-    await saveDrawState();
+    saveDrawState();
 
     populateRoundSelect();
     populateScheduleRoundSelect();
     await renderDrawBuilder();
-    updateDrawStatus("Cuadro creado desde 0 con cruces base y sincronizado online.");
+    updateDrawStatus("Cuadro creado desde 0 con cruces base.");
     updateScheduleStatus("Cuadro base cargado correctamente.");
 }
 
 async function initDrawAdmin() {
-    const panel = document.getElementById("draw-results-panel");
-    if (!panel) return;
+    const hasDrawControls = document.getElementById("draw-results-panel") ||
+                            document.getElementById("draw-schedule-panel") ||
+                            document.getElementById("draw-builder-panel") ||
+                            document.getElementById("scheduleRoundSelect") ||
+                            document.getElementById("roundSelect");
+    if (!hasDrawControls) return;
 
-    const response = await fetch("data/draw-bracket.json", { cache: "no-store" });
-    const baseBracket = await response.json();
+    let baseBracket = null;
+    try {
+        const response = await fetch("data/draw-bracket.json", { cache: "no-store" });
+        baseBracket = await response.json();
+    } catch (err) {
+        console.error("Error cargando data/draw-bracket.json:", err);
+    }
+
     const stored = localStorage.getItem(DRAW_BRACKET_KEY);
+    let parsed = null;
+    if (stored) {
+        try {
+            parsed = JSON.parse(stored);
+            while (typeof parsed === "string") {
+                parsed = JSON.parse(parsed);
+            }
+        } catch (e) {
+            parsed = null;
+        }
+    }
 
-    drawState = stored ? JSON.parse(stored) : baseBracket;
+    drawState = (parsed?.rounds && Array.isArray(parsed.rounds) && parsed.rounds.length > 0) ? parsed : baseBracket;
+    if (!drawState) return;
+
     normalizeBracket(drawState);
     autoAdvanceBracket(drawState);
-    await saveDrawState();
 
     populateRoundSelect();
     populateScheduleRoundSelect();
@@ -5094,10 +5377,10 @@ async function initDrawAdmin() {
     const saveScheduleBtn = document.getElementById("saveMatchSchedule");
     const createDrawFromZeroBtn = document.getElementById("createDrawFromZero");
 
-    roundSelect.addEventListener("change", populateMatchSelect);
-    matchSelect.addEventListener("change", fillMatchEditor);
-    saveBtn.addEventListener("click", saveMatchResult);
-    resetBtn.addEventListener("click", resetDrawState);
+    if (roundSelect) roundSelect.addEventListener("change", populateMatchSelect);
+    if (matchSelect) matchSelect.addEventListener("change", fillMatchEditor);
+    if (saveBtn) saveBtn.addEventListener("click", saveMatchResult);
+    if (resetBtn) resetBtn.addEventListener("click", resetDrawState);
 
     if (scheduleRoundSelect) {
         scheduleRoundSelect.addEventListener("change", populateScheduleMatchSelect);

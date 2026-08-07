@@ -2367,6 +2367,22 @@ function readNewsCollection() {
     return [];
 }
 
+function insertFormatTag(targetInputId, tagBefore, tagAfter = "") {
+    const el = document.getElementById(targetInputId);
+    if (!el) return;
+
+    const start = el.selectionStart || 0;
+    const end = el.selectionEnd || 0;
+    const selectedText = el.value.substring(start, end) || "Texto";
+    const replacement = tagBefore + selectedText + tagAfter;
+
+    el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
+    el.focus();
+    el.selectionStart = start + tagBefore.length;
+    el.selectionEnd = start + tagBefore.length + selectedText.length;
+}
+window.insertFormatTag = insertFormatTag;
+
 function saveNewsCollection(collection) {
     try {
         localStorage.setItem(NEWS_COLLECTION_KEY, JSON.stringify(collection));
@@ -3424,6 +3440,17 @@ function renderNewsAdminList() {
             <textarea id="newsSeoDescription_${item.id}_es" rows="3">${escapeHtml(item.seo?.description?.es || "")}</textarea>
 
             <label class="field-label" for="newsArticle_${item.id}_es">Artículo ES</label>
+            <div class="wysiwyg-toolbar" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:6px; background:#081a2a; border:1px solid #1a2a3a; border-radius:6px;">
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<strong>', '</strong>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; font-weight:bold; cursor:pointer;" title="Negrita"><b>B</b> Negrita</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<em>', '</em>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; font-style:italic; cursor:pointer;" title="Cursiva"><i>I</i> Cursiva</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<h2>', '</h2>')" style="padding:4px 10px; background:#122b42; color:#F0D7A2; border:1px solid #234567; border-radius:4px; font-weight:bold; cursor:pointer;" title="Subtítulo">H2 Subtítulo</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<span style=&quot;font-size:1.25em;&quot;>', '</span>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Aumentar tamaño">A+ Tamaño</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<ul>\n  <li>', '</li>\n</ul>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Lista">• Lista</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<a href=&quot;https://&quot; target=&quot;_blank&quot;>', '</a>')" style="padding:4px 10px; background:#122b42; color:#64B5F6; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Enlace">🔗 Enlace</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<img src=&quot;', '&quot; alt=&quot;Imagen&quot; style=&quot;width:100%; border-radius:8px; margin:15px 0;&quot;>')" style="padding:4px 10px; background:#122b42; color:#81C784; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Imagen HTML">🖼️ Imagen HTML</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<p>', '</p>')" style="padding:4px 10px; background:#1e3a5f; color:#81D4FA; border:1px solid #29b6f6; border-radius:4px; font-weight:bold; cursor:pointer;" title="Etiqueta HTML Párrafo">&lt;&gt; HTML</button>
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newsArticle_${item.id}_es', '<div style=&quot;margin:20px 0;padding:16px 20px;background:rgba(199,140,50,0.12);border-left:4px solid #C78C32;border-radius:10px;color:#fff;&quot;><h3 style=&quot;margin-top:0;color:#F0D7A2;&quot;>🏆 Título destacado</h3><p style=&quot;margin-bottom:0;&quot;>', '</p></div>')" style="padding:4px 10px; background:#C78C32; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" title="Cuadro Destacado">🏆 Cuadro Destacado</button>
+            </div>
             <textarea id="newsArticle_${item.id}_es" rows="6">${escapeHtml(item.article?.es || "")}</textarea>
 
             <p class="admin-muted">URL pública: <a href="${escapeHtml(getNewsPublicUrl(item))}" target="_blank" rel="noopener noreferrer">${escapeHtml(getNewsPublicUrl(item))}</a></p>
