@@ -536,7 +536,13 @@
                 const title = getLocalizedText(item.title, lang);
                 const article = getLocalizedText(item.article, lang);
                 const seoDescription = getLocalizedText(item.seo?.description, lang);
-                const summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
+                let summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
+                if (title) {
+                    const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
+                    if (cleanTitle && summaryBase.toLowerCase().startsWith(cleanTitle.toLowerCase())) {
+                        summaryBase = summaryBase.slice(cleanTitle.length).replace(/^[\s:.\-–—]+/, "").trim();
+                    }
+                }
                 const summary = summaryBase.length > 150 ? `${summaryBase.slice(0, 150)}...` : summaryBase;
                 const imageSrc = item.imageSrc || item.image || "";
                 const newsUrl = getNewsPublicUrl(item);
