@@ -2401,7 +2401,11 @@ function insertFormatTag(targetInputId, tagBefore, tagAfter = "") {
 
     const start = el.selectionStart || 0;
     const end = el.selectionEnd || 0;
-    const selectedText = el.value.substring(start, end) || "Texto";
+    // Sin texto seleccionado, insertamos la etiqueta vacía y dejamos el cursor dentro
+    // para escribir directamente. Antes se metía un placeholder "Texto" que, si el
+    // botón se pulsaba varias veces seguidas sin seleccionar nada, quedaba anidado
+    // y a veces se publicaba tal cual en la noticia.
+    const selectedText = el.value.substring(start, end);
     const replacement = tagBefore + selectedText + tagAfter;
 
     el.value = el.value.substring(0, start) + replacement + el.value.substring(end);
