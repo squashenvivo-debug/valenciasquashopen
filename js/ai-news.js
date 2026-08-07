@@ -1,24 +1,23 @@
 /**
  * ai-news.js — Centro de Prensa IA (admin-ai-news.html)
  *
- * Lógica de cliente: consulta PSA, llama al backend serverless (api/generate-news
- * en Vercel) que decide la historia del día y genera 3 versiones con OpenAI,
- * y publica la versión elegida reutilizando el mismo almacén de noticias
- * (localStorage + Supabase) que ya usa admin-news.html.
+ * Lógica de cliente: pide al backend serverless (api/generate-news en Vercel)
+ * que genere la noticia, y publica la versión elegida reutilizando el mismo
+ * almacén de noticias (localStorage + Supabase) que ya usa admin-news.html.
+ *
+ * El backend hace todo el trabajo pesado (consultar PSA, decidir la historia,
+ * llamar a OpenAI): este archivo solo manda las preferencias (tono/longitud/
+ * idioma), pinta el resultado y gestiona la publicación. No necesita ninguna
+ * configuración adicional aparte de `aiNewsApiBase` en config.js.
  *
  * Se carga después de js/admin.js en la misma página, así que reutiliza como
  * funciones globales: readNewsCollection, saveNewsCollection, createId,
  * slugifyText, buildLocalizedFromSpanish, uploadNewsImageFile,
- * normalizeStringArray, resolveNewsPublication, escapeHtml, isNewsPublished,
- * getNewsSortTime.
+ * normalizeStringArray, resolveNewsPublication, escapeHtml.
  */
 
 "use strict";
 
-const AI_NEWS_COMPLETED_STATUSES = new Set(["completed", "retired", "walkover"]);
-const AI_NEWS_MAX_MATCHES = 40;
-
-let aiNewsCachedContext = null; // { matches, divisions, tournament } de la última consulta a PSA
 let aiNewsVersions = {}; // version -> artículo actual (con las ediciones del redactor)
 let aiNewsSelectedVersion = null;
 
@@ -41,70 +40,10 @@ function setAiNewsPublishStatus(message, isError = false) {
     el.style.color = isError ? "#ff8f8f" : "#93E4A2";
 }
 
-function getLastPublishedTimestamp() {
-    const collection = typeof readNewsCollection === "function" ? readNewsCollection() : [];
-    const published = collection.filter((item) => (typeof isNewsPublished === "function" ? isNewsPublished(item) : true));
-    if (published.length === 0) return 0;
-    return published.reduce((max, item) => Math.max(max, getNewsSortTime(item)), 0);
-}
-
-function getMatchTimestamp(match) {
-    if (!match?.date) return NaN;
-    const time = match.time || "00:00";
-    const parsed = Date.parse(`${match.date}T${time}`);
-    return Number.isFinite(parsed) ? parsed : NaN;
-}
-
-/** Aplana divisions[].brackets[].matches[] y filtra a partidos completados desde la última noticia publicada. */
-function collectRecentCompletedMatches(divisions, sinceTs) {
-    const all = (Array.isArray(divisions) ? divisions : []).flatMap((division) =>
-        (Array.isArray(division?.brackets) ? division.brackets : []).flatMap((bracket) =>
-            Array.isArray(bracket?.matches) ? bracket.matches : []
-        )
-    );
-
-    const completed = all.filter((match) => AI_NEWS_COMPLETED_STATUSES.has(String(match?.status || "")));
-
-    const filtered = sinceTs > 0
-        ? completed.filter((match) => {
-            const ts = getMatchTimestamp(match);
-            // Sin fecha fiable y ya hay noticias previas: mejor excluir que repetir un resultado antiguo.
-            return Number.isFinite(ts) && ts > sinceTs;
-        })
-        : completed;
-
-    return filtered
-        .sort((a, b) => (getMatchTimestamp(b) || 0) - (getMatchTimestamp(a) || 0))
-        .slice(0, AI_NEWS_MAX_MATCHES);
-}
-
-async function fetchPsaSnapshot() {
-    const supabaseUrl = window.PSA_CONFIG?.supabaseUrl;
-    const tournamentId = window.PSA_CONFIG?.psaTournamentId;
-    if (!supabaseUrl || !tournamentId) {
-        throw new Error("Falta configuración de Supabase/torneo PSA.");
-    }
-
-    const url = `${supabaseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true&head_to_head=false`;
-    const response = await fetch(url, { headers: { Accept: "application/json" } });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload?.success === false) {
-        throw new Error(payload?.error || `No se pudo consultar la API de PSA (${response.status}).`);
-    }
-    return payload;
-}
-
-function describeTournamentLocation(tournament) {
-    const location = tournament?.location;
-    if (!location) return "Valencia, España";
-    if (typeof location === "string") return location;
-    return location.city || location.name || location.country || "Valencia, España";
-}
-
 async function runAiNewsGeneration() {
     const apiUrl = getAiNewsApiUrl();
     if (!apiUrl) {
-        setAiNewsStatus("Configura primero la URL del backend IA (aiNewsApiBase) en config.js o localStorage.", true);
+        setAiNewsStatus("Falta configurar aiNewsApiBase en config.js (URL del backend IA en Vercel).", true);
         return;
     }
 
@@ -116,31 +55,7 @@ async function runAiNewsGeneration() {
     if (generateBtn) generateBtn.disabled = true;
 
     try {
-        let context = aiNewsCachedContext;
-
-        if (!context) {
-            setAiNewsStatus("Consultando partidos del PSA Valencia Open...");
-            const snapshot = await fetchPsaSnapshot();
-            const sinceTs = getLastPublishedTimestamp();
-            const matches = collectRecentCompletedMatches(snapshot.divisions, sinceTs);
-
-            if (matches.length === 0) {
-                setAiNewsStatus("No hay partidos nuevos completados desde la última noticia publicada.", true);
-                return;
-            }
-
-            context = {
-                matches,
-                divisions: Array.isArray(snapshot.divisions) ? snapshot.divisions : [],
-                tournament: {
-                    name: snapshot.tournament?.name || "PSA Valencia Open",
-                    location: describeTournamentLocation(snapshot.tournament)
-                }
-            };
-            aiNewsCachedContext = context;
-        }
-
-        setAiNewsStatus(`Analizando ${context.matches.length} partido(s) y generando 3 versiones con IA...`);
+        setAiNewsStatus("Consultando PSA y generando 3 versiones con IA (puede tardar unos segundos)...");
 
         const token = await window.AdminSupabase?.getAccessToken?.();
         const response = await fetch(apiUrl, {
@@ -149,12 +64,7 @@ async function runAiNewsGeneration() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token || ""}`
             },
-            body: JSON.stringify({
-                matches: context.matches,
-                divisions: context.divisions,
-                tournament: context.tournament,
-                options: { tone, length, language }
-            })
+            body: JSON.stringify({ options: { tone, length, language } })
         });
 
         const payload = await response.json().catch(() => ({}));
@@ -438,10 +348,7 @@ function initAiNewsAdmin() {
     const panel = document.getElementById("ai-news-panel");
     if (!panel) return;
 
-    document.getElementById("generateAiNewsBtn")?.addEventListener("click", () => {
-        aiNewsCachedContext = null; // cada pulsación explícita relee PSA por si hay resultados nuevos
-        runAiNewsGeneration();
-    });
+    document.getElementById("generateAiNewsBtn")?.addEventListener("click", runAiNewsGeneration);
 
     document.getElementById("aiNewsConfirmPublishBtn")?.addEventListener("click", confirmPublishAiNews);
     document.getElementById("aiNewsCancelPublishBtn")?.addEventListener("click", () => {

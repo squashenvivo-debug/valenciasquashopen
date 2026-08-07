@@ -1,26 +1,33 @@
 /**
  * /api/generate-news
  *
- * Función serverless de Vercel (Node.js runtime). Recibe los partidos disputados
- * del PSA Valencia Open desde el panel admin (admin-ai-news.html / js/ai-news.js),
- * decide la historia principal de la jornada y genera 3 versiones del artículo
- * (periodística, sensacionalista, SEO) con la Responses API de OpenAI.
+ * Función serverless de Vercel (Node.js runtime). Todo el flujo ocurre aquí,
+ * sin que el panel admin tenga que preparar ni enviar datos:
+ *
+ *   1. Consulta la API oficial de PSA (vía el proxy de Supabase Edge Functions
+ *      que ya usa el resto del proyecto) para traer el cuadro del torneo.
+ *   2. Lee las noticias ya publicadas (Supabase) para saber desde cuándo hay
+ *      que analizar partidos nuevos.
+ *   3. Decide la historia principal de la jornada (lib/newsAnalyzer).
+ *   4. Construye los prompts (lib/newsPrompt) y genera 3 versiones del
+ *      artículo con la Responses API de OpenAI, con el HTML ya listo.
  *
  * La API key de OpenAI vive solo aquí (variable de entorno de Vercel) y nunca
- * llega al navegador. El endpoint exige un token de sesión de Supabase válido,
- * el mismo que usa el panel admin, como control de acceso.
+ * llega al navegador. El endpoint exige un token de sesión de Supabase válido
+ * (el mismo que usa el panel admin) como control de acceso.
  *
- * No publica nada: solo devuelve las 3 versiones para revisión humana.
+ * No publica nada: solo devuelve las versiones generadas para revisión humana.
  */
 
 "use strict";
 
 const { analyzeStory } = require("../lib/newsAnalyzer");
-const { buildPromptsForVersions, ARTICLE_JSON_SCHEMA } = require("../lib/newsPrompt");
+const { buildPromptsForVersions, buildArticleHtml, ARTICLE_JSON_SCHEMA } = require("../lib/newsPrompt");
 
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const OPENAI_TIMEOUT_MS = 45000;
 const MAX_MATCHES_PER_REQUEST = 40;
+const COMPLETED_STATUSES = new Set(["completed", "retired", "walkover"]);
 
 // Ajusta esta lista (o usa la env var ALLOWED_ORIGINS) a los orígenes reales desde los que se llamará al endpoint.
 const DEFAULT_ALLOWED_ORIGINS = [
@@ -66,6 +73,92 @@ async function verifySupabaseUser(token) {
     } catch (error) {
         return null;
     }
+}
+
+/** Trae el cuadro/partidos del torneo a través del proxy de PSA ya desplegado en Supabase Edge Functions. */
+async function fetchPsaSnapshot() {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const tournamentId = process.env.PSA_TOURNAMENT_ID || "12711";
+    if (!supabaseUrl) throw new Error("Falta SUPABASE_URL en el servidor.");
+
+    const url = `${supabaseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true&head_to_head=false`;
+    const response = await fetch(url, { headers: { Accept: "application/json" } });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload?.success === false) {
+        throw new Error(payload?.error || `No se pudo consultar la API de PSA (${response.status}).`);
+    }
+    return payload;
+}
+
+/** Lee la colección de noticias ya publicadas directamente de Supabase (misma tabla que usa el panel admin). */
+async function fetchPublishedNews() {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !anonKey) throw new Error("Falta configuración de Supabase en el servidor.");
+
+    const response = await fetch(`${supabaseUrl}/rest/v1/site_content?id=eq.1&select=qf`, {
+        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` }
+    });
+    if (!response.ok) throw new Error(`No se pudo leer el listado de noticias (${response.status}).`);
+
+    const rows = await response.json().catch(() => []);
+    const rawQf = rows?.[0]?.qf;
+    const collection = typeof rawQf === "string" ? JSON.parse(rawQf || "[]") : rawQf;
+    if (!Array.isArray(collection)) return [];
+
+    const now = Date.now();
+    return collection.filter((item) => {
+        const status = ["draft", "scheduled", "published"].includes(item?.status) ? item.status : "published";
+        if (status === "draft") return false;
+        if (status === "scheduled") {
+            const publishTime = Date.parse(item?.publishAt || "");
+            return Number.isFinite(publishTime) && publishTime <= now;
+        }
+        return true;
+    });
+}
+
+function getLastPublishedTimestamp(publishedNews) {
+    return publishedNews.reduce((max, item) => {
+        const ts = Date.parse(item?.publishAt || item?.createdAt || "");
+        return Number.isFinite(ts) ? Math.max(max, ts) : max;
+    }, 0);
+}
+
+function getMatchTimestamp(match) {
+    if (!match?.date) return NaN;
+    const parsed = Date.parse(`${match.date}T${match.time || "00:00"}`);
+    return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+/** Aplana divisions[].brackets[].matches[] y filtra a partidos completados desde la última noticia publicada. */
+function collectRecentCompletedMatches(divisions, sinceTs) {
+    const all = (Array.isArray(divisions) ? divisions : []).flatMap((division) =>
+        (Array.isArray(division?.brackets) ? division.brackets : []).flatMap((bracket) =>
+            Array.isArray(bracket?.matches) ? bracket.matches : []
+        )
+    );
+
+    const completed = all.filter((match) => COMPLETED_STATUSES.has(String(match?.status || "")));
+
+    const filtered = sinceTs > 0
+        ? completed.filter((match) => {
+            const ts = getMatchTimestamp(match);
+            // Sin fecha fiable y ya hay noticias previas: mejor excluir que repetir un resultado antiguo.
+            return Number.isFinite(ts) && ts > sinceTs;
+        })
+        : completed;
+
+    return filtered
+        .sort((a, b) => (getMatchTimestamp(b) || 0) - (getMatchTimestamp(a) || 0))
+        .slice(0, MAX_MATCHES_PER_REQUEST);
+}
+
+function describeTournamentLocation(tournament) {
+    const location = tournament?.location;
+    if (!location) return "Valencia, España";
+    if (typeof location === "string") return location;
+    return location.city || location.name || location.country || "Valencia, España";
 }
 
 /** Extrae el texto de salida de una respuesta de la Responses API sin depender del SDK oficial. */
@@ -157,21 +250,22 @@ module.exports = async function handler(req, res) {
 
     try {
         const body = req.body && typeof req.body === "object" ? req.body : {};
-        const rawMatches = Array.isArray(body.matches) ? body.matches : [];
-        const divisions = Array.isArray(body.divisions) ? body.divisions : [];
-        const tournament = body.tournament && typeof body.tournament === "object" ? body.tournament : {};
         const options = body.options && typeof body.options === "object" ? body.options : {};
 
-        // Defensa en profundidad: solo partidos realmente completados, y con un tope de tamaño.
-        const completedStatuses = new Set(["completed", "retired", "walkover"]);
-        const matches = rawMatches
-            .filter((match) => completedStatuses.has(String(match?.status || "")))
-            .slice(0, MAX_MATCHES_PER_REQUEST);
+        const [snapshot, publishedNews] = await Promise.all([fetchPsaSnapshot(), fetchPublishedNews()]);
+        const sinceTs = getLastPublishedTimestamp(publishedNews);
+        const matches = collectRecentCompletedMatches(snapshot.divisions, sinceTs);
 
         if (matches.length === 0) {
-            res.status(400).json({ success: false, error: "No hay partidos completados que analizar desde la última noticia publicada." });
+            res.status(400).json({ success: false, error: "No hay partidos nuevos completados desde la última noticia publicada." });
             return;
         }
+
+        const divisions = Array.isArray(snapshot.divisions) ? snapshot.divisions : [];
+        const tournament = {
+            name: snapshot.tournament?.name || "PSA Valencia Open",
+            location: describeTournamentLocation(snapshot.tournament)
+        };
 
         const storyAnalysis = analyzeStory(matches, divisions);
         const prompts = buildPromptsForVersions({ storyAnalysis, matches, tournament, options });
@@ -183,7 +277,7 @@ module.exports = async function handler(req, res) {
                 callOpenAiVersion({ system: prompt.system, user: prompt.user, model, maxOutputTokens }).then((article) => ({
                     version: prompt.version,
                     label: prompt.label,
-                    article
+                    article: { ...article, html: buildArticleHtml(article) }
                 }))
             )
         );

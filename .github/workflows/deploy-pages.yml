@@ -63,10 +63,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           ASSET_CDN_BASE: ${{ secrets.ASSET_CDN_BASE }}
+          AI_NEWS_API_BASE: ${{ secrets.AI_NEWS_API_BASE }}
         run: |
           SUPABASE_URL="${SUPABASE_URL:-https://texjzaanugmssmolzwgb.supabase.co}"
           SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-sb_publishable_lTEaFAp9lgMMInv-0TjeCA_ViWtDg2J}"
           ASSET_CDN_BASE="${ASSET_CDN_BASE:-https://www.psavalenciaopen.com}"
+          AI_NEWS_API_BASE="${AI_NEWS_API_BASE:-https://valenciasquashopen.vercel.app}"
           cat > dist/config.js <<EOF
           /*
            * Runtime configuration injected by CI for GitHub Pages deployment.
@@ -75,11 +77,13 @@ jobs:
             window.PSA_CONFIG = Object.assign({
               supabaseUrl: "",
               supabaseAnonKey: "",
-              assetCdnBase: ""
+              assetCdnBase: "",
+              aiNewsApiBase: ""
             }, window.PSA_CONFIG || {}, {
               supabaseUrl: "${SUPABASE_URL}",
               supabaseAnonKey: "${SUPABASE_ANON_KEY}",
-              assetCdnBase: "${ASSET_CDN_BASE}"
+              assetCdnBase: "${ASSET_CDN_BASE}",
+              aiNewsApiBase: "${AI_NEWS_API_BASE}"
             });
           EOF
 
