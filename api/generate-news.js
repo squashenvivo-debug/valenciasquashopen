@@ -21,8 +21,8 @@
 
 "use strict";
 
-const { analyzeStory } = require("../lib/newsAnalyzer");
-const { buildPromptsForVersions, buildArticleHtml, ARTICLE_JSON_SCHEMA } = require("../lib/newsPrompt");
+const { analyzeStory, buildTournamentPreview } = require("../lib/newsAnalyzer");
+const { buildPromptsForVersions, buildPreviewPrompts, buildArticleHtml, ARTICLE_JSON_SCHEMA } = require("../lib/newsPrompt");
 
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const OPENAI_TIMEOUT_MS = 45000;
@@ -254,21 +254,21 @@ module.exports = async function handler(req, res) {
 
         const [snapshot, publishedNews] = await Promise.all([fetchPsaSnapshot(), fetchPublishedNews()]);
         const sinceTs = getLastPublishedTimestamp(publishedNews);
-        const matches = collectRecentCompletedMatches(snapshot.divisions, sinceTs);
-
-        if (matches.length === 0) {
-            res.status(400).json({ success: false, error: "No hay partidos nuevos completados desde la última noticia publicada." });
-            return;
-        }
-
         const divisions = Array.isArray(snapshot.divisions) ? snapshot.divisions : [];
+        const matches = collectRecentCompletedMatches(divisions, sinceTs);
+
         const tournament = {
             name: snapshot.tournament?.name || "PSA Valencia Open",
             location: describeTournamentLocation(snapshot.tournament)
         };
 
-        const storyAnalysis = analyzeStory(matches, divisions);
-        const prompts = buildPromptsForVersions({ storyAnalysis, matches, tournament, options });
+        // Sin partidos completados todavía (antes de empezar el torneo, o justo tras la última
+        // noticia): en vez de fallar, generamos una previa del torneo a partir del cuadro. Así el
+        // botón siempre produce algo que revisar, incluso sin resultados en vivo.
+        const storyAnalysis = matches.length > 0 ? analyzeStory(matches, divisions) : buildTournamentPreview(divisions);
+        const prompts = matches.length > 0
+            ? buildPromptsForVersions({ storyAnalysis, matches, tournament, options })
+            : buildPreviewPrompts({ preview: storyAnalysis, tournament, options });
         const model = process.env.OPENAI_MODEL || "gpt-5";
         const maxOutputTokens = estimateMaxOutputTokens(options.length);
 
@@ -305,7 +305,8 @@ module.exports = async function handler(req, res) {
                 mainStoryBrief: storyAnalysis.mainStoryBrief,
                 playerOfDay: storyAnalysis.playerOfDay,
                 totalMatchesAnalyzed: storyAnalysis.totalMatchesAnalyzed,
-                topMatches: storyAnalysis.topMatches
+                topMatches: storyAnalysis.topMatches,
+                isPreview: Boolean(storyAnalysis.isPreview)
             },
             versions
         });

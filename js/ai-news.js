@@ -87,7 +87,11 @@ function renderAiNewsStory(story) {
     if (!box || !story) return;
 
     box.hidden = false;
+    const previewNotice = story.isPreview
+        ? `<p class="ai-news-story-label" style="color:#ff8f8f;">⚠️ Modo previa: todavía no hay partidos completados, este texto anticipa el torneo (no es una crónica de resultados).</p>`
+        : "";
     box.innerHTML = `
+        ${previewNotice}
         <p class="ai-news-story-label">Historia detectada: <strong>${escapeHtml(story.mainStoryLabel || "")}</strong></p>
         <p>${escapeHtml(story.mainStoryBrief || "")}</p>
         <p class="admin-muted">Jugador del día: ${escapeHtml(story.playerOfDay || "sin protagonista único")} · ${Number(story.totalMatchesAnalyzed) || 0} partido(s) analizados</p>
