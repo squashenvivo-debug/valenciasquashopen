@@ -69,7 +69,13 @@ async function runAiNewsGeneration() {
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload?.success) {
-            throw new Error(payload?.error || `El backend de IA respondió con error (${response.status}).`);
+            // Si OpenAI falló en las 3 versiones, el motivo real va en versions[].error
+            // (p.ej. cuota agotada); mostrarlo es mucho más útil que el mensaje genérico.
+            const versionErrors = Array.isArray(payload?.versions)
+                ? payload.versions.map((v) => v.error).filter(Boolean)
+                : [];
+            const detail = versionErrors.length > 0 ? versionErrors[0] : (payload?.error || `El backend de IA respondió con error (${response.status}).`);
+            throw new Error(detail);
         }
 
         renderAiNewsStory(payload.story);
@@ -159,6 +165,15 @@ function renderAiNewsVersions(versions, language) {
                     <button type="button" class="ai-news-aceptar-btn" data-version="${escapeHtml(v)}">Aceptar</button>
                     <button type="button" class="ai-news-regenerar-btn btn-secondary-admin" data-version="${escapeHtml(v)}">Regenerar</button>
                 </div>
+
+                <div class="ai-news-chat-box">
+                    <label class="field-label">¿No te gusta? Pide un cambio</label>
+                    <textarea class="ai-news-chat-input" data-version="${escapeHtml(v)}" rows="2" placeholder="Ej: hazlo más corto, quita la última frase, dale más protagonismo a Iván Pérez..."></textarea>
+                    <div class="results-actions">
+                        <button type="button" class="ai-news-refinar-btn" data-version="${escapeHtml(v)}">💬 Aplicar cambio</button>
+                    </div>
+                    <p class="ai-news-chat-status" data-version="${escapeHtml(v)}"></p>
+                </div>
             </article>`;
     }).join("");
 }
@@ -209,6 +224,88 @@ function buildArticleHtml(article) {
     if (article.next_matches) parts.push(`<p><strong>Próximos partidos:</strong> ${article.next_matches}</p>`);
     if (article.closing) parts.push(`<p>${article.closing}</p>`);
     return parts.join("\n");
+}
+
+function getAiNewsRefineApiUrl() {
+    const base = String(window.PSA_CONFIG?.aiNewsApiBase || "").trim().replace(/\/+$/, "");
+    return base ? `${base}/api/refine-news` : "";
+}
+
+function setChatStatus(version, message, isError = false) {
+    const el = document.querySelector(`.ai-news-chat-status[data-version="${CSS.escape(version)}"]`);
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = isError ? "#ff8f8f" : "#93E4A2";
+}
+
+/** Rellena los campos de la tarjeta con el artículo actualizado que devuelve /api/refine-news. */
+function applyRefinedArticleToCard(version, article) {
+    const card = document.querySelector(`.ai-news-version-card[data-version="${CSS.escape(version)}"]`);
+    if (!card) return;
+
+    const setValue = (field, value) => {
+        const el = card.querySelector(`[data-field="${field}"]`);
+        if (el) el.value = value;
+    };
+
+    setValue("title", article.title || "");
+    setValue("subtitle", article.subtitle || "");
+    setValue("lead", article.lead || "");
+    setValue("body_paragraphs", fieldsToTextarea(article.body_paragraphs));
+    setValue("key_moments", fieldsToTextarea(article.key_moments));
+    setValue("player_of_day", article.player_of_day || "");
+    setValue("surprise", article.surprise || "");
+    setValue("next_matches", article.next_matches || "");
+    setValue("closing", article.closing || "");
+
+    aiNewsVersions[version] = { ...aiNewsVersions[version], ...article };
+}
+
+async function refineVersion(version) {
+    const apiUrl = getAiNewsRefineApiUrl();
+    if (!apiUrl) {
+        setChatStatus(version, "Falta configurar aiNewsApiBase en config.js.", true);
+        return;
+    }
+
+    const input = document.querySelector(`.ai-news-chat-input[data-version="${CSS.escape(version)}"]`);
+    const instruction = (input?.value || "").trim();
+    if (!instruction) {
+        setChatStatus(version, "Escribe qué quieres cambiar.", true);
+        return;
+    }
+
+    const article = readVersionFromCard(version);
+    if (!article) return;
+
+    const button = document.querySelector(`.ai-news-refinar-btn[data-version="${CSS.escape(version)}"]`);
+    if (button) button.disabled = true;
+    setChatStatus(version, "Aplicando el cambio...");
+
+    try {
+        const token = await window.AdminSupabase?.getAccessToken?.();
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token || ""}`
+            },
+            body: JSON.stringify({ version, article, instruction, language: article.language })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload?.success) {
+            throw new Error(payload?.error || `El backend de IA respondió con error (${response.status}).`);
+        }
+
+        applyRefinedArticleToCard(version, payload.article);
+        if (input) input.value = "";
+        setChatStatus(version, "Cambio aplicado ✓");
+    } catch (error) {
+        setChatStatus(version, `No se pudo aplicar: ${error?.message || "error inesperado"}`, true);
+    } finally {
+        if (button) button.disabled = false;
+    }
 }
 
 function openPublishPanelForVersion(version) {
@@ -344,6 +441,8 @@ function bindAiNewsResultsDelegation() {
             openPublishPanelForVersion(version);
         } else if (target.classList.contains("ai-news-regenerar-btn")) {
             runAiNewsGeneration();
+        } else if (target.classList.contains("ai-news-refinar-btn")) {
+            refineVersion(version);
         }
     });
 }

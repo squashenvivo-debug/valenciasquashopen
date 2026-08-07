@@ -8,7 +8,8 @@
  *      que ya usa el resto del proyecto) para traer el cuadro del torneo.
  *   2. Lee las noticias ya publicadas (Supabase) para saber desde cuándo hay
  *      que analizar partidos nuevos.
- *   3. Decide la historia principal de la jornada (lib/newsAnalyzer).
+ *   3. Decide la historia principal de la jornada (lib/newsAnalyzer). Si aún
+ *      no hay partidos completados, cae a una previa del torneo.
  *   4. Construye los prompts (lib/newsPrompt) y genera 3 versiones del
  *      artículo con la Responses API de OpenAI, con el HTML ya listo.
  *
@@ -21,59 +22,13 @@
 
 "use strict";
 
+const { guardRequest } = require("../lib/apiAuth");
+const { callStructuredOpenAi, estimateMaxOutputTokens } = require("../lib/openaiClient");
 const { analyzeStory, buildTournamentPreview } = require("../lib/newsAnalyzer");
 const { buildPromptsForVersions, buildPreviewPrompts, buildArticleHtml, ARTICLE_JSON_SCHEMA } = require("../lib/newsPrompt");
 
-const OPENAI_API_URL = "https://api.openai.com/v1/responses";
-const OPENAI_TIMEOUT_MS = 45000;
 const MAX_MATCHES_PER_REQUEST = 40;
 const COMPLETED_STATUSES = new Set(["completed", "retired", "walkover"]);
-
-// Ajusta esta lista (o usa la env var ALLOWED_ORIGINS) a los orígenes reales desde los que se llamará al endpoint.
-const DEFAULT_ALLOWED_ORIGINS = [
-    "https://psavalenciaopen.com",
-    "https://www.psavalenciaopen.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500"
-];
-
-function getAllowedOrigins() {
-    const fromEnv = String(process.env.ALLOWED_ORIGINS || "")
-        .split(",")
-        .map((origin) => origin.trim())
-        .filter(Boolean);
-    return fromEnv.length > 0 ? fromEnv : DEFAULT_ALLOWED_ORIGINS;
-}
-
-function applyCors(req, res) {
-    const origin = req.headers.origin || "";
-    const allowed = getAllowedOrigins();
-    if (allowed.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
-        res.setHeader("Vary", "Origin");
-    }
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-}
-
-/** Verifica el token de sesión de Supabase que ya usa el panel admin (window.AdminSupabase.getAccessToken()). */
-async function verifySupabaseUser(token) {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !anonKey || !token) return null;
-
-    try {
-        const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-            headers: { Authorization: `Bearer ${token}`, apikey: anonKey }
-        });
-        if (!response.ok) return null;
-        return await response.json();
-    } catch (error) {
-        return null;
-    }
-}
 
 /** Trae el cuadro/partidos del torneo a través del proxy de PSA ya desplegado en Supabase Edge Functions. */
 async function fetchPsaSnapshot() {
@@ -161,92 +116,9 @@ function describeTournamentLocation(tournament) {
     return location.city || location.name || location.country || "Valencia, España";
 }
 
-/** Extrae el texto de salida de una respuesta de la Responses API sin depender del SDK oficial. */
-function extractOutputText(responseJson) {
-    const items = Array.isArray(responseJson?.output) ? responseJson.output : [];
-    for (const item of items) {
-        if (item?.type !== "message" || !Array.isArray(item.content)) continue;
-        const textPart = item.content.find((part) => part?.type === "output_text" && typeof part.text === "string");
-        if (textPart) return textPart.text;
-    }
-    return "";
-}
-
-async function callOpenAiVersion({ system, user, model, maxOutputTokens }) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
-
-    try {
-        const response = await fetch(OPENAI_API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model,
-                input: [
-                    { role: "system", content: system },
-                    { role: "user", content: user }
-                ],
-                text: {
-                    format: {
-                        type: "json_schema",
-                        name: "news_article",
-                        schema: ARTICLE_JSON_SCHEMA,
-                        strict: true
-                    }
-                },
-                max_output_tokens: maxOutputTokens
-            }),
-            signal: controller.signal
-        });
-
-        const payload = await response.json();
-        if (!response.ok) {
-            throw new Error(payload?.error?.message || `OpenAI respondió ${response.status}`);
-        }
-
-        const rawText = extractOutputText(payload);
-        if (!rawText) throw new Error("La respuesta de OpenAI no incluyó contenido de texto.");
-
-        return JSON.parse(rawText);
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
-function estimateMaxOutputTokens(wordCount) {
-    const safeWordCount = Number(wordCount) || 500;
-    // ~2.2 tokens por palabra en español/inglés + margen para el JSON envolvente.
-    return Math.min(4000, Math.max(600, Math.round(safeWordCount * 2.2) + 400));
-}
-
 module.exports = async function handler(req, res) {
-    applyCors(req, res);
-
-    if (req.method === "OPTIONS") {
-        res.status(204).end();
-        return;
-    }
-
-    if (req.method !== "POST") {
-        res.status(405).json({ success: false, error: "Método no permitido." });
-        return;
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-        res.status(500).json({ success: false, error: "El servidor no tiene configurada OPENAI_API_KEY." });
-        return;
-    }
-
-    const authHeader = String(req.headers.authorization || "");
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
-    const user = await verifySupabaseUser(token);
-    if (!user?.id) {
-        res.status(401).json({ success: false, error: "Sesión no válida. Inicia sesión en el panel admin de nuevo." });
-        return;
-    }
+    const user = await guardRequest(req, res);
+    if (!user) return;
 
     try {
         const body = req.body && typeof req.body === "object" ? req.body : {};
@@ -274,7 +146,7 @@ module.exports = async function handler(req, res) {
 
         const results = await Promise.allSettled(
             prompts.map((prompt) =>
-                callOpenAiVersion({ system: prompt.system, user: prompt.user, model, maxOutputTokens }).then((article) => ({
+                callStructuredOpenAi({ system: prompt.system, user: prompt.user, model, maxOutputTokens, schema: ARTICLE_JSON_SCHEMA }).then((article) => ({
                     version: prompt.version,
                     label: prompt.label,
                     article: { ...article, html: buildArticleHtml(article) }

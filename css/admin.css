@@ -1020,6 +1020,18 @@ background:#10293E;
 animation:aiNewsFadeIn .3s ease;
 }
 
+.ai-news-chat-box{
+margin-top:16px;
+padding-top:14px;
+border-top:1px dashed #2D4861;
+}
+
+.ai-news-chat-status{
+margin-top:6px;
+min-height:18px;
+font-size:.85rem;
+}
+
 @keyframes aiNewsFadeIn{
 from{opacity:0;transform:translateY(6px);}
 to{opacity:1;transform:translateY(0);}
