@@ -529,7 +529,7 @@
             const player = String(item.player || item.meta?.player || "").trim();
 
             return `
-            <article class="news-card">
+            <a class="news-card" href="${newsUrl}">
                 <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${title}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
                 <div class="news-content">
                     <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
@@ -537,11 +537,11 @@
                     ${player ? `<span class="news-date">Jugador: ${escapeHtml(player)}</span>` : ""}
                     <h3>${title}</h3>
                     <p>${summary}</p>
-                    <a href="${newsUrl}" class="btn btn-primary">
+                    <span class="btn btn-primary">
                         ${ctaText[lang] || ctaText.es}
-                    </a>
+                    </span>
                 </div>
-            </article>`;
+            </a>`;
         }).join("");
     }
 
