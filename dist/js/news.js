@@ -217,9 +217,28 @@ function decodeAllHtmlEntities(str) {
     return decoded;
 }
 
-function formatNewsArticleHtml(text) {
+function formatNewsArticleHtml(text, mainTitle = "") {
     if (!text) return "";
     let str = decodeAllHtmlEntities(text).trim();
+
+    if (mainTitle) {
+        const cleanTitle = mainTitle.replace(/<[^>]*>/g, "").trim().toLowerCase();
+        str = str.replace(/^(?:\s*<p>\s*)?<h[1-2]\b[^>]*>(.*?)<\/h[1-2]>(?:\s*<\/p>)?/i, (match, p1) => {
+            const cleanP1 = p1.replace(/<[^>]*>/g, "").trim().toLowerCase();
+            if (!cleanTitle || cleanP1.includes(cleanTitle) || cleanTitle.includes(cleanP1)) {
+                return "";
+            }
+            return match;
+        }).trim();
+
+        str = str.replace(/^(?:\s*<p>\s*)(.*?)(?:\s*<\/p>)/i, (match, p1) => {
+            const cleanP1 = p1.replace(/<[^>]*>/g, "").trim().toLowerCase();
+            if (cleanTitle && (cleanP1 === cleanTitle || cleanP1.includes(cleanTitle))) {
+                return "";
+            }
+            return match;
+        }).trim();
+    }
 
     if (/<[a-z][\s\S]*>/i.test(str)) {
         return str;
@@ -244,7 +263,7 @@ async function renderNewsDetail() {
     const tags = document.getElementById("newsPageTags");
     const empty = document.getElementById("newsPageEmpty");
 
-    if (!titleEl || !card || !dateEl || !heading || !body || !empty) return;
+    if (!card || !dateEl || !heading || !body || !empty) return;
 
     const lang = getCurrentLanguage();
     const newsId = getNewsIdFromUrl();
@@ -270,11 +289,11 @@ async function renderNewsDetail() {
     const article = getLocalizedText(item.article, lang);
     const displayDate = item.publishAt || item.createdAt;
 
-    titleEl.textContent = title || "Noticia";
+    if (titleEl) titleEl.textContent = "Noticias";
     heading.textContent = title || "";
     body.className = "news-content-body";
     body.style.whiteSpace = "normal";
-    body.innerHTML = formatNewsArticleHtml(article || "");
+    body.innerHTML = formatNewsArticleHtml(article || "", title || "");
 
     // Render all images complete & uncropped
     const allImages = Array.isArray(item.images) && item.images.length ? item.images : [item.imageSrc || ""];

@@ -2422,7 +2422,7 @@ async function readFileAsDataUrl(file) {
     const originalDataUrl = await fileToDataUrl(file);
     const image = await loadImage(originalDataUrl);
 
-    const maxWidth = 1600;
+    const maxWidth = 720;
     const scale = image.width > maxWidth ? maxWidth / image.width : 1;
     const targetWidth = Math.max(1, Math.round(image.width * scale));
     const targetHeight = Math.max(1, Math.round(image.height * scale));
@@ -2435,7 +2435,7 @@ async function readFileAsDataUrl(file) {
     if (!ctx) return originalDataUrl;
 
     ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
-    return canvas.toDataURL("image/jpeg", 0.82);
+    return canvas.toDataURL("image/jpeg", 0.72);
 }
 
 function dataUrlToBlob(dataUrl) {
