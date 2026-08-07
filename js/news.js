@@ -191,6 +191,32 @@ async function readNewsCollection() {
     }
 }
 
+function decodeAllHtmlEntities(str) {
+    if (!str) return "";
+    let decoded = String(str || "");
+
+    for (let i = 0; i < 4; i++) {
+        if (!/&[a-z0-9#]+;/i.test(decoded)) break;
+        decoded = decoded
+            .replace(/&amp;lt;/gi, "<")
+            .replace(/&amp;gt;/gi, ">")
+            .replace(/&lt;/gi, "<")
+            .replace(/&gt;/gi, ">")
+            .replace(/&#60;/gi, "<")
+            .replace(/&#62;/gi, ">")
+            .replace(/&#x3c;/gi, "<")
+            .replace(/&#x3e;/gi, ">")
+            .replace(/&quot;/gi, '"')
+            .replace(/&#34;/gi, '"')
+            .replace(/&#39;/gi, "'")
+            .replace(/&apos;/gi, "'")
+            .replace(/&nbsp;/gi, " ")
+            .replace(/&amp;/gi, "&");
+    }
+
+    return decoded;
+}
+
 async function renderNewsDetail() {
     const titleEl = document.getElementById("newsPageTitle");
     const card = document.getElementById("newsPageArticle");
@@ -225,9 +251,13 @@ async function renderNewsDetail() {
     const article = getLocalizedText(item.article, lang);
     const displayDate = item.publishAt || item.createdAt;
 
+
+
     titleEl.textContent = title || "Noticia";
     heading.textContent = title || "";
-    body.textContent = article || "";
+    body.className = "news-content-body";
+    body.style.whiteSpace = "normal";
+    body.innerHTML = decodeAllHtmlEntities(article || "");
 
     // Render all images complete & uncropped
     const allImages = Array.isArray(item.images) && item.images.length ? item.images : [item.imageSrc || ""];

@@ -536,7 +536,7 @@
                 const title = getLocalizedText(item.title, lang);
                 const article = getLocalizedText(item.article, lang);
                 const seoDescription = getLocalizedText(item.seo?.description, lang);
-                const summaryBase = seoDescription || article;
+                const summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
                 const summary = summaryBase.length > 150 ? `${summaryBase.slice(0, 150)}...` : summaryBase;
                 const imageSrc = item.imageSrc || item.image || "";
                 const newsUrl = getNewsPublicUrl(item);

@@ -95,9 +95,15 @@ function normalizeNewsItem(item) {
         en: String(item?.seo?.description?.en || body.en || body.es || "").slice(0, 160),
         fr: String(item?.seo?.description?.fr || body.fr || body.es || "").slice(0, 160)
     };
+
+    const mainImage = item?.imageSrc || item?.image || "";
+    const rawExtra = Array.isArray(item?.images) ? item.images : (Array.isArray(item?.gallery) ? item.gallery : []);
+    const images = Array.from(new Set([mainImage, ...rawExtra].map((s) => String(s || "").trim()).filter(Boolean)));
+
     return {
         id: item?.id || "",
-        imageSrc: item?.imageSrc || item?.image || "",
+        imageSrc: mainImage,
+        images: images,
         imageStoragePath: item?.imageStoragePath || "",
         player: String(item?.player || item?.meta?.player || "").trim(),
         title,
@@ -174,6 +180,7 @@ async function readNewsCollection() {
         return fallback.map((item, index) => ({
             id: `legacy_${index}`,
             imageSrc: `assets/images/news/${item.image}`,
+            images: [`assets/images/news/${item.image}`],
             title: normalizeLocalizedText(item.title || ""),
             article: normalizeLocalizedText(item.summary || ""),
             createdAt: ""
@@ -184,10 +191,37 @@ async function readNewsCollection() {
     }
 }
 
+function decodeAllHtmlEntities(str) {
+    if (!str) return "";
+    let decoded = String(str || "");
+
+    for (let i = 0; i < 4; i++) {
+        if (!/&[a-z0-9#]+;/i.test(decoded)) break;
+        decoded = decoded
+            .replace(/&amp;lt;/gi, "<")
+            .replace(/&amp;gt;/gi, ">")
+            .replace(/&lt;/gi, "<")
+            .replace(/&gt;/gi, ">")
+            .replace(/&#60;/gi, "<")
+            .replace(/&#62;/gi, ">")
+            .replace(/&#x3c;/gi, "<")
+            .replace(/&#x3e;/gi, ">")
+            .replace(/&quot;/gi, '"')
+            .replace(/&#34;/gi, '"')
+            .replace(/&#39;/gi, "'")
+            .replace(/&apos;/gi, "'")
+            .replace(/&nbsp;/gi, " ")
+            .replace(/&amp;/gi, "&");
+    }
+
+    return decoded;
+}
+
 async function renderNewsDetail() {
     const titleEl = document.getElementById("newsPageTitle");
     const card = document.getElementById("newsPageArticle");
-    const image = document.getElementById("newsPageImage");
+    const galleryContainer = document.getElementById("newsPageGallery");
+    const singleImage = document.getElementById("newsPageImage");
     const dateEl = document.getElementById("newsPageDate");
     const category = document.getElementById("newsPageCategory");
     const player = document.getElementById("newsPagePlayer");
@@ -196,7 +230,7 @@ async function renderNewsDetail() {
     const tags = document.getElementById("newsPageTags");
     const empty = document.getElementById("newsPageEmpty");
 
-    if (!titleEl || !card || !image || !dateEl || !heading || !body || !empty) return;
+    if (!titleEl || !card || !dateEl || !heading || !body || !empty) return;
 
     const lang = getCurrentLanguage();
     const newsId = getNewsIdFromUrl();
@@ -217,13 +251,40 @@ async function renderNewsDetail() {
     const article = getLocalizedText(item.article, lang);
     const displayDate = item.publishAt || item.createdAt;
 
+
+
     titleEl.textContent = title || "Noticia";
     heading.textContent = title || "";
-    body.textContent = article || "";
-    image.loading = "lazy";
-    image.decoding = "async";
-    image.src = resolveOptimizedAssetUrl(item.imageSrc || "");
-    image.alt = title || "Noticia";
+    body.className = "news-content-body";
+    body.style.whiteSpace = "normal";
+    body.innerHTML = decodeAllHtmlEntities(article || "");
+
+    // Render all images complete & uncropped
+    const allImages = Array.isArray(item.images) && item.images.length ? item.images : [item.imageSrc || ""];
+    const validImages = allImages.filter(Boolean);
+
+    if (galleryContainer) {
+        if (validImages.length > 1) {
+            galleryContainer.className = "news-detail-gallery news-detail-grid";
+            galleryContainer.innerHTML = validImages.map((src, idx) => `
+                <img src="${resolveOptimizedAssetUrl(src)}" alt="${title} (${idx + 1})" loading="lazy" decoding="async" style="width:100%; height:auto; max-height:75vh; object-fit:contain; border-radius:12px; background:#06101a;">
+            `).join("");
+        } else if (validImages.length === 1) {
+            galleryContainer.className = "news-detail-gallery";
+            galleryContainer.innerHTML = `
+                <img src="${resolveOptimizedAssetUrl(validImages[0])}" alt="${title}" loading="lazy" decoding="async" style="width:100%; height:auto; max-height:75vh; object-fit:contain; border-radius:12px; background:#06101a;">
+            `;
+        } else if (singleImage) {
+            singleImage.style.display = "none";
+        }
+    } else if (singleImage && validImages[0]) {
+        singleImage.src = resolveOptimizedAssetUrl(validImages[0]);
+        singleImage.alt = title || "Noticia";
+        singleImage.style.objectFit = "contain";
+        singleImage.style.height = "auto";
+        singleImage.style.maxHeight = "75vh";
+    }
+
     dateEl.textContent = formatNewsDate(displayDate, lang);
     if (category) category.textContent = item.category || "";
     if (player) player.textContent = item.player ? `Jugador: ${item.player}` : "";
