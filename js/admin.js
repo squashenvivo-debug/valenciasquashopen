@@ -3238,6 +3238,10 @@ function renderGalleryAdminList() {
             const gallery = getGalleryById(galleriesInner, galleryId);
             if (!gallery || !Array.isArray(gallery.photos)) return;
 
+            if (!window.confirm("¿Seguro que quieres borrar esta foto? Esta acción no se puede deshacer.")) {
+                return;
+            }
+
             gallery.photos = gallery.photos.filter((photo) => photo.id !== photoId);
             const saved = saveGalleryCollection(galleriesInner);
             if (!saved) {
@@ -3304,7 +3308,16 @@ function deleteSelectedGallery() {
         return;
     }
 
-    const galleries = readGalleryCollection().filter((item) => item.id !== galleryId);
+    const allGalleries = readGalleryCollection();
+    const gallery = getGalleryById(allGalleries, galleryId);
+    const galleryTitle = gallery?.title?.es || "esta galería";
+    const photoCount = Array.isArray(gallery?.photos) ? gallery.photos.length : 0;
+    const photoWarning = photoCount > 0 ? ` (${photoCount} foto${photoCount === 1 ? "" : "s"})` : "";
+    if (!window.confirm(`¿Seguro que quieres borrar la galería "${galleryTitle}"${photoWarning}? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+
+    const galleries = allGalleries.filter((item) => item.id !== galleryId);
     const saved = saveGalleryCollection(galleries);
     if (!saved) {
         updateGalleryStatus("No se pudo guardar la galería: almacenamiento lleno. Prueba con menos fotos o más pequeñas.");
@@ -3441,7 +3454,14 @@ function deleteSelectedNews() {
         return;
     }
 
-    const nextCollection = readNewsCollection().filter((item) => item.id !== newsId);
+    const collection = readNewsCollection();
+    const newsItem = collection.find((item) => item.id === newsId);
+    const newsTitle = newsItem?.title?.es || "esta noticia";
+    if (!window.confirm(`¿Seguro que quieres borrar la noticia "${newsTitle}"? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+
+    const nextCollection = collection.filter((item) => item.id !== newsId);
     const saved = saveNewsCollection(nextCollection);
     if (!saved) {
         updateNewsStatus("No se pudo borrar la noticia.");
