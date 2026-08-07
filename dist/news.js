@@ -217,6 +217,20 @@ function decodeAllHtmlEntities(str) {
     return decoded;
 }
 
+function formatNewsArticleHtml(text) {
+    if (!text) return "";
+    let str = decodeAllHtmlEntities(text).trim();
+
+    if (/<[a-z][\s\S]*>/i.test(str)) {
+        return str;
+    }
+
+    str = str.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
+    str = str.replace(/(\*|_)(.*?)\1/g, "<em>$2</em>");
+    const paragraphs = str.split(/\n\s*\n/);
+    return paragraphs.map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+}
+
 async function renderNewsDetail() {
     const titleEl = document.getElementById("newsPageTitle");
     const card = document.getElementById("newsPageArticle");
@@ -235,11 +249,16 @@ async function renderNewsDetail() {
     const lang = getCurrentLanguage();
     const newsId = getNewsIdFromUrl();
     const newsSlug = getNewsSlugFromUrl();
-    const collection = await readNewsCollection();
-    const item = collection.find((entry) => {
-        if (newsSlug && slugifyText(entry?.seo?.slug || "") === newsSlug) return true;
-        return entry.id === newsId;
+    const collection = await readNewsCollection(true);
+    let item = collection.find((entry) => {
+        if (newsId && entry.id === newsId) return true;
+        if (newsSlug && (slugifyText(entry?.seo?.slug || "") === newsSlug || slugifyText(entry?.title?.es || "") === newsSlug)) return true;
+        return false;
     });
+
+    if (!item && collection.length > 0) {
+        item = collection[0];
+    }
 
     if (!item) {
         card.style.display = "none";
@@ -251,13 +270,11 @@ async function renderNewsDetail() {
     const article = getLocalizedText(item.article, lang);
     const displayDate = item.publishAt || item.createdAt;
 
-
-
     titleEl.textContent = title || "Noticia";
     heading.textContent = title || "";
     body.className = "news-content-body";
     body.style.whiteSpace = "normal";
-    body.innerHTML = decodeAllHtmlEntities(article || "");
+    body.innerHTML = formatNewsArticleHtml(article || "");
 
     // Render all images complete & uncropped
     const allImages = Array.isArray(item.images) && item.images.length ? item.images : [item.imageSrc || ""];
