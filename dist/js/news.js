@@ -160,6 +160,21 @@ function applyNewsSeo(item, lang, title, article) {
     ensureMetaTag("keywords").setAttribute("content", normalizeStringArray(item?.tags).join(", "));
 }
 
+function readNewsCollectionSync() {
+    try {
+        const raw = localStorage.getItem(NEWS_COLLECTION_KEY);
+        if (raw !== null) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed.map(normalizeNewsItem);
+            }
+        }
+    } catch (error) {
+        return null;
+    }
+    return null;
+}
+
 async function readNewsCollection() {
     try {
         const raw = localStorage.getItem(NEWS_COLLECTION_KEY);

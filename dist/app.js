@@ -501,22 +501,70 @@
        NEWS
     ========================================================== */
 
+    function renderNewsGridItems(grid, newsItems, lang) {
+        if (!grid || !Array.isArray(newsItems)) return;
+        const ctaText = {
+            es: "Leer más",
+            va: "Llegir més",
+            en: "Read more",
+            fr: "Lire plus"
+        };
+
+        grid.innerHTML = newsItems.map((item) => {
+            const title = getLocalizedText(item.title, lang);
+            const article = getLocalizedText(item.article, lang);
+            const seoDescription = getLocalizedText(item.seo?.description, lang);
+            let summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
+            if (title) {
+                const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
+                if (cleanTitle && summaryBase.toLowerCase().startsWith(cleanTitle.toLowerCase())) {
+                    summaryBase = summaryBase.slice(cleanTitle.length).replace(/^[\s:.\-–—]+/, "").trim();
+                }
+            }
+            const summary = summaryBase.length > 150 ? `${summaryBase.slice(0, 150)}...` : summaryBase;
+            const imageSrc = item.imageSrc || item.image || "";
+            const newsUrl = getNewsPublicUrl(item);
+            const displayDate = item.publishAt || item.createdAt;
+            const category = String(item.category || "").trim();
+            const player = String(item.player || item.meta?.player || "").trim();
+
+            return `
+            <article class="news-card">
+                <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${title}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
+                <div class="news-content">
+                    <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
+                    ${category ? `<span class="news-date">${category}</span>` : ""}
+                    ${player ? `<span class="news-date">Jugador: ${escapeHtml(player)}</span>` : ""}
+                    <h3>${title}</h3>
+                    <p>${summary}</p>
+                    <a href="${newsUrl}" class="btn btn-primary">
+                        ${ctaText[lang] || ctaText.es}
+                    </a>
+                </div>
+            </article>`;
+        }).join("");
+    }
+
     async function loadNews() {
-
         const grid = document.querySelector(".news-grid");
-
         if (!grid) return;
 
-        try {
-            const lang = getCurrentLanguage();
-            const ctaText = {
-                es: "Leer más",
-                va: "Llegir més",
-                en: "Read more",
-                fr: "Lire plus"
-            };
+        const lang = getCurrentLanguage();
 
-            const dynamicNews = readNewsCollection();
+        // 1. Instant 0ms cache-first render
+        try {
+            const syncCollection = typeof readNewsCollectionSync === "function" ? readNewsCollectionSync() : null;
+            if (Array.isArray(syncCollection) && syncCollection.length > 0) {
+                const publishedSync = syncCollection.filter((item) => isNewsPublished(item));
+                if (publishedSync.length > 0) {
+                    renderNewsGridItems(grid, publishedSync, lang);
+                }
+            }
+        } catch (err) {}
+
+        // 2. Non-blocking cloud/fallback fetch for complete consistency
+        try {
+            const dynamicNews = await readNewsCollection();
             let news = dynamicNews.filter((item) => isNewsPublished(item));
 
             if (news.length === 0) {
@@ -530,42 +578,7 @@
                 }));
             }
 
-            grid.innerHTML = "";
-
-            news.forEach((item) => {
-                const title = getLocalizedText(item.title, lang);
-                const article = getLocalizedText(item.article, lang);
-                const seoDescription = getLocalizedText(item.seo?.description, lang);
-                let summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
-                if (title) {
-                    const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
-                    if (cleanTitle && summaryBase.toLowerCase().startsWith(cleanTitle.toLowerCase())) {
-                        summaryBase = summaryBase.slice(cleanTitle.length).replace(/^[\s:.\-–—]+/, "").trim();
-                    }
-                }
-                const summary = summaryBase.length > 150 ? `${summaryBase.slice(0, 150)}...` : summaryBase;
-                const imageSrc = item.imageSrc || item.image || "";
-                const newsUrl = getNewsPublicUrl(item);
-                const displayDate = item.publishAt || item.createdAt;
-                const category = String(item.category || "").trim();
-                const player = String(item.player || item.meta?.player || "").trim();
-
-                grid.innerHTML += `
-                <article class="news-card">
-                    <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${title}" loading="lazy" decoding="async">
-                    <div class="news-content">
-                        <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
-                        ${category ? `<span class="news-date">${category}</span>` : ""}
-                        ${player ? `<span class="news-date">Jugador: ${escapeHtml(player)}</span>` : ""}
-                        <h3>${title}</h3>
-                        <p>${summary}</p>
-                        <a href="${newsUrl}" class="btn btn-primary">
-                            ${ctaText[lang] || ctaText.es}
-                        </a>
-                    </div>
-                </article>
-            `;
-            });
+            renderNewsGridItems(grid, news, lang);
         } catch (error) {
             console.error("Error cargando noticias:", error);
             reportPublicError("news", error);
