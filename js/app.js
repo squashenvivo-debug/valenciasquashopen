@@ -849,26 +849,42 @@
     DRAWS
     ========================================================== */
 
+    function showManualDrawFallback() {
+        const psaViewport = document.querySelector(".psa-bracket-viewport");
+        const legacyContainer = document.getElementById("legacyDrawBackupContainer");
+        if (psaViewport) psaViewport.style.display = "none";
+        if (legacyContainer) {
+            legacyContainer.style.display = "block";
+            legacyContainer.setAttribute("aria-hidden", "false");
+        }
+        renderManualDrawBracket();
+    }
+
     async function loadDraws() {
         const mode = localStorage.getItem(TOURNAMENT_MODE_KEY) || "api";
         const psaViewport = document.querySelector(".psa-bracket-viewport");
         const legacyContainer = document.getElementById("legacyDrawBackupContainer");
 
         if (mode === "manual") {
-            if (psaViewport) psaViewport.style.display = "none";
-            if (legacyContainer) {
-                legacyContainer.style.display = "block";
-                legacyContainer.setAttribute("aria-hidden", "false");
-            }
-        } else {
-            if (psaViewport) psaViewport.style.display = "block";
-            if (legacyContainer) {
-                legacyContainer.style.display = "none";
-                legacyContainer.setAttribute("aria-hidden", "true");
-            }
+            showManualDrawFallback();
             return;
         }
 
+        // Modo API (por defecto): mostramos el cuadro en vivo. Si js/psa-draw.js no consigue
+        // cargar datos reales de PSA (torneo nuevo sin acceso, red caída, etc.), cae automáticamente
+        // al cuadro manual guardado en vez de dejar la página vacía.
+        if (psaViewport) psaViewport.style.display = "block";
+        if (legacyContainer) {
+            legacyContainer.style.display = "none";
+            legacyContainer.setAttribute("aria-hidden", "true");
+        }
+        window.addEventListener("psa-draw-status", (event) => {
+            if (!event.detail?.ok) showManualDrawFallback();
+        }, { once: true });
+        return;
+    }
+
+    async function renderManualDrawBracket() {
         const bracket = document.querySelector(".draw-bracket");
         if (!bracket) return;
 

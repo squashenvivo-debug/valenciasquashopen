@@ -33,7 +33,7 @@
             dateTime: "11 AUG, 12:45",
             status: "scheduled",
             player1: { name: "Daniel Poleshchuk", country: "ISR", seed: "", score: null },
-            player2: { name: "Aly Tolba", country: "EGY", seed: "", score: null },
+            player2: { name: "Yusuf Sheikh", country: "ENG", seed: "", score: null },
             scores: []
         },
         {

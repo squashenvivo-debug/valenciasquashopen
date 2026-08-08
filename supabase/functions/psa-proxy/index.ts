@@ -24,11 +24,13 @@ type TournamentPlayer = {
   id?: number | string;
   name?: string | null;
   country?: string | null;
-  ranking?: number | null;
+  current_world_ranking?: number | null;
+  profile_photo_url?: string | null;
   entry?: {
     seed_number?: number | null;
     status?: string | null;
     draw_type?: string | null;
+    is_wildcard?: boolean | null;
   };
 };
 
@@ -306,14 +308,18 @@ function simplifyDivision(division: TournamentDivision, tournamentStreamUrl: str
     sub_level: division.sub_level || null,
     draw_size: division.draw_size ?? null,
     entries_count: division.entries_count ?? null,
-    players_sample: players.slice(0, 8).map((player) => ({
+    players: players.map((player) => ({
       id: player.id ?? null,
       name: player.name || null,
       country: player.country || null,
-      ranking: player.ranking ?? null,
-      seed_number: player.entry?.seed_number ?? null,
-      draw_type: player.entry?.draw_type || null,
-      entry_status: player.entry?.status || null,
+      current_world_ranking: player.current_world_ranking ?? null,
+      profile_photo_url: player.profile_photo_url || null,
+      entry: {
+        seed_number: player.entry?.seed_number ?? null,
+        draw_type: player.entry?.draw_type || null,
+        status: player.entry?.status || null,
+        is_wildcard: Boolean(player.entry?.is_wildcard),
+      },
     })),
     brackets: brackets.map((bracket) => ({
       id: bracket.id ?? null,

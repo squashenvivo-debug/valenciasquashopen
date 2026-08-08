@@ -1,89 +1,22 @@
 (function () {
-    const PSA_DIRECT_API_URL = "https://data.psasquashtour.com";
+    "use strict";
 
-    // Official PSA Valencia Open 2026 Round 1 Matchups & Players
-    const OFFICIAL_PSA_ROUND_1 = [
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 12:00",
-            status: "scheduled",
-            player1: { name: "Sergio Garcia Pollan", country: "ESP", ranking: "#151", seed: "WC", mugshot: "assets/images/players/player-23.jpg" },
-            player2: { name: "Brice Nicolas", country: "FRA", ranking: "#136", seed: "", mugshot: "assets/images/players/player-17.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 12:45",
-            status: "scheduled",
-            player1: { name: "Daniel Poleshchuk", country: "ISR", ranking: "#099", seed: "", mugshot: "assets/images/players/player-14.jpg" },
-            player2: { name: "Aly Tolba", country: "EGY", ranking: "#122", seed: "", mugshot: "assets/images/players/player-18.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 17:00",
-            status: "scheduled",
-            player1: { name: "Khaled Labib", country: "EGY", ranking: "#137", seed: "", mugshot: "assets/images/players/player-21.jpg" },
-            player2: { name: "Muhammad Asim Khan", country: "PAK", ranking: "#077", seed: "", mugshot: "assets/images/players/player-10.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 17:45",
-            status: "scheduled",
-            player1: { name: "Marwan Tamer", country: "EGY", ranking: "#114", seed: "", mugshot: "assets/images/players/player-16.jpg" },
-            player2: { name: "Aqeel Rehman", country: "AUT", ranking: "#146", seed: "", mugshot: "assets/images/players/aqeel-rehman.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 18:30",
-            status: "scheduled",
-            player1: { name: "Omar Said", country: "EGY", ranking: "#105", seed: "", mugshot: "assets/images/players/player-13.jpg" },
-            player2: { name: "Hamza Khan", country: "PAK", ranking: "#169", seed: "", mugshot: "assets/images/players/player-20.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 19:15",
-            status: "scheduled",
-            player1: { name: "Ernesto Revert", country: "ESP", ranking: "#866", seed: "WC", mugshot: "assets/images/players/player-24.jpg" },
-            player2: { name: "Yannik Omlor", country: "GER", ranking: "#112", seed: "", mugshot: "assets/images/players/player-15.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 13:30",
-            status: "scheduled",
-            player1: { name: "Will Salter", country: "ENG", ranking: "#120", seed: "", mugshot: "assets/images/players/player-19.jpg" },
-            player2: { name: "Rhys Evans", country: "WAL", ranking: "#128", seed: "", mugshot: "assets/images/players/player-12.jpg" },
-            scores: []
-        },
-        {
-            round: "Round 1",
-            dateTime: "11 Aug 2026 • 14:15",
-            status: "scheduled",
-            player1: { name: "Joseph White", country: "AUS", ranking: "#108", seed: "", mugshot: "assets/images/players/player-11.jpg" },
-            player2: { name: "Marek Panacek", country: "CZE", ranking: "#115", seed: "", mugshot: "assets/images/players/player-22.jpg" },
-            scores: []
-        }
-    ];
-
-    const SEEDED_BYES = [
-        { name: "Samuel Osborne - Wylde", seed: "(2)", country: "ENG", ranking: "#051", mugshot: "assets/images/players/player-03.jpg" },
-        { name: "Mohamed Nasser", seed: "(7)", country: "EGY", ranking: "#065", mugshot: "assets/images/players/player-08.jpg" },
-        { name: "Simon Herbert", seed: "(5)", country: "ENG", ranking: "#058", mugshot: "assets/images/players/player-06.jpg" },
-        { name: "Ivan Perez", seed: "(3)", country: "ESP", ranking: "#052", mugshot: "assets/images/players/player-04.jpg" },
-        { name: "Balazs Farkas", seed: "(4)", country: "HUN", ranking: "#055", mugshot: "assets/images/players/player-05.jpg" },
-        { name: "Abdulla Al-Tamimi", seed: "(6)", country: "QAT", ranking: "#060", mugshot: "assets/images/players/player-07.jpg" },
-        { name: "Yassin Elshafei", seed: "(8)", country: "EGY", ranking: "#070", mugshot: "assets/images/players/player-09.jpg" },
-        { name: "Patrick Rooney", seed: "(1)", country: "ENG", ranking: "#045", mugshot: "assets/images/players/player-02.jpg" }
-    ];
+    /**
+     * Cuadro del torneo — siempre en vivo desde la API oficial de PSA (vía el
+     * proxy de Supabase Edge Functions), nunca datos escritos a mano. Si un
+     * jugador tiene foto propia subida en el panel admin (playersCollection),
+     * se usa esa; si no, se usa la foto oficial de PSA; si tampoco hay, una
+     * silueta genérica.
+     */
 
     function getProxyUrl() {
         const config = window.PSA_CONFIG || {};
         const baseUrl = config.supabaseUrl || "https://texjzaanugmssmolzwgb.supabase.co";
         return `${baseUrl}/functions/v1/psa-proxy`;
+    }
+
+    function getTournamentId() {
+        return (localStorage.getItem("psaTournamentId") || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
     }
 
     const RED_SILHOUETTE_SVG = `
@@ -100,8 +33,68 @@
         </svg>
     `;
 
+    function normalizeName(name) {
+        return String(name || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+    }
+
+    /** Fotos que el admin ha subido a mano (panel Jugadores), para usarlas por encima de la foto oficial de PSA. */
+    function getCuratedPhotoMap() {
+        const map = new Map();
+        try {
+            const raw = localStorage.getItem("playersCollection");
+            const list = raw ? JSON.parse(raw) : [];
+            (Array.isArray(list) ? list : []).forEach((player) => {
+                if (player?.name && player?.image) {
+                    map.set(normalizeName(player.name), player.image);
+                }
+            });
+        } catch (error) {
+            // Sin colección local todavía: seguimos solo con las fotos de PSA.
+        }
+        return map;
+    }
+
+    function buildPlayerLookup(rawPlayers) {
+        const byId = new Map();
+        (Array.isArray(rawPlayers) ? rawPlayers : []).forEach((player) => {
+            if (player?.id !== undefined && player?.id !== null) {
+                byId.set(String(player.id), player);
+            }
+        });
+        return byId;
+    }
+
+    /** Convierte un jugador de partido (id/nombre) + su ficha completa en el objeto que pinta renderPlayerRow. */
+    function toDisplayPlayer(matchPlayer, playerById, curatedMap) {
+        if (!matchPlayer) return null;
+
+        const full = matchPlayer.id !== undefined ? playerById.get(String(matchPlayer.id)) : null;
+        const name = matchPlayer.name || full?.name || "";
+        const country = full?.country || "";
+        const ranking = full?.current_world_ranking ? `#${String(full.current_world_ranking).padStart(3, "0")}` : "";
+        const seedNumber = full?.entry?.seed_number;
+        const seed = seedNumber ? `(${seedNumber})` : (full?.entry?.is_wildcard ? "WC" : "");
+        const curatedPhoto = curatedMap.get(normalizeName(name));
+        const mugshot = curatedPhoto || full?.profile_photo_url || "";
+
+        return { name, country, ranking, seed, mugshot };
+    }
+
+    function formatMatchDateTime(match) {
+        if (!match?.date) return "Fecha por confirmar";
+        const parsed = new Date(`${match.date}T${match.time || "00:00"}`);
+        if (Number.isNaN(parsed.getTime())) return match.date;
+        const datePart = parsed.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
+        return match.time ? `${datePart} • ${match.time}` : datePart;
+    }
+
     function renderPlayerRow(player) {
-        const isPlaceholder = !player || !player.mugshot || player.name === "BYE" || 
+        const isPlaceholder = !player || !player.mugshot || player.name === "BYE" || player.name === "TBD" ||
             /^(Ganador|Guanyador|Winner|Vainqueur|Semifinalist|Semifinalista)/i.test(player.name || "");
 
         if (!player || player.name === "BYE") {
@@ -117,15 +110,21 @@
         const flagUrl = player.country ? `assets/images/flags/${player.country}.svg` : "";
         const flagHtml = player.country ? `<img class="psa-player-flag" src="${flagUrl}" alt="${player.country}" onerror="this.style.display='none'">` : "";
 
-        const avatarHtml = isPlaceholder 
-            ? RED_SILHOUETTE_SVG 
-            : `<img class="psa-player-mugshot" src="${player.mugshot}" alt="${player.name}" onerror="this.src='assets/images/players/player-01.jpg'">`;
+        // Se pinta la foto y, debajo escondida, la silueta genérica; si la foto falla al cargar
+        // (algo habitual con las fotos oficiales de PSA para jugadores sin ficha completa),
+        // el onerror simplemente intercambia cuál de las dos se ve.
+        const avatarHtml = isPlaceholder
+            ? RED_SILHOUETTE_SVG
+            : `<span class="psa-mugshot-wrap">
+                    <img class="psa-player-mugshot" src="${player.mugshot}" alt="${player.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='';">
+                    <span class="psa-mugshot-fallback" style="display:none;">${RED_SILHOUETTE_SVG}</span>
+               </span>`;
 
         return `
-            <div class="psa-player-row ${isPlaceholder ? 'is-placeholder-row' : ''}">
+            <div class="psa-player-row ${isPlaceholder ? "is-placeholder-row" : ""}">
                 ${avatarHtml}
                 ${flagHtml}
-                <span class="psa-player-name-box ${isPlaceholder ? 'psa-placeholder-name' : ''}">
+                <span class="psa-player-name-box ${isPlaceholder ? "psa-placeholder-name" : ""}">
                     ${player.name} ${seedHtml}
                 </span>
             </div>
@@ -134,176 +133,195 @@
 
     function renderMatchCard(match) {
         const isLive = match.status === "in_progress";
-        const metaDate = match.dateTime || "11 Aug 2026";
+        const metaDate = match.dateTime || "Fecha por confirmar";
         const p1Name = match.player1?.name || "";
         const p2Name = match.player2?.name || "";
-        const showH2H = p1Name && p1Name !== "BYE" && p2Name && p2Name !== "BYE";
+        const showH2H = p1Name && p1Name !== "BYE" && p1Name !== "TBD" && p2Name && p2Name !== "BYE" && p2Name !== "TBD";
 
         const p1Safe = p1Name.replace(/'/g, "\\'");
         const p2Safe = p2Name.replace(/'/g, "\\'");
+        const matchId = match.id !== undefined && match.id !== null ? String(match.id) : "";
 
         return `
-            <div class="psa-match-item ${isLive ? 'is-live' : ''}">
+            <div class="psa-match-item ${isLive ? "is-live" : ""}">
                 ${renderPlayerRow(match.player1)}
                 ${renderPlayerRow(match.player2)}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
-                    ${showH2H 
-                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}')">Head-to-head</button>` 
-                        : ''}
+                    ${showH2H
+                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}', '${matchId}')">Head-to-head</button>`
+                        : ""}
                 </div>
             </div>
         `;
     }
 
-    function buildRound1Column() {
-        const listContainer = document.getElementById("r1Matches");
-        if (!listContainer) return;
+    function renderColumn(elementId, html, emptyMessage) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        el.innerHTML = html || `<p class="psa-empty-msg">${emptyMessage || "Por determinar"}</p>`;
+    }
 
-        let html = "";
-        // Round 1 alternates between Bye matches for seeds and real pairings
-        let matchIdx = 0;
-        for (let i = 0; i < 4; i++) {
-            // Seed BYE match
-            const seed = SEEDED_BYES[i];
-            html += renderMatchCard({
-                round: "Round 1",
-                dateTime: "-",
-                player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
-                player2: { name: "BYE" }
-            });
+    /** Agrupa los partidos del cuadro por ronda a partir del nombre real que devuelve PSA. */
+    function groupMatchesByRound(matches) {
+        const groups = { round1: [], round2: [], quarter: [], semi: [], final: [] };
 
-            // Real pairing
-            if (OFFICIAL_PSA_ROUND_1[matchIdx]) {
-                html += renderMatchCard(OFFICIAL_PSA_ROUND_1[matchIdx]);
-                matchIdx++;
+        (Array.isArray(matches) ? matches : []).forEach((match) => {
+            const round = String(match.round || "").toLowerCase();
+            if (/\bfinal\b/.test(round) && !round.includes("semi") && !round.includes("quarter")) {
+                groups.final.push(match);
+            } else if (round.includes("semi")) {
+                groups.semi.push(match);
+            } else if (round.includes("quarter")) {
+                groups.quarter.push(match);
+            } else if (round.includes("round 2") || match.round_num === 2) {
+                groups.round2.push(match);
+            } else {
+                groups.round1.push(match);
             }
+        });
+
+        return groups;
+    }
+
+    function renderStageColumn(elementId, matches, playerById, curatedMap) {
+        if (!matches.length) {
+            renderColumn(elementId, renderMatchCard({ dateTime: "Por determinar", player1: { name: "TBD" }, player2: { name: "TBD" } }));
+            return;
         }
-        for (let i = 4; i < 8; i++) {
-            // Real pairing
-            if (OFFICIAL_PSA_ROUND_1[matchIdx]) {
-                html += renderMatchCard(OFFICIAL_PSA_ROUND_1[matchIdx]);
-                matchIdx++;
+
+        const html = matches.map((match) => renderMatchCard({
+            id: match.id,
+            dateTime: formatMatchDateTime(match),
+            status: match.status,
+            player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
+            player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
+        })).join("");
+        renderColumn(elementId, html);
+    }
+
+    // Nota: llamar directo a data.psasquashtour.com desde el navegador falla por CORS
+    // (probado). Por eso todo pasa por el proxy de Supabase, que sí tiene cabeceras CORS
+    // para este sitio. El proxy actualmente desplegado no reenvía el head-to-head aunque se
+    // lo pidamos aquí — cuando se corrija/redeploye, esto empezará a traer datos reales sin
+    // tocar el frontend.
+    async function fetchLiveDraw() {
+        const url = `${getProxyUrl()}?tournament=${encodeURIComponent(getTournamentId())}&expanded=true&include_divisions=true&show_past=true&head_to_head=true`;
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success === false) {
+            throw new Error(payload?.error || `PSA respondió ${response.status}`);
+        }
+        return payload;
+    }
+
+    /** id de partido -> estadísticas head_to_head, cuando el proxy las incluya. */
+    let headToHeadMap = new Map();
+
+    function buildHeadToHeadMap(matches) {
+        const map = new Map();
+        (Array.isArray(matches) ? matches : []).forEach((match) => {
+            if (match?.id !== undefined && match?.head_to_head) {
+                map.set(String(match.id), match.head_to_head);
             }
-            // Seed BYE match
-            const seed = SEEDED_BYES[i];
-            html += renderMatchCard({
-                round: "Round 1",
-                dateTime: "-",
-                player1: { name: "BYE" },
-                player2: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot }
-            });
-        }
-
-        listContainer.innerHTML = html;
+        });
+        return map;
     }
 
-    function buildRound2Column() {
-        const listContainer = document.getElementById("r2Matches");
-        if (!listContainer) return;
-
-        let html = "";
-        for (let i = 0; i < 8; i++) {
-            const seed = SEEDED_BYES[i] || { name: "Seed" };
-            html += renderMatchCard({
-                round: "Round 2",
-                dateTime: "12 Aug 2026 • 16:00",
-                player1: { name: seed.name, seed: seed.seed, country: seed.country, mugshot: seed.mugshot },
-                player2: { name: "TBD", seed: "", country: "", mugshot: "" }
-            });
-        }
-        listContainer.innerHTML = html;
-    }
-
-    function buildQFColumn() {
-        const listContainer = document.getElementById("qfMatches");
-        if (!listContainer) return;
-
-        let html = "";
-        for (let i = 1; i <= 4; i++) {
-            html += renderMatchCard({
-                round: "Cuarto de Final",
-                dateTime: "13 Aug 2026",
-                player1: { name: "TBD" },
-                player2: { name: "TBD" }
-            });
-        }
-        listContainer.innerHTML = html;
-    }
-
-    function buildSFColumn() {
-        const listContainer = document.getElementById("sfMatches");
-        if (!listContainer) return;
-
-        let html = "";
-        for (let i = 1; i <= 2; i++) {
-            html += renderMatchCard({
-                round: "Semifinal",
-                dateTime: "14 Aug 2026",
-                player1: { name: "TBD" },
-                player2: { name: "TBD" }
-            });
-        }
-        listContainer.innerHTML = html;
-    }
-
-    function buildFinalColumn() {
-        const listContainer = document.getElementById("finalMatches");
-        if (!listContainer) return;
-
-        listContainer.innerHTML = renderMatchCard({
-            round: "Gran Final",
-            dateTime: "15 Aug 2026 • 18:30",
-            player1: { name: "TBD" },
-            player2: { name: "TBD" }
+    function showLoadError() {
+        document.querySelectorAll(".psa-live-indicator").forEach((el) => { el.style.display = "none"; });
+        ["r1Matches", "r2Matches", "qfMatches", "sfMatches", "finalMatches"].forEach((id) => {
+            renderColumn(id, "", "No se pudo cargar el cuadro en directo de PSA. Inténtalo de nuevo en unos minutos.");
         });
     }
 
-    const H2H_DATABASE = {
-        "will salter|rhys evans": {
-            matchesCount: "1 - 0",
-            lastMeeting: "PSA European Tour 2025 (3-1)",
-            winPct: "100% - 0%"
-        },
-        "sergio garcia pollan|brice nicolas": {
-            matchesCount: "1 - 1",
-            lastMeeting: "PSA Challenger 2024 (3-2)",
-            winPct: "50% - 50%"
-        },
-        "daniel poleshchuk|aly tolba": {
-            matchesCount: "1 - 0",
-            lastMeeting: "PSA World Tour 2025 (3-0)",
-            winPct: "100% - 0%"
-        },
-        "khaled labib|muhammad asim khan": {
-            matchesCount: "0 - 2",
-            lastMeeting: "PSA International 2025 (1-3)",
-            winPct: "0% - 100%"
-        },
-        "marwan tamer|aqeel rehman": {
-            matchesCount: "1 - 0",
-            lastMeeting: "PSA Challenger 2025 (3-1)",
-            winPct: "100% - 0%"
-        },
-        "omar said|hamza khan": {
-            matchesCount: "0 - 1",
-            lastMeeting: "World Junior Champ 2024 (2-3)",
-            winPct: "0% - 100%"
-        },
-        "ernesto revert|yannik omlor": {
-            matchesCount: "0 - 1",
-            lastMeeting: "PSA European Tour 2024 (0-3)",
-            winPct: "0% - 100%"
-        },
-        "joseph white|marek panacek": {
-            matchesCount: "1 - 1",
-            lastMeeting: "PSA Open 2025 (3-2)",
-            winPct: "50% - 50%"
-        }
-    };
+    async function renderAllColumns() {
+        // Modo manual explícito (torneo sin acceso a la API de PSA): no intentamos llamar a
+        // nada, draw.html / index.html ya muestran el cuadro guardado a mano en ese caso.
+        const mode = localStorage.getItem("tournamentContentMode") || "api";
+        if (mode === "manual") return;
 
-    // Modal Head to Head Handler
-    window.openH2HModal = function (p1Name, p2Name) {
+        let payload;
+        try {
+            payload = await fetchLiveDraw();
+        } catch (error) {
+            console.error("No se pudo cargar el cuadro en directo de PSA:", error);
+            showLoadError();
+            window.dispatchEvent(new CustomEvent("psa-draw-status", { detail: { ok: false } }));
+            return;
+        }
+
+        const division = (Array.isArray(payload.divisions) ? payload.divisions : [])[0];
+        if (!division) {
+            showLoadError();
+            window.dispatchEvent(new CustomEvent("psa-draw-status", { detail: { ok: false } }));
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent("psa-draw-status", { detail: { ok: true } }));
+        document.querySelectorAll(".psa-live-indicator").forEach((el) => { el.style.display = ""; });
+
+        const playerById = buildPlayerLookup(division.players);
+        const curatedMap = getCuratedPhotoMap();
+        const matches = (Array.isArray(division.brackets) ? division.brackets : []).flatMap((bracket) => Array.isArray(bracket.matches) ? bracket.matches : []);
+        headToHeadMap = buildHeadToHeadMap(matches);
+        const groups = groupMatchesByRound(matches);
+
+        // Los cabezas de serie con bye directo a Round 2 aparecen en los datos de PSA como su
+        // partido de Round 2 con un único jugador (rival aún por determinar), no como un
+        // enfrentamiento "vs BYE" en Round 1. Los reconstruimos aquí para mantener las 16
+        // tarjetas visuales de Round 1 (8 partidos reales + 8 byes) que ya conocía el diseño.
+        const byePlayers = groups.round2
+            .filter((match) => (match.players || []).length === 1)
+            .map((match) => toDisplayPlayer(match.players[0], playerById, curatedMap))
+            .filter(Boolean);
+
+        const realRound1 = groups.round1.filter((match) => (match.players || []).length === 2);
+        let round1Html = "";
+        let byeIndex = 0;
+        realRound1.forEach((match, idx) => {
+            if (idx % 2 === 0 && byePlayers[byeIndex]) {
+                round1Html += renderMatchCard({ dateTime: "-", player1: byePlayers[byeIndex], player2: { name: "BYE" } });
+                byeIndex++;
+            }
+            round1Html += renderMatchCard({
+                id: match.id,
+                dateTime: formatMatchDateTime(match),
+                status: match.status,
+                player1: toDisplayPlayer(match.players[0], playerById, curatedMap),
+                player2: toDisplayPlayer(match.players[1], playerById, curatedMap)
+            });
+            if (idx % 2 === 1 && byePlayers[byeIndex]) {
+                round1Html += renderMatchCard({ dateTime: "-", player1: { name: "BYE" }, player2: byePlayers[byeIndex] });
+                byeIndex++;
+            }
+        });
+        renderColumn("r1Matches", round1Html);
+
+        const round2Html = groups.round2.map((match) => renderMatchCard({
+            dateTime: formatMatchDateTime(match),
+            status: match.status,
+            player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
+            player2: { name: "TBD" }
+        })).join("");
+        renderColumn("r2Matches", round2Html);
+
+        renderStageColumn("qfMatches", groups.quarter, playerById, curatedMap);
+        renderStageColumn("sfMatches", groups.semi, playerById, curatedMap);
+        renderStageColumn("finalMatches", groups.final, playerById, curatedMap);
+    }
+
+    function formatH2HDate(isoDate) {
+        if (!isoDate) return "";
+        const parsed = new Date(isoDate);
+        if (Number.isNaN(parsed.getTime())) return isoDate;
+        return parsed.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    // Modal Head to Head — usa el histórico real que devuelve la API de PSA (fetchHeadToHeadMap).
+    // Si esta pareja de jugadores no tiene enfrentamientos previos registrados (lo habitual: la
+    // mayoría son primeros cruces), se muestra ese estado honesto en vez de inventar cifras.
+    window.openH2HModal = function (p1Name, p2Name, matchId) {
         let modal = document.getElementById("h2hModal");
         if (!modal) {
             modal = document.createElement("div");
@@ -334,10 +352,6 @@
                         <span style="color: var(--psa-text-muted, #8E9BAE);">Último duelo:</span>
                         <strong id="h2hStatLast">Primer enfrentamiento oficial</strong>
                     </div>
-                    <div class="psa-h2h-stat-row">
-                        <span style="color: var(--psa-text-muted, #8E9BAE);">Porcentaje de victorias:</span>
-                        <strong id="h2hStatPct">50% - 50%</strong>
-                    </div>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -348,31 +362,21 @@
         if (el1) el1.textContent = p1Name;
         if (el2) el2.textContent = p2Name;
 
-        const k1 = `${p1Name.toLowerCase()}|${p2Name.toLowerCase()}`;
-        const k2 = `${p2Name.toLowerCase()}|${p1Name.toLowerCase()}`;
-
-        let h2h = H2H_DATABASE[k1];
-        let reversed = false;
-        if (!h2h && H2H_DATABASE[k2]) {
-            h2h = H2H_DATABASE[k2];
-            reversed = true;
-        }
-
         const matchesEl = document.getElementById("h2hStatMatches");
         const lastEl = document.getElementById("h2hStatLast");
-        const pctEl = document.getElementById("h2hStatPct");
+        const h2h = matchId ? headToHeadMap.get(String(matchId)) : null;
 
-        if (h2h) {
-            const countStr = reversed ? h2h.matchesCount.split(" - ").reverse().join(" - ") : h2h.matchesCount;
-            const pctStr = reversed ? h2h.winPct.split(" - ").reverse().join(" - ") : h2h.winPct;
-
-            if (matchesEl) matchesEl.textContent = countStr;
-            if (lastEl) lastEl.textContent = h2h.lastMeeting;
-            if (pctEl) pctEl.textContent = pctStr;
+        if (h2h && h2h.total_matches > 0) {
+            if (matchesEl) matchesEl.textContent = `${h2h.player1_wins} - ${h2h.player2_wins}`;
+            if (lastEl) {
+                const lm = h2h.last_meeting;
+                lastEl.textContent = lm
+                    ? `${lm.tournament || "Torneo PSA"} · ${lm.round || ""} (${formatH2HDate(lm.date)})`
+                    : `${h2h.total_matches} enfrentamiento(s) previo(s)`;
+            }
         } else {
             if (matchesEl) matchesEl.textContent = "0 - 0";
             if (lastEl) lastEl.textContent = "Primer enfrentamiento oficial";
-            if (pctEl) pctEl.textContent = "50% - 50%";
         }
 
         modal.classList.add("active");
@@ -382,25 +386,6 @@
         const modal = document.getElementById("h2hModal");
         if (modal) modal.classList.remove("active");
     };
-
-    function getTournamentId() {
-        return (localStorage.getItem("psaTournamentId") || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
-    }
-
-    function renderAllColumns() {
-        const mode = localStorage.getItem("tournamentContentMode") || "api";
-        const liveIndicators = document.querySelectorAll(".psa-live-indicator");
-        if (mode === "manual") {
-            liveIndicators.forEach((el) => { el.style.display = "none"; });
-            return;
-        }
-        liveIndicators.forEach((el) => { el.style.display = ""; });
-        buildRound1Column();
-        buildRound2Column();
-        buildQFColumn();
-        buildSFColumn();
-        buildFinalColumn();
-    }
 
     document.addEventListener("DOMContentLoaded", renderAllColumns);
     document.addEventListener("app-language-changed", renderAllColumns);

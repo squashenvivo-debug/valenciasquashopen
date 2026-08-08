@@ -134,22 +134,28 @@
 <script src="js/draw-viewer.js?v=20260806-v12"></script>
 <script src="js/psa-draw.js?v=20260806-v12"></script>
 <script>
-(function() {
-    function applyDrawMode() {
-        const mode = localStorage.getItem("tournamentContentMode") || "api";
+(function () {
+    function showManual() {
         const psaViewport = document.querySelector(".psa-bracket-viewport");
         const manualWrapper = document.getElementById("manualDrawWrapper");
         const liveIndicator = document.querySelector(".psa-live-indicator");
+        if (psaViewport) psaViewport.style.display = "none";
+        if (liveIndicator) liveIndicator.style.display = "none";
+        if (manualWrapper) manualWrapper.style.display = "block";
+    }
 
+    function applyDrawMode() {
+        const mode = localStorage.getItem("tournamentContentMode") || "api";
         if (mode === "manual") {
-            if (psaViewport) psaViewport.style.display = "none";
-            if (liveIndicator) liveIndicator.style.display = "none";
-            if (manualWrapper) manualWrapper.style.display = "block";
-        } else {
-            if (psaViewport) psaViewport.style.display = "block";
-            if (liveIndicator) liveIndicator.style.display = "";
-            if (manualWrapper) manualWrapper.style.display = "none";
+            showManual();
+            return;
         }
+        // Modo API (por defecto): js/psa-draw.js intenta cargar el cuadro en vivo de PSA.
+        // Si no lo consigue (torneo sin acceso a la API, red caída...), avisa con este evento
+        // y caemos al cuadro manual guardado en vez de dejar la página vacía.
+        window.addEventListener("psa-draw-status", (event) => {
+            if (!event.detail?.ok) showManual();
+        }, { once: true });
     }
     document.addEventListener("DOMContentLoaded", applyDrawMode);
 })();

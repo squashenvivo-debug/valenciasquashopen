@@ -319,6 +319,20 @@ body {
     border: 1.5px solid rgba(255, 82, 82, 0.6);
 }
 
+.psa-mugshot-wrap {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+}
+
+.psa-empty-msg {
+    padding: 16px 14px;
+    color: var(--psa-text-muted, #8E9BAE);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 .psa-placeholder-name {
     color: var(--psa-text-muted);
     font-style: italic;
