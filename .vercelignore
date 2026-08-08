@@ -1,8 +1,9 @@
-# Este despliegue en Vercel solo existe para /api/generate-news (Centro de Prensa IA).
-# El sitio público real se sirve desde GitHub Pages; no hace falta duplicar aquí
-# los assets pesados ni las carpetas que no usa la función serverless.
+# OJO: este repo tiene DOS despliegues de Vercel activos sobre el mismo código:
+# el proyecto "valenciasquashopen" (solo /api, creado para el Centro de Prensa IA)
+# y "psavalencia-dkun" (conectado por GitHub a este repo, dueño del dominio real
+# psavalenciaopen.com — sirve el sitio completo). Este .vercelignore afecta a AMBOS,
+# así que nunca puede excluir assets/, css/ ni js/, o se rompen las imágenes en producción.
 dist/
-assets/
 docker/
 supabase/
 .github/
