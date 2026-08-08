@@ -272,6 +272,7 @@ async function renderPlayerPage() {
     const id = (params.get("id") || "").trim();
     const name = (params.get("name") || "").trim();
 
+    const loadingEl = document.getElementById("playerLoading");
     const notFoundEl = document.getElementById("playerNotFound");
     const cardEl = document.getElementById("playerHeaderCard");
     if (!notFoundEl || !cardEl) return;
@@ -282,6 +283,7 @@ async function renderPlayerPage() {
 
     const player = findPlayer(players, id, name);
     if (!player) {
+        if (loadingEl) loadingEl.style.display = "none";
         cardEl.style.display = "none";
         notFoundEl.style.display = "block";
         return;
@@ -324,6 +326,11 @@ async function renderPlayerPage() {
 
     renderPlayerMatches(getPlayerMatches(divisions, playerName));
     renderPlayerRecentMeetings(getPlayerRecentMeetings(divisions, playerName));
+
+    // Todos los datos reales ya están puestos: ahora sí mostramos la ficha entera de una vez,
+    // en vez de enseñar valores de relleno que van cambiando mientras carga.
+    if (loadingEl) loadingEl.style.display = "none";
+    cardEl.style.display = "";
 }
 
 document.addEventListener("DOMContentLoaded", renderPlayerPage);
