@@ -189,3 +189,63 @@ color:#C78C32;
     }
 
 }
+
+.player-modal-card{
+
+max-width:760px;
+
+max-height:88vh;
+
+overflow-y:auto;
+
+}
+
+.player-modal-card .player-header{
+
+grid-template-columns:200px 1fr;
+
+gap:30px;
+
+align-items:start;
+
+}
+
+.player-modal-card .player-data h1{
+
+font-size:2rem;
+
+margin-bottom:14px;
+
+}
+
+.player-modal-card .player-ranking{
+
+margin-bottom:20px;
+
+}
+
+@media(max-width:640px){
+
+    .player-modal-card .player-header{
+
+        grid-template-columns:1fr;
+
+        text-align:center;
+
+    }
+
+    .player-modal-card .player-photo{
+
+        max-width:180px;
+
+        margin:0 auto;
+
+    }
+
+    .player-modal-card .player-country{
+
+        justify-content:center;
+
+    }
+
+}

@@ -181,9 +181,9 @@ function getPlayerRecentMeetings(divisions, name) {
         .slice(0, 5);
 }
 
-function renderPlayerRecentMeetings(meetings) {
-    const section = document.getElementById("playerRecentMeetingsSection");
-    const list = document.getElementById("playerRecentMeetingsList");
+function renderPlayerRecentMeetings(meetings, sectionId, listId) {
+    const section = document.getElementById(sectionId || "playerRecentMeetingsSection");
+    const list = document.getElementById(listId || "playerRecentMeetingsList");
     if (!section || !list) return;
 
     if (!meetings.length) {
@@ -221,9 +221,9 @@ function tp(key, fallback) {
     return (typeof t === "function" ? t(`psaPlayer.${key}`) : "") || fallback;
 }
 
-function renderPlayerMatches(matches) {
-    const section = document.getElementById("playerMatchesSection");
-    const list = document.getElementById("playerMatchList");
+function renderPlayerMatches(matches, sectionId, listId) {
+    const section = document.getElementById(sectionId || "playerMatchesSection");
+    const list = document.getElementById(listId || "playerMatchList");
     if (!section || !list) return;
 
     if (!matches.length) {

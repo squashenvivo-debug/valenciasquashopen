@@ -354,7 +354,7 @@
 
                 grid.innerHTML += `
 
-                <a class="player-card" href="player.html?${playerLinkParam}">
+                <a class="player-card" href="player.html?${playerLinkParam}" data-player-id="${player.id || ""}" data-player-name="${player.name || ""}">
 
                     <div class="player-photo">
                         <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${player.name}" loading="lazy" decoding="async"${positionStyle}>
@@ -385,6 +385,21 @@
             `;
 
             });
+
+            // Abre la ficha del jugador en una ventana modal (igual que el head-to-head del
+            // cuadro) en vez de navegar a player.html, así no se pierde el sitio de la portada
+            // en el que estaba el usuario. Ctrl/Cmd/clic central siguen abriendo en pestaña
+            // nueva con normalidad.
+            if (!grid.dataset.playerModalBound) {
+                grid.dataset.playerModalBound = "1";
+                grid.addEventListener("click", (event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) return;
+                    const card = event.target.closest(".player-card");
+                    if (!card || typeof window.openPlayerModal !== "function") return;
+                    event.preventDefault();
+                    window.openPlayerModal(card.dataset.playerId || "", card.dataset.playerName || "");
+                });
+            }
 
         } catch (error) {
 
