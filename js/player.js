@@ -9,6 +9,7 @@
  */
 
 const PLAYERS_COLLECTION_KEY = "playersCollection";
+const PLAYER_SILHOUETTE_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjI0IiBmaWxsPSIjMWMyNTMwIi8+PGNpcmNsZSBjeD0iNTAiIGN5PSIzOCIgcj0iMTgiIGZpbGw9IiM0YTU1NjgiLz48cGF0aCBkPSJNMTggOTBjMC0yNCAxMy0zNCAzMi0zNHMzMiAxMCAzMiAzNHoiIGZpbGw9IiM0YTU1NjgiLz48L3N2Zz4=";
 
 function resolvePlayerImageSrc(image) {
     const value = String(image || "").trim();
@@ -82,7 +83,7 @@ async function fetchLiveTournamentSnapshot() {
         const config = window.PSA_CONFIG || {};
         const baseUrl = config.supabaseUrl || "https://texjzaanugmssmolzwgb.supabase.co";
         const tournamentId = (localStorage.getItem("psaTournamentId") || config.psaTournamentId || "12711").trim();
-        const url = `${baseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true&head_to_head=false`;
+        const url = `${baseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true&head_to_head=true`;
         const response = await fetch(url, { headers: { Accept: "application/json" } });
         const payload = await response.json();
         if (!response.ok || payload?.success === false) return null;
@@ -134,6 +135,78 @@ function getPlayerMatches(divisions, name) {
     });
 
     return matches.sort((a, b) => a.round_num - b.round_num);
+}
+
+/**
+ * Últimos enfrentamientos reales (head-to-head) contra los rivales que le tocan en este
+ * torneo. No hay un endpoint de "historial general" de un jugador en la API de PSA que
+ * tengamos conectada — solo el head-to-head entre dos jugadores concretos cuando coinciden
+ * en un cruce — así que construimos el historial a partir de esos enfrentamientos reales
+ * en vez de inventar datos de partidos que no tenemos.
+ */
+function getPlayerRecentMeetings(divisions, name) {
+    const target = normalizePlayerName(name);
+    const meetings = [];
+
+    (divisions || []).forEach((division) => {
+        (division.brackets || []).forEach((bracket) => {
+            (bracket.matches || []).forEach((match) => {
+                if (match.bye) return;
+                const players = Array.isArray(match.players) ? match.players : [];
+                const meIdx = players.findIndex((p) => normalizePlayerName(p?.name) === target);
+                if (meIdx === -1) return;
+                const opponent = players[meIdx === 0 ? 1 : 0];
+                if (!opponent?.name) return;
+                const myId = players[meIdx]?.id;
+
+                const recent = Array.isArray(match.head_to_head?.recent_meetings) ? match.head_to_head.recent_meetings : [];
+                recent.forEach((meeting) => {
+                    if (!meeting?.date) return;
+                    meetings.push({
+                        date: meeting.date,
+                        tournament: meeting.tournament || "",
+                        round: meeting.round || "",
+                        opponentName: opponent.name,
+                        gamesScore: meeting.games_score || "",
+                        isWinner: meeting.winner_id !== null && meeting.winner_id !== undefined
+                            && String(meeting.winner_id) === String(myId)
+                    });
+                });
+            });
+        });
+    });
+
+    return meetings
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+}
+
+function renderPlayerRecentMeetings(meetings) {
+    const section = document.getElementById("playerRecentMeetingsSection");
+    const list = document.getElementById("playerRecentMeetingsList");
+    if (!section || !list) return;
+
+    if (!meetings.length) {
+        section.style.display = "none";
+        return;
+    }
+
+    list.innerHTML = meetings.map((meeting) => {
+        const resultClass = meeting.isWinner ? "is-win" : "is-loss";
+        const resultLabel = meeting.isWinner ? tp("won", "Victoria") : tp("lost", "Derrota");
+        const context = [meeting.round, meeting.tournament].filter(Boolean).join(" · ");
+
+        return `
+            <div class="player-match-row ${resultClass}">
+                <span class="player-match-round">${formatMatchDate(meeting.date, "")}</span>
+                <span class="player-match-opponent">${tp("vs", "vs")} ${meeting.opponentName}${context ? `<br><small>${context}</small>` : ""}</span>
+                <span class="player-match-score">${meeting.gamesScore}</span>
+                <span class="player-match-result">${resultLabel}</span>
+            </div>
+        `;
+    }).join("");
+
+    section.style.display = "";
 }
 
 function formatMatchDate(date, time) {
@@ -220,7 +293,10 @@ async function renderPlayerPage() {
     const imageEl = document.getElementById("player-image");
     if (imageEl) {
         const src = resolvePlayerImageSrc(player.image || player.imageSrc || "");
-        if (src) imageEl.src = src;
+        if (src) {
+            imageEl.onerror = () => { imageEl.onerror = null; imageEl.src = PLAYER_SILHOUETTE_SRC; };
+            imageEl.src = src;
+        }
     }
 
     const nameEl = document.getElementById("player-name");
@@ -247,6 +323,7 @@ async function renderPlayerPage() {
     setRowVisible("player-hand-row", "player-hand", handLabel);
 
     renderPlayerMatches(getPlayerMatches(divisions, playerName));
+    renderPlayerRecentMeetings(getPlayerRecentMeetings(divisions, playerName));
 }
 
 document.addEventListener("DOMContentLoaded", renderPlayerPage);

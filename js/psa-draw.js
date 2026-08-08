@@ -199,6 +199,14 @@
             }
         });
 
+        // PSA no devuelve los partidos en orden de posición dentro del cuadro (p.ej. junta
+        // primero los partidos "normales" y luego los byes al final del array) — "match_num"
+        // es el número de hueco real dentro de la ronda, así que ordenamos por él para que las
+        // tarjetas salgan en su sitio correcto.
+        Object.values(groups).forEach((list) => {
+            list.sort((a, b) => (a.match_num ?? 0) - (b.match_num ?? 0));
+        });
+
         return groups;
     }
 
@@ -285,37 +293,31 @@
         headToHeadMap = buildHeadToHeadMap(matches);
         const groups = groupMatchesByRound(matches);
 
-        // PSA marca explícitamente los huecos de bye dentro de Round 1 con "bye": true (un
-        // partido de un solo jugador, el cabeza de serie que pasa directo a Round 2). Usamos esa
-        // señal directa en vez de inferirla — así sigue funcionando igual de bien tanto ahora
-        // como cuando Round 1 esté completo y Round 2 ya tenga los dos jugadores decididos.
-        const byePlayers = groups.round1
-            .filter((match) => match.bye)
-            .map((match) => toDisplayPlayer(match.players?.[0], playerById, curatedMap))
-            .filter(Boolean);
-
-        const realRound1 = groups.round1.filter((match) => !match.bye && (match.players || []).length === 2);
+        // PSA marca los huecos de bye dentro de Round 1 con "bye": true (un partido de un solo
+        // jugador, el cabeza de serie que pasa directo a Round 2), pero una baja de última hora
+        // puede dejar un partido con un solo jugador SIN esa marca (el walkover aún no
+        // formalizado por PSA) — por eso tratamos como hueco automático cualquier entrada de
+        // Round 1 que no tenga dos jugadores, tenga o no el flag puesto. Ya no intercalamos "cada
+        // 2 partidos" a ciegas: usamos match_num (posición real en el cuadro, ver
+        // groupMatchesByRound) para que cada tarjeta salga en su hueco correcto.
         let round1Html = "";
-        let byeIndex = 0;
-        realRound1.forEach((match, idx) => {
-            if (idx % 2 === 0 && byePlayers[byeIndex]) {
-                round1Html += renderMatchCard({ dateTime: "-", player1: byePlayers[byeIndex], player2: { name: "BYE" } });
-                byeIndex++;
-            }
-            round1Html += renderMatchCard({
-                id: match.id,
-                dateTime: formatMatchDateTime(match),
-                status: match.status,
-                player1: toDisplayPlayer(match.players[0], playerById, curatedMap),
-                player2: toDisplayPlayer(match.players[1], playerById, curatedMap)
-            });
-            if (idx % 2 === 1 && byePlayers[byeIndex]) {
-                round1Html += renderMatchCard({ dateTime: "-", player1: { name: "BYE" }, player2: byePlayers[byeIndex] });
-                byeIndex++;
+        groups.round1.forEach((match) => {
+            const players = match.players || [];
+            if (players.length === 2) {
+                round1Html += renderMatchCard({
+                    id: match.id,
+                    dateTime: formatMatchDateTime(match),
+                    status: match.status,
+                    player1: toDisplayPlayer(players[0], playerById, curatedMap),
+                    player2: toDisplayPlayer(players[1], playerById, curatedMap)
+                });
+            } else {
+                const byePlayer = toDisplayPlayer(players[0], playerById, curatedMap) || { name: "TBD" };
+                round1Html += renderMatchCard({ dateTime: "-", player1: byePlayer, player2: { name: "BYE" } });
             }
         });
         renderColumn("r1Matches", round1Html);
-        updateColumnCount("r1Count", realRound1.length + byePlayers.length);
+        updateColumnCount("r1Count", groups.round1.length);
 
         // El rival de Round 2 empieza como TBD (aún no ha terminado su partido de Round 1),
         // pero en cuanto PSA lo resuelve, match.players[1] ya viene relleno con el ganador —
