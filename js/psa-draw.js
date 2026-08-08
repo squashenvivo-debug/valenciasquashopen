@@ -162,6 +162,24 @@
         el.innerHTML = html || `<p class="psa-empty-msg">${emptyMessage || "Por determinar"}</p>`;
     }
 
+    /**
+     * Traduce el número de partidos de cada columna usando js/language.js (si está cargado en
+     * la página) para que cambie con el idioma en vez de quedar fijo en español.
+     */
+    function updateColumnCount(elementId, count) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        // translations/currentLanguage vienen de js/language.js (variables globales de script
+        // clásico, no propiedades de window): si esa página no lo carga, usamos el español fijo.
+        const psaDraw = typeof translations !== "undefined" && typeof currentLanguage !== "undefined"
+            ? translations[currentLanguage]?.psaDraw
+            : null;
+        const singular = psaDraw?.matchSingular || "partido";
+        const plural = psaDraw?.matchPlural || "partidos";
+        el.textContent = `${count} ${count === 1 ? singular : plural}`;
+    }
+
     /** Agrupa los partidos del cuadro por ronda a partir del nombre real que devuelve PSA. */
     function groupMatchesByRound(matches) {
         const groups = { round1: [], round2: [], quarter: [], semi: [], final: [] };
@@ -297,6 +315,7 @@
             }
         });
         renderColumn("r1Matches", round1Html);
+        updateColumnCount("r1Count", realRound1.length + byePlayers.length);
 
         // El rival de Round 2 empieza como TBD (aún no ha terminado su partido de Round 1),
         // pero en cuanto PSA lo resuelve, match.players[1] ya viene relleno con el ganador —
@@ -309,9 +328,12 @@
             player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");
         renderColumn("r2Matches", round2Html);
+        updateColumnCount("r2Count", groups.round2.length);
 
         renderStageColumn("qfMatches", groups.quarter, playerById, curatedMap);
+        updateColumnCount("qfCount", groups.quarter.length);
         renderStageColumn("sfMatches", groups.semi, playerById, curatedMap);
+        updateColumnCount("sfCount", groups.semi.length);
         renderStageColumn("finalMatches", groups.final, playerById, curatedMap);
     }
 

@@ -375,35 +375,35 @@ DRAW
 
                 <div class="psa-round-column">
                     <div class="psa-round-title">
-                        Round 1 <span class="count">16 partidos</span>
+                        <span data-i18n="psaDraw.round1">Round 1</span> <span class="count" id="r1Count">16</span>
                     </div>
                     <div class="psa-matches-list" id="r1Matches"></div>
                 </div>
 
                 <div class="psa-round-column">
                     <div class="psa-round-title">
-                        Round 2 <span class="count">8 partidos</span>
+                        <span data-i18n="psaDraw.round2">Round 2</span> <span class="count" id="r2Count">8</span>
                     </div>
                     <div class="psa-matches-list" id="r2Matches"></div>
                 </div>
 
                 <div class="psa-round-column">
                     <div class="psa-round-title">
-                        Cuartos <span class="count">4 partidos</span>
+                        <span data-i18n="psaDraw.quarters">Cuartos</span> <span class="count" id="qfCount">4</span>
                     </div>
                     <div class="psa-matches-list" id="qfMatches"></div>
                 </div>
 
                 <div class="psa-round-column">
                     <div class="psa-round-title">
-                        Semifinales <span class="count">2 partidos</span>
+                        <span data-i18n="psaDraw.semis">Semifinales</span> <span class="count" id="sfCount">2</span>
                     </div>
                     <div class="psa-matches-list" id="sfMatches"></div>
                 </div>
 
                 <div class="psa-round-column">
                     <div class="psa-round-title">
-                        Final <span class="count">Gran Final</span>
+                        <span data-i18n="psaDraw.final">Final</span> <span class="count" id="finalCount" data-i18n="psaDraw.grandFinal">Gran Final</span>
                     </div>
                     <div class="psa-matches-list" id="finalMatches"></div>
                 </div>
@@ -733,8 +733,8 @@ FOOTER
     <div class="psa-modal-card">
         <button class="psa-modal-close" onclick="closeH2HModal()">&times;</button>
         <div class="psa-h2h-header">
-            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;">Head-to-head Stats</h3>
-            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;">Histórico de enfrentamientos en el PSA World Tour</p>
+            <h3 style="color: var(--psa-green); font-size: 1.1rem; text-transform: uppercase;" data-i18n="psaDraw.h2hTitle">Head-to-head Stats</h3>
+            <p style="color: var(--psa-text-muted); font-size: 0.85rem; margin-top: 4px;" data-i18n="psaDraw.h2hSubtitle">Histórico de enfrentamientos en el PSA World Tour</p>
         </div>
 
         <div class="psa-h2h-versus">
@@ -753,11 +753,7 @@ FOOTER
         </div>
         <div class="psa-h2h-stat-row">
             <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hLastMeeting">Último duelo:</span>
-            <strong id="h2hStatLast" data-i18n="psaDraw.h2hFirstMeeting">Primer enfrentamiento oficial</strong>
-        </div>
-        <div class="psa-h2h-stat-row">
-            <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hWinPct">Porcentaje de victorias:</span>
-            <strong id="h2hStatPct">50% - 50%</strong>
+            <strong id="h2hStatLast">Primer enfrentamiento oficial</strong>
         </div>
     </div>
 </div>

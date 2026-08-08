@@ -255,6 +255,13 @@ const pageTranslations = {
     es: {
         menu: { discover: "Experience Valencia", sponsors: "Patrocinadores" },
         cta: { live: "DIRECTO" },
+        psaDraw: {
+            round1: "Round 1", round2: "Round 2", quarters: "Cuartos", semis: "Semifinales", final: "Final", grandFinal: "Gran Final",
+            matchSingular: "partido", matchPlural: "partidos",
+            h2hTitle: "Estadísticas Head-to-head", h2hSubtitle: "Histórico de enfrentamientos en el PSA World Tour",
+            h2hMatches: "Enfrentamientos directos:", h2hLastMeeting: "Último duelo:", h2hFirstMeeting: "Primer enfrentamiento oficial",
+            h2hBtn: "Head-to-head"
+        },
         sectionHeaders: {
             quick: { label: "ACCESO", title: "ACCESOS DIRECTOS", intro: "Entra rápido a las secciones más importantes del torneo." },
             tournament: { label: "PSA WORLD TOUR COPPER", title: "TORNEO", intro: "Toda la información oficial del PSA Valencia Open 2026." },
@@ -281,6 +288,13 @@ const pageTranslations = {
     va: {
         menu: { discover: "Experience València", sponsors: "Patrocinadors" },
         cta: { live: "DIRECTE" },
+        psaDraw: {
+            round1: "Round 1", round2: "Round 2", quarters: "Quarts", semis: "Semifinals", final: "Final", grandFinal: "Gran Final",
+            matchSingular: "partit", matchPlural: "partits",
+            h2hTitle: "Estadístiques Head-to-head", h2hSubtitle: "Historial d'enfrontaments al PSA World Tour",
+            h2hMatches: "Enfrontaments directes:", h2hLastMeeting: "Últim duel:", h2hFirstMeeting: "Primer enfrontament oficial",
+            h2hBtn: "Head-to-head"
+        },
         sectionHeaders: {
             quick: { label: "ACCÉS", title: "ACCESSOS DIRECTES", intro: "Entra ràpid a les seccions més importants del torneig." },
             tournament: { label: "PSA WORLD TOUR COPPER", title: "TORNEIG", intro: "Tota la informació oficial del PSA Valencia Open 2026." },
@@ -307,6 +321,13 @@ const pageTranslations = {
     en: {
         menu: { discover: "Experience Valencia", sponsors: "Sponsors" },
         cta: { live: "LIVE" },
+        psaDraw: {
+            round1: "Round 1", round2: "Round 2", quarters: "Quarterfinals", semis: "Semifinals", final: "Final", grandFinal: "Grand Final",
+            matchSingular: "match", matchPlural: "matches",
+            h2hTitle: "Head-to-head Stats", h2hSubtitle: "Head-to-head history on the PSA World Tour",
+            h2hMatches: "Head-to-head record:", h2hLastMeeting: "Last meeting:", h2hFirstMeeting: "First official meeting",
+            h2hBtn: "Head-to-head"
+        },
         sectionHeaders: {
             quick: { label: "ACCESS", title: "QUICK ACCESS", intro: "Jump directly to the most important tournament sections." },
             tournament: { label: "PSA WORLD TOUR COPPER", title: "TOURNAMENT", intro: "All official information about PSA Valencia Open 2026." },
@@ -333,6 +354,13 @@ const pageTranslations = {
     fr: {
         menu: { discover: "Experience Valencia", sponsors: "Sponsors" },
         cta: { live: "DIRECT" },
+        psaDraw: {
+            round1: "Round 1", round2: "Round 2", quarters: "Quarts de finale", semis: "Demi-finales", final: "Finale", grandFinal: "Grande Finale",
+            matchSingular: "match", matchPlural: "matchs",
+            h2hTitle: "Statistiques Head-to-head", h2hSubtitle: "Historique des confrontations sur le PSA World Tour",
+            h2hMatches: "Confrontations directes:", h2hLastMeeting: "Dernière confrontation:", h2hFirstMeeting: "Première confrontation officielle",
+            h2hBtn: "Head-to-head"
+        },
         sectionHeaders: {
             quick: { label: "ACCÈS", title: "ACCÈS DIRECTS", intro: "Accédez rapidement aux sections les plus importantes du tournoi." },
             tournament: { label: "PSA WORLD TOUR COPPER", title: "TOURNOI", intro: "Toutes les informations officielles du PSA Valencia Open 2026." },
