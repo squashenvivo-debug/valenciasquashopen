@@ -290,7 +290,12 @@ async function renderNewsDetail() {
         return false;
     });
 
-    if (!item && collection.length > 0) {
+    // Si no se pidió una noticia concreta (news.html sin parámetros), mostramos la más
+    // reciente como valor por defecto. Pero si SÍ se pidió un slug/id concreto y no está
+    // entre las publicadas (borrador, programada para el futuro, o slug inexistente), no
+    // sustituimos por otra noticia distinta sin avisar — mostramos el estado de "no
+    // encontrada" en vez de confundir mostrando un artículo que no es el pedido.
+    if (!item && !newsId && !newsSlug && collection.length > 0) {
         item = collection[0];
     }
 
