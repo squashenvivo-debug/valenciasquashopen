@@ -768,6 +768,18 @@ border-radius:12px;
 padding:12px;
 }
 
+.gallery-admin-card-title{
+margin:0 0 8px;
+font-size:1.05rem;
+color:#F0D7A2;
+}
+
+.gallery-admin-card-title em{
+font-size:.8rem;
+color:#8E9BAE;
+font-style:normal;
+}
+
 .gallery-admin-head{
 display:flex;
 gap:10px;

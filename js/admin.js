@@ -3603,10 +3603,18 @@ function renderNewsAdminList() {
         return;
     }
 
-    host.innerHTML = newsItems.map((item) => `
+    host.innerHTML = newsItems.map((item) => {
+        // Si no hay título aparte (ya está puesto dentro del artículo), mostramos igualmente
+        // un titular identificable en la lista de edición, sacado del propio artículo — así
+        // no se ven tarjetas en blanco cuando el título es opcional y se dejó vacío.
+        const hasOwnTitle = String(item.title?.es || "").trim().length > 0;
+        const displayTitle = hasOwnTitle ? item.title.es : deriveTitleFromArticleHtml(item.article?.es, 90);
+
+        return `
         <article class="gallery-admin-card" data-news-id="${item.id}">
+            <h4 class="gallery-admin-card-title">${escapeHtml(displayTitle || "(sin título ni artículo)")}${!hasOwnTitle && displayTitle ? " <em>(sacado del artículo)</em>" : ""}</h4>
             <p class="admin-muted">Estado: <strong>${escapeHtml(getNewsStatusLabel(item.status))}</strong>${item.publishAt ? ` · Publicación: ${escapeHtml(formatAdminDateTime(item.publishAt))}` : ""}</p>
-            <img class="gallery-thumb" src="${item.imageSrc}" alt="${escapeHtml(item.title?.es || "Noticia")}">
+            <img class="gallery-thumb" src="${item.imageSrc}" alt="${escapeHtml(displayTitle || "Noticia")}">
             <label class="field-label" for="newsReplaceImage_${item.id}">Reemplazar imagen</label>
             <input id="newsReplaceImage_${item.id}" class="news-replace-image" type="file" accept="image/*">
             <label class="field-label" for="newsTitle_${item.id}_es">Título ES (opcional)</label>
@@ -3665,7 +3673,8 @@ function renderNewsAdminList() {
                 <button type="button" class="btn-gallery-save" data-action="save-news" data-news-id="${item.id}">Guardar noticia</button>
             </div>
         </article>
-    `).join("");
+        `;
+    }).join("");
 
     host.querySelectorAll("[data-action='save-news']").forEach((button) => {
         button.addEventListener("click", async () => {
