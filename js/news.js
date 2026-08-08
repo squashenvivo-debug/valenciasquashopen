@@ -149,6 +149,22 @@ function getPreviewTokenFromUrl() {
     return String(params.get("preview") || "").trim();
 }
 
+/** El título es opcional: si el admin no lo rellenó (porque ya escribió el titular dentro
+ *  del artículo con texto enriquecido), esto saca un texto de repuesto SOLO para lo que
+ *  técnicamente necesita texto plano (pestaña del navegador, meta SEO, tarjetas de la
+ *  portada) — nunca se usa para pintar una cabecera visible duplicada en la propia noticia. */
+function deriveTitleFromArticleHtml(html, maxLen = 100) {
+    const source = String(html || "");
+    // Si el artículo empieza con un encabezado (h1-h3), usamos justo ese texto — normalmente
+    // es el titular que el admin ya escribió ahí. Si no, recurrimos al primer texto plano.
+    const headingMatch = source.match(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i);
+    const raw = headingMatch ? headingMatch[1] : source;
+    const text = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (text.length <= maxLen) return text;
+    return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+}
+
 function ensureMetaTag(name) {
     let tag = document.querySelector(`meta[name="${name}"]`);
     if (!tag) {
@@ -160,7 +176,7 @@ function ensureMetaTag(name) {
 }
 
 function applyNewsSeo(item, lang, title, article) {
-    const seoTitle = getLocalizedText(item?.seo?.title, lang) || title || "Noticia";
+    const seoTitle = getLocalizedText(item?.seo?.title, lang) || title || deriveTitleFromArticleHtml(article, 70) || "Noticia";
     const seoDescription = getLocalizedText(item?.seo?.description, lang) || article.slice(0, 160);
     document.title = `${seoTitle} | PSA Valencia Open`;
     ensureMetaTag("description").setAttribute("content", seoDescription);
@@ -334,6 +350,10 @@ async function renderNewsDetail() {
     const displayDate = item.publishAt || item.createdAt;
 
     if (titleEl) titleEl.textContent = (typeof t === "function" ? t("psaNews.pageTitle") : "") || "Noticias";
+    // El título es opcional: si no se rellenó porque ya está puesto dentro del artículo con
+    // texto enriquecido, no pintamos una cabecera vacía/duplicada — el propio artículo ya
+    // trae su titular con el formato que eligió el admin.
+    heading.style.display = title ? "" : "none";
     heading.textContent = title || "";
     body.className = "news-content-body";
     body.style.whiteSpace = "normal";

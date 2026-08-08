@@ -1868,6 +1868,20 @@ function decodeHtmlEntities(value) {
     return parser.value;
 }
 
+/** El título de una noticia es opcional: si se deja vacío porque ya se escribió el titular
+ *  dentro del artículo con texto enriquecido, esto saca un título de repuesto (solo para el
+ *  slug SEO / <title> / tarjetas de la portada) a partir del propio artículo, en vez de
+ *  obligar a rellenar un campo redundante. */
+function deriveTitleFromArticleHtml(html, maxLen = 100) {
+    const source = String(html || "");
+    const headingMatch = source.match(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i);
+    const raw = headingMatch ? headingMatch[1] : source;
+    const text = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (text.length <= maxLen) return text;
+    return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+}
+
 async function buildLocalizedFromSpanish(sourceText) {
     const es = String(sourceText || "").trim();
     if (!es) {
@@ -3531,8 +3545,8 @@ function renderNewsAdminList() {
             <img class="gallery-thumb" src="${item.imageSrc}" alt="${escapeHtml(item.title?.es || "Noticia")}">
             <label class="field-label" for="newsReplaceImage_${item.id}">Reemplazar imagen</label>
             <input id="newsReplaceImage_${item.id}" class="news-replace-image" type="file" accept="image/*">
-            <label class="field-label" for="newsTitle_${item.id}_es">Título ES</label>
-            <input id="newsTitle_${item.id}_es" type="text" value="${escapeHtml(item.title?.es || "")}">
+            <label class="field-label" for="newsTitle_${item.id}_es">Título ES (opcional)</label>
+            <input id="newsTitle_${item.id}_es" type="text" value="${escapeHtml(item.title?.es || "")}" placeholder="Déjalo vacío si ya pusiste el titular dentro del artículo">
 
             <div class="results-grid">
                 <div>
@@ -3608,10 +3622,14 @@ function renderNewsAdminList() {
                 const seoTitleEs = (document.getElementById(`newsSeoTitle_${newsId}_es`)?.value || "").trim();
                 const seoDescriptionEs = (document.getElementById(`newsSeoDescription_${newsId}_es`)?.value || "").trim();
 
-                if (!titleEs || !articleEs) {
-                    updateNewsStatus("Escribe título y artículo en español para traducir automáticamente.");
+                if (!articleEs) {
+                    updateNewsStatus("Escribe el artículo en español.");
                     return;
                 }
+
+                // Título opcional, igual que al crear: si está vacío, usamos un extracto del
+                // artículo solo para slug/SEO, sin duplicar el titular en la página pública.
+                const titleBasis = titleEs || deriveTitleFromArticleHtml(articleEs, 70);
 
                 const publication = resolveNewsPublication(statusValue, publishAtValue);
                 if (publication.error) {
@@ -3619,15 +3637,15 @@ function renderNewsAdminList() {
                     return;
                 }
 
-                const slug = slugifyText(slugValue || titleEs);
+                const slug = slugifyText(slugValue || titleBasis);
                 if (!slug) {
-                    updateNewsStatus("Escribe un título válido para generar el slug SEO.");
+                    updateNewsStatus("Escribe el artículo o un slug SEO manual.");
                     return;
                 }
 
                 const title = await buildLocalizedFromSpanish(titleEs);
                 const article = await buildLocalizedFromSpanish(articleEs);
-                const seoTitle = await buildLocalizedFromSpanish(seoTitleEs || titleEs);
+                const seoTitle = await buildLocalizedFromSpanish(seoTitleEs || titleBasis);
                 const seoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || articleEs.slice(0, 160));
 
                 const imageInput = document.getElementById(`newsReplaceImage_${newsId}`);
@@ -3691,10 +3709,16 @@ async function saveNewNews() {
         const seoTitleEs = (document.getElementById("newNewsSeoTitle_es")?.value || "").trim();
         const seoDescriptionEs = (document.getElementById("newNewsSeoDescription_es")?.value || "").trim();
 
-        if (!String(title.es || "").trim() || !String(article.es || "").trim()) {
-            updateNewsStatus("Escribe título y artículo en español.");
+        if (!String(article.es || "").trim()) {
+            updateNewsStatus("Escribe el artículo en español.");
             return;
         }
+
+        // El título es opcional: si no se rellena (porque ya está puesto dentro del artículo
+        // con texto enriquecido), usamos un extracto del propio artículo solo para lo que
+        // técnicamente necesita texto (slug, SEO, tarjetas) — el título visible del artículo
+        // en sí no se duplica, así que no forzamos a escribirlo dos veces.
+        const titleBasis = String(title.es || "").trim() || deriveTitleFromArticleHtml(article.es, 70);
 
         const publication = resolveNewsPublication(statusValue, publishAtValue);
         if (publication.error) {
@@ -3702,9 +3726,9 @@ async function saveNewNews() {
             return;
         }
 
-        const slug = slugifyText(slugInput || title.es);
+        const slug = slugifyText(slugInput || titleBasis);
         if (!slug) {
-            updateNewsStatus("Escribe un título válido para generar el slug SEO.");
+            updateNewsStatus("Escribe el artículo o un slug SEO manual.");
             return;
         }
 
@@ -3718,7 +3742,7 @@ async function saveNewNews() {
 
         const localizedTitle = await buildLocalizedFromSpanish(title.es);
         const localizedArticle = await buildLocalizedFromSpanish(article.es);
-        const localizedSeoTitle = await buildLocalizedFromSpanish(seoTitleEs || title.es);
+        const localizedSeoTitle = await buildLocalizedFromSpanish(seoTitleEs || titleBasis);
         const localizedSeoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || article.es.slice(0, 160));
         const imageInput = document.getElementById("newNewsImage");
         const imageFile = imageInput?.files?.[0];

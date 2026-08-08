@@ -519,6 +519,11 @@
         grid.innerHTML = newsItems.map((item) => {
             const title = getLocalizedText(item.title, lang);
             const article = getLocalizedText(item.article, lang);
+            // El título es opcional (se puede dejar puesto solo dentro del artículo): la
+            // tarjeta de la portada sí necesita un titular visible, así que si no hay uno
+            // propio sacamos uno de repuesto del artículo (deriveTitleFromArticleHtml viene
+            // de js/news.js, cargado antes que este script en index.html).
+            const displayTitle = title || (typeof deriveTitleFromArticleHtml === "function" ? deriveTitleFromArticleHtml(article, 70) : "");
             const seoDescription = getLocalizedText(item.seo?.description, lang);
             let summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
             if (title) {
@@ -536,12 +541,12 @@
 
             return `
             <a class="news-card" href="${newsUrl}">
-                <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${title}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
+                <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${displayTitle}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
                 <div class="news-content">
                     <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
                     ${category ? `<span class="news-date">${category}</span>` : ""}
                     ${player ? `<span class="news-date">Jugador: ${escapeHtml(player)}</span>` : ""}
-                    <h3>${title}</h3>
+                    <h3>${displayTitle}</h3>
                     <p>${summary}</p>
                     <span class="btn btn-primary">
                         ${ctaText[lang] || ctaText.es}
