@@ -1882,6 +1882,17 @@ function deriveTitleFromArticleHtml(html, maxLen = 100) {
     return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
 }
 
+/** Texto plano (sin ninguna etiqueta) para usar como descripción SEO de repuesto cuando el
+ *  admin no rellena ese campo. Antes se recortaba el HTML en crudo a 160 caracteres, lo que
+ *  casi siempre cortaba a mitad de una etiqueta y dejaba HTML roto guardado — quitamos las
+ *  etiquetas PRIMERO y recortamos después, así nunca puede quedar HTML a medias. */
+function stripHtmlForSeoDescription(html, maxLen = 160) {
+    const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (text.length <= maxLen) return text;
+    return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+}
+
 async function buildLocalizedFromSpanish(sourceText) {
     const es = String(sourceText || "").trim();
     if (!es) {
@@ -3719,7 +3730,7 @@ function renderNewsAdminList() {
                 const title = await buildLocalizedFromSpanish(titleEs);
                 const article = await buildLocalizedFromSpanish(articleEs);
                 const seoTitle = await buildLocalizedFromSpanish(seoTitleEs || titleBasis);
-                const seoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || articleEs.slice(0, 160));
+                const seoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || stripHtmlForSeoDescription(articleEs, 160));
 
                 const imageInput = document.getElementById(`newsReplaceImage_${newsId}`);
                 const replacement = imageInput?.files?.[0];
@@ -3816,7 +3827,7 @@ async function saveNewNews() {
         const localizedTitle = await buildLocalizedFromSpanish(title.es);
         const localizedArticle = await buildLocalizedFromSpanish(article.es);
         const localizedSeoTitle = await buildLocalizedFromSpanish(seoTitleEs || titleBasis);
-        const localizedSeoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || article.es.slice(0, 160));
+        const localizedSeoDescription = await buildLocalizedFromSpanish(seoDescriptionEs || stripHtmlForSeoDescription(article.es, 160));
         const imageInput = document.getElementById("newNewsImage");
         const imageFile = imageInput?.files?.[0];
         const uploadedImage = imageFile

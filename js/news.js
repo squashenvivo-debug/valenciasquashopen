@@ -13,6 +13,16 @@ function getCurrentLanguage() {
     return DYNAMIC_LANGS.includes(lang) ? lang : "es";
 }
 
+/** Texto plano seguro para usar como resumen/descripción: quita TODAS las etiquetas antes de
+ *  recortar, para no dejar nunca HTML a medio cortar (a diferencia de un simple
+ *  string.slice() sobre HTML en crudo, que corta donde caiga sin mirar las etiquetas). */
+function stripHtmlTagsForSummary(html, maxLen = 160) {
+    const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (text.length <= maxLen) return text;
+    return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+}
+
 function normalizeLocalizedText(value) {
     if (value && typeof value === "object") {
         const base = value.es || value.va || value.en || value.fr || "";
@@ -89,11 +99,14 @@ function normalizeNewsItem(item) {
     const article = item?.article || item?.summary || "";
     const title = normalizeLocalizedText(item?.title);
     const body = normalizeLocalizedText(article);
+    // Recorte defensivo: si algún día llega un seo.description vacío, generamos uno de
+    // repuesto quitando las etiquetas ANTES de recortar (recortar el HTML en crudo puede
+    // cortar a mitad de una etiqueta y guardar/mostrar HTML roto).
     const fallbackSeoDescription = {
-        es: String(item?.seo?.description?.es || body.es || "").slice(0, 160),
-        va: String(item?.seo?.description?.va || body.va || body.es || "").slice(0, 160),
-        en: String(item?.seo?.description?.en || body.en || body.es || "").slice(0, 160),
-        fr: String(item?.seo?.description?.fr || body.fr || body.es || "").slice(0, 160)
+        es: stripHtmlTagsForSummary(item?.seo?.description?.es || body.es || "", 160),
+        va: stripHtmlTagsForSummary(item?.seo?.description?.va || body.va || body.es || "", 160),
+        en: stripHtmlTagsForSummary(item?.seo?.description?.en || body.en || body.es || "", 160),
+        fr: stripHtmlTagsForSummary(item?.seo?.description?.fr || body.fr || body.es || "", 160)
     };
 
     const mainImage = item?.imageSrc || item?.image || "";
@@ -177,7 +190,7 @@ function ensureMetaTag(name) {
 
 function applyNewsSeo(item, lang, title, article) {
     const seoTitle = getLocalizedText(item?.seo?.title, lang) || title || deriveTitleFromArticleHtml(article, 70) || "Noticia";
-    const seoDescription = getLocalizedText(item?.seo?.description, lang) || article.slice(0, 160);
+    const seoDescription = getLocalizedText(item?.seo?.description, lang) || stripHtmlTagsForSummary(article, 160);
     document.title = `${seoTitle} | PSA Valencia Open`;
     ensureMetaTag("description").setAttribute("content", seoDescription);
     ensureMetaTag("keywords").setAttribute("content", normalizeStringArray(item?.tags).join(", "));

@@ -525,7 +525,14 @@
             // de js/news.js, cargado antes que este script en index.html).
             const displayTitle = title || (typeof deriveTitleFromArticleHtml === "function" ? deriveTitleFromArticleHtml(article, 70) : "");
             const seoDescription = getLocalizedText(item.seo?.description, lang);
-            let summaryBase = String(seoDescription || article || "").replace(/<[^>]*>/g, "").replace(/(\*\*|__|[*_])/g, "").trim();
+            // El .replace(/<[^>]*$/, "") de más quita cualquier etiqueta que se haya quedado
+            // a medias al final (p.ej. una descripción guardada con un recorte antiguo que
+            // cortaba el HTML en crudo) — sin esto, ese trozo suelto rompe la tarjeta entera.
+            let summaryBase = String(seoDescription || article || "")
+                .replace(/<[^>]*>/g, "")
+                .replace(/<[^>]*$/, "")
+                .replace(/(\*\*|__|[*_])/g, "")
+                .trim();
             if (title) {
                 const cleanTitle = title.replace(/<[^>]*>/g, "").trim();
                 if (cleanTitle && summaryBase.toLowerCase().startsWith(cleanTitle.toLowerCase())) {
@@ -1544,15 +1551,24 @@
         return `news.html?newsId=${encodeURIComponent(item?.id || "")}`;
     }
 
+    function stripHtmlTagsForSummaryLocal(html, maxLen) {
+        if (typeof stripHtmlTagsForSummary === "function") return stripHtmlTagsForSummary(html, maxLen);
+        const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        return text.length <= maxLen ? text : `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+    }
+
     function normalizeNewsItem(item) {
         const article = item?.article || item?.summary || "";
         const title = normalizeLocalizedText(item?.title);
         const body = normalizeLocalizedText(article);
+        // Recorte defensivo: si algún día llega un seo.description vacío, generamos uno de
+        // repuesto quitando las etiquetas ANTES de recortar (recortar el HTML en crudo puede
+        // cortar a mitad de una etiqueta y guardar/mostrar HTML roto).
         const fallbackSeoDescription = {
-            es: String(item?.seo?.description?.es || body.es || "").slice(0, 160),
-            va: String(item?.seo?.description?.va || body.va || body.es || "").slice(0, 160),
-            en: String(item?.seo?.description?.en || body.en || body.es || "").slice(0, 160),
-            fr: String(item?.seo?.description?.fr || body.fr || body.es || "").slice(0, 160)
+            es: stripHtmlTagsForSummaryLocal(item?.seo?.description?.es || body.es || "", 160),
+            va: stripHtmlTagsForSummaryLocal(item?.seo?.description?.va || body.va || body.es || "", 160),
+            en: stripHtmlTagsForSummaryLocal(item?.seo?.description?.en || body.en || body.es || "", 160),
+            fr: stripHtmlTagsForSummaryLocal(item?.seo?.description?.fr || body.fr || body.es || "", 160)
         };
         return {
             id: item?.id || `news_${Math.random().toString(36).slice(2, 8)}`,
