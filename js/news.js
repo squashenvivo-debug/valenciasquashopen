@@ -304,7 +304,7 @@ async function renderNewsDetail() {
     const article = getLocalizedText(item.article, lang);
     const displayDate = item.publishAt || item.createdAt;
 
-    if (titleEl) titleEl.textContent = "Noticias";
+    if (titleEl) titleEl.textContent = (typeof t === "function" ? t("psaNews.pageTitle") : "") || "Noticias";
     heading.textContent = title || "";
     body.className = "news-content-body";
     body.style.whiteSpace = "normal";

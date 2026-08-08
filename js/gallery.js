@@ -289,15 +289,17 @@ function setupGalleryFilters(photoEntries, lang) {
     const playerValues = Array.from(new Set(photoEntries.map((item) => item.meta.player).filter(Boolean))).sort();
     const categoryValues = Array.from(new Set(photoEntries.map((item) => item.meta.category).filter(Boolean))).sort();
 
-    populateSelect(document.getElementById("galleryTournamentFilter"), tournamentValues, lang === "en" ? "All tournaments" : "Todos los torneos");
-    populateSelect(document.getElementById("galleryClubFilter"), clubValues, lang === "en" ? "All clubs" : "Todos los clubs");
-    populateSelect(document.getElementById("galleryDateFilter"), dateValues.map((value) => formatGalleryDate(value, lang)), lang === "en" ? "All dates" : "Todas las fechas");
+    const tAll = (key, fallback) => (typeof t === "function" ? t(`psaGallery.${key}`) : "") || fallback;
+
+    populateSelect(document.getElementById("galleryTournamentFilter"), tournamentValues, tAll("allTournaments", "Todos los torneos"));
+    populateSelect(document.getElementById("galleryClubFilter"), clubValues, tAll("allClubs", "Todos los clubs"));
+    populateSelect(document.getElementById("galleryDateFilter"), dateValues.map((value) => formatGalleryDate(value, lang)), tAll("allDates", "Todas las fechas"));
 
     const dateSelect = document.getElementById("galleryDateFilter");
     if (dateSelect) {
         const current = dateSelect.dataset.rawValue || "";
         dateSelect.innerHTML = ["", ...dateValues].map((value) => {
-            const label = value ? formatGalleryDate(value, lang) : (lang === "en" ? "All dates" : "Todas las fechas");
+            const label = value ? formatGalleryDate(value, lang) : tAll("allDates", "Todas las fechas");
             const selected = value === current ? " selected" : "";
             return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
         }).join("");
@@ -309,8 +311,8 @@ function setupGalleryFilters(photoEntries, lang) {
         }
     }
 
-    populateSelect(document.getElementById("galleryPlayerFilter"), playerValues, lang === "en" ? "All players" : "Todos los jugadores");
-    populateSelect(document.getElementById("galleryCategoryFilter"), categoryValues, lang === "en" ? "All categories" : "Todas las categorias");
+    populateSelect(document.getElementById("galleryPlayerFilter"), playerValues, tAll("allPlayers", "Todos los jugadores"));
+    populateSelect(document.getElementById("galleryCategoryFilter"), categoryValues, tAll("allCategories", "Todas las categorias"));
 }
 
 function getGalleryFilterState() {
@@ -347,10 +349,12 @@ function renderGalleryArchive() {
 
     if (!titleEl || !grid || !empty || !summary) return;
 
+    const tg = (key, fallback) => (typeof t === "function" ? t(`psaGallery.${key}`) : "") || fallback;
+
     if (galleryId && !selectedGallery) {
-        titleEl.textContent = "Galeria no encontrada";
+        titleEl.textContent = tg("notFoundTitle", "Galeria no encontrada");
         empty.style.display = "block";
-        empty.textContent = "Esta galeria no existe o fue eliminada.";
+        empty.textContent = tg("notFoundText", "Esta galeria no existe o fue eliminada.");
         grid.innerHTML = "";
         summary.textContent = "";
         return;
@@ -358,7 +362,7 @@ function renderGalleryArchive() {
 
     titleEl.textContent = selectedGallery
         ? getGalleryDisplayTitle(selectedGallery, lang)
-        : "Archivo de galerias";
+        : tg("archiveTitle", "Archivo de galerias");
 
     const photoEntries = flattenGalleryPhotos(galleries, lang);
     setupGalleryFilters(photoEntries, lang);
@@ -366,14 +370,14 @@ function renderGalleryArchive() {
     const filteredEntries = filterGalleryPhotos(photoEntries, filters);
     lastRenderedGalleryEntries = filteredEntries;
 
-    summary.textContent = `${filteredEntries.length} foto(s) de ${photoEntries.length}`;
+    summary.textContent = `${filteredEntries.length} ${tg("photosOfLabel", "foto(s) de")} ${photoEntries.length}`;
 
     if (filteredEntries.length === 0) {
         grid.innerHTML = "";
         empty.style.display = "block";
         empty.textContent = photoEntries.length === 0
-            ? "No hay fotos disponibles en esta galeria."
-            : "Ninguna foto coincide con los filtros seleccionados.";
+            ? tg("noPhotos", "No hay fotos disponibles en esta galeria.")
+            : tg("noMatch", "Ninguna foto coincide con los filtros seleccionados.");
         return;
     }
 

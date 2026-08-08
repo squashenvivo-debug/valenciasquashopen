@@ -401,6 +401,8 @@
         const container = $("lsMatchesContainer");
         if (!container) return;
 
+        const tls = (key, fallback) => (typeof t === "function" ? t(`psaLiveScores.${key}`) : "") || fallback;
+
         const filtered = matchesData.filter((match) => {
             if (isInvalidPlayer(match.player1?.name) || isInvalidPlayer(match.player2?.name)) {
                 return false;
@@ -410,7 +412,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="text-align: center; color: var(--ls-muted); padding: 32px; font-size: 1.05rem;">No hay partidos en esta categoría.</p>`;
+            container.innerHTML = `<p style="text-align: center; color: var(--ls-muted); padding: 32px; font-size: 1.05rem;">${tls("noMatches", "No hay partidos en esta categoría.")}</p>`;
             return;
         }
 
@@ -428,10 +430,10 @@
 
             const statusClass = `ls-status-${match.status}`;
             const statusLabel = match.status === "in_progress"
-                ? "● EN JUEGO LIVE"
+                ? tls("statusLive", "● EN JUEGO LIVE")
                 : match.status === "completed"
-                ? "✓ FINALIZADO"
-                : "PROGRAMADO";
+                ? tls("statusCompleted", "✓ FINALIZADO")
+                : tls("statusScheduled", "PROGRAMADO");
 
             const p1Score = (match.player1.score !== null && match.player1.score !== undefined) ? match.player1.score : null;
             const p2Score = (match.player2.score !== null && match.player2.score !== undefined) ? match.player2.score : null;
@@ -451,7 +453,7 @@
                     const cleanSc = sc.replace("(LIVE)", "").replace("(jugando)", "").trim();
                     return `<span class="ls-score-pill ${isLiveSet ? 'is-live-pill' : ''}">${cleanSc}${isLiveSet ? ' <span class="live-dot">●</span>' : ''}</span>`;
                 }).join("")
-                : `<span style="color: var(--ls-muted); font-size: 0.85rem; font-style: italic;">Sin juegos iniciados</span>`;
+                : `<span style="color: var(--ls-muted); font-size: 0.85rem; font-style: italic;">${tls("noSets", "Sin juegos iniciados")}</span>`;
 
             const courtHtml = match.court
                 ? `<span class="ls-match-court">· ${match.court}</span>`
@@ -472,7 +474,7 @@
                             <span class="ls-player-name">
                                 ${match.player1.name}
                                 ${match.player1.seed ? `<span class="ls-player-seed">${match.player1.seed}</span>` : ""}
-                                ${p1Winner ? `<span class="ls-winner-badge" title="Ganador">✓</span>` : ""}
+                                ${p1Winner ? `<span class="ls-winner-badge" title="${tls("winner", "Ganador")}">✓</span>` : ""}
                             </span>
                         </div>
 
@@ -480,7 +482,7 @@
 
                         <div class="ls-player right ${p2Winner ? 'is-winner' : ''}">
                             <span class="ls-player-name">
-                                ${p2Winner ? `<span class="ls-winner-badge" title="Ganador">✓</span>` : ""}
+                                ${p2Winner ? `<span class="ls-winner-badge" title="${tls("winner", "Ganador")}">✓</span>` : ""}
                                 ${match.player2.name}
                                 ${match.player2.seed ? `<span class="ls-player-seed">${match.player2.seed}</span>` : ""}
                             </span>
@@ -489,7 +491,7 @@
 
                         <div class="ls-live-details">
                             <div class="ls-scores-summary">
-                                <span class="ls-sets-label">PARCIALES:</span>
+                                <span class="ls-sets-label">${tls("partials", "PARCIALES:")}</span>
                                 ${scoresMarkup}
                             </div>
                             <span class="ls-status-badge ${statusClass}">${statusLabel}</span>

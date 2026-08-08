@@ -13,7 +13,7 @@
 
     <!-- Navigation / Header -->
     <header class="ls-page-header">
-        <a href="index.html" class="ls-back-link">← Volver a PSA Valencia Open</a>
+        <a href="index.html" class="ls-back-link" data-i18n="psaLiveScores.backLink">← Volver a PSA Valencia Open</a>
         <div style="font-weight: 700; color: var(--ls-green); font-size: 0.9rem;">
             ● PSA LIVE SCORES INTEGRATION
         </div>
@@ -32,16 +32,16 @@
     <div class="ls-clock-container">
         <div class="ls-clock-badge">
             <div id="lsDigitalClock" class="ls-clock-time">03:07</div>
-            <div class="ls-clock-sub">LOCAL TIME (GMT +2)</div>
+            <div class="ls-clock-sub" data-i18n="psaLiveScores.localTime">LOCAL TIME (GMT +2)</div>
         </div>
     </div>
 
     <!-- Category Tabs -->
     <div class="ls-tabs">
-        <button type="button" class="ls-tab-btn active" data-filter="all">TODOS LOS PARTIDOS</button>
-        <button type="button" class="ls-tab-btn" data-filter="in_progress">EN JUEGO LIVE</button>
-        <button type="button" class="ls-tab-btn" data-filter="scheduled">PROGRAMADOS</button>
-        <button type="button" class="ls-tab-btn" data-filter="completed">FINALIZADOS</button>
+        <button type="button" class="ls-tab-btn active" data-filter="all" data-i18n="psaLiveScores.tabAll">TODOS LOS PARTIDOS</button>
+        <button type="button" class="ls-tab-btn" data-filter="in_progress" data-i18n="psaLiveScores.tabLive">EN JUEGO LIVE</button>
+        <button type="button" class="ls-tab-btn" data-filter="scheduled" data-i18n="psaLiveScores.tabScheduled">PROGRAMADOS</button>
+        <button type="button" class="ls-tab-btn" data-filter="completed" data-i18n="psaLiveScores.tabCompleted">FINALIZADOS</button>
     </div>
 
     <!-- Match Cards List -->
@@ -52,6 +52,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="js/language.js?v=20260808-v1"></script>
 <script src="js/live-scores.js?v=20260805-1"></script>
 </body>
 </html>

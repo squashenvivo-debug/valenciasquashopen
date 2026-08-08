@@ -14,14 +14,14 @@
 <main class="gallery-page-main">
     <div class="container">
         <header class="gallery-page-header">
-            <h1 class="gallery-page-title" id="galleryPageTitle">Galeria</h1>
-            <a class="gallery-back-link" href="index.html#gallery">Salir de galeria</a>
+            <h1 class="gallery-page-title" id="galleryPageTitle" data-i18n="psaGallery.defaultTitle">Galeria</h1>
+            <a class="gallery-back-link" href="index.html#gallery" data-i18n="psaGallery.backLink">Salir de galeria</a>
         </header>
 
         <p id="galleryResultsSummary" class="gallery-filter-summary"></p>
 
         <div id="galleryDetailGrid" class="gallery-detail-grid"></div>
-        <p id="galleryDetailEmpty" class="gallery-empty" style="display:none;">No hay fotos en esta galeria.</p>
+        <p id="galleryDetailEmpty" class="gallery-empty" style="display:none;" data-i18n="psaGallery.noPhotos">No hay fotos en esta galeria.</p>
     </div>
 </main>
 
@@ -37,6 +37,7 @@
 <script src="js/runtime-optimizations.js?v=20260803-1"></script>
 <script src="js/cloud-store.js?v=20260726-4"></script>
 <script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/language.js?v=20260808-v1"></script>
 <script src="js/gallery.js?v=20260803-5"></script>
 </body>
 </html>
