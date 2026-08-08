@@ -259,9 +259,7 @@ GALLERY
 }
 
 .gallery-action-download{ background:#C78C32; }
-.gallery-action-whatsapp{ background:#25D366; }
-.gallery-action-facebook{ background:#1877F2; }
-.gallery-action-native{ background:#2D4861; }
+.gallery-action-share{ background:#2D4861; }
 
 @media(max-width:768px){
     .gallery-page-main{

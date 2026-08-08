@@ -394,17 +394,37 @@ async function renderNewsDetail() {
 }
 
 /**
- * WhatsApp y Facebook sí tienen un enlace de "compartir" público que cualquier web puede
- * usar sin login ni API. Instagram, a propósito, NO lo tiene — no existe forma de que una
- * página web abra "publicar esto en Instagram" (solo su propia app puede hacerlo). Para eso
- * usamos el "compartir" nativo del propio móvil/navegador (Web Share API): en el sistema
- * operativo del usuario, ese panel de compartir SÍ incluye Instagram (y WhatsApp, Telegram,
- * etc.) entre las apps a elegir. Solo aparece donde el navegador lo soporta (sobre todo
- * móvil); si no está disponible, el botón se oculta en vez de fingir que hace algo.
+ * Un único botón "Compartir" que abre el panel nativo de compartir del dispositivo (Web
+ * Share API) — ahí es donde el usuario elige WhatsApp, Instagram, Facebook, Telegram, etc.
+ * Instagram en concreto no tiene ningún enlace público de "compartir" que una web pueda usar
+ * directamente (solo su propia app), así que el panel nativo del sistema es la única vía
+ * real para ofrecerlo. Si el navegador no soporta esa API (algunos de escritorio), en vez de
+ * ocultar el botón copiamos el enlace al portapapeles — siempre hace algo útil.
  */
+function shareOrCopyLink(button, shareTitle, shareUrl) {
+    if (typeof navigator.share === "function") {
+        navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
+        return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            const original = button.innerHTML;
+            button.innerHTML = `✅ ${(typeof t === "function" ? t("psaNews.linkCopied") : "") || "Enlace copiado"}`;
+            setTimeout(() => { button.innerHTML = original; }, 2000);
+        }).catch(() => {
+            window.open(shareUrl, "_blank", "noopener");
+        });
+        return;
+    }
+
+    window.open(shareUrl, "_blank", "noopener");
+}
+
 function renderNewsShareBar(item, title, article, isPreview) {
     const bar = document.getElementById("newsShareBar");
-    if (!bar) return;
+    const button = document.getElementById("newsShareNative");
+    if (!bar || !button) return;
 
     if (isPreview) {
         bar.style.display = "none";
@@ -417,24 +437,7 @@ function renderNewsShareBar(item, title, article, isPreview) {
         : window.location.href.split("&preview=")[0];
     const shareText = title || deriveTitleFromArticleHtml(article, 100) || "PSA Valencia Open";
 
-    const waLink = document.getElementById("newsShareWhatsapp");
-    if (waLink) waLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-
-    const fbLink = document.getElementById("newsShareFacebook");
-    if (fbLink) fbLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-
-    const nativeBtn = document.getElementById("newsShareNative");
-    if (nativeBtn) {
-        if (typeof navigator.share === "function") {
-            nativeBtn.style.display = "";
-            nativeBtn.onclick = () => {
-                navigator.share({ title: shareText, url: shareUrl }).catch(() => {});
-            };
-        } else {
-            nativeBtn.style.display = "none";
-        }
-    }
-
+    button.onclick = () => shareOrCopyLink(button, shareText, shareUrl);
     bar.style.display = "";
 }
 

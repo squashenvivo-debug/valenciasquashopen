@@ -166,7 +166,6 @@ function openLightbox(src, caption, photoMeta = {}) {
     document.body.style.overflow = "hidden";
 
     currentLightboxPhoto = { imageSrc: src, caption: caption || "", ...photoMeta };
-    updateLightboxActions(currentLightboxPhoto);
 }
 
 /** Descarga la foto de verdad (no solo abrirla) trayéndola como blob — un <a download> normal
@@ -199,33 +198,46 @@ async function downloadCurrentPhoto() {
     });
 }
 
-function shareCurrentPhoto(action) {
+/** Un único botón "Compartir": panel nativo del dispositivo (ahí elige Instagram, WhatsApp,
+ *  Facebook, etc. — Instagram no tiene enlace público de compartir, solo esta vía funciona).
+ *  Si el navegador no lo soporta, copiamos el enlace en vez de ocultar el botón. */
+function shareOrCopyLink(button, shareTitle, shareUrl, onShared) {
+    if (typeof navigator.share === "function") {
+        navigator.share({ title: shareTitle, url: shareUrl }).then(onShared).catch(() => {});
+        return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            onShared?.();
+            const original = button.innerHTML;
+            button.innerHTML = `✅ ${(typeof t === "function" ? t("psaGallery.linkCopied") : "") || "Enlace copiado"}`;
+            setTimeout(() => { button.innerHTML = original; }, 2000);
+        }).catch(() => {
+            window.open(shareUrl, "_blank", "noopener");
+        });
+        return;
+    }
+
+    window.open(shareUrl, "_blank", "noopener");
+}
+
+function shareCurrentPhoto() {
     const photo = currentLightboxPhoto;
     if (!photo?.imageSrc) return;
 
-    window.PSAPhotoAnalytics?.trackEvent?.(action, {
-        galleryId: photo.galleryId,
-        photoId: photo.photoId,
-        photoUrl: photo.imageSrc
-    });
-}
-
-function updateLightboxActions(photo) {
-    const shareText = photo.caption || "PSA Valencia Open";
     const shareUrl = photo.galleryId
         ? `${window.location.origin}/gallery.html?galleryId=${encodeURIComponent(photo.galleryId)}`
         : window.location.href;
+    const button = document.getElementById("galleryShareNative");
 
-    const waLink = document.getElementById("galleryShareWhatsapp");
-    if (waLink) waLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-
-    const fbLink = document.getElementById("galleryShareFacebook");
-    if (fbLink) fbLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-
-    const nativeBtn = document.getElementById("galleryShareNative");
-    if (nativeBtn) {
-        nativeBtn.style.display = typeof navigator.share === "function" ? "" : "none";
-    }
+    shareOrCopyLink(button, photo.caption || "PSA Valencia Open", shareUrl, () => {
+        window.PSAPhotoAnalytics?.trackEvent?.("share_native", {
+            galleryId: photo.galleryId,
+            photoId: photo.photoId,
+            photoUrl: photo.imageSrc
+        });
+    });
 }
 
 function closeLightbox() {
@@ -261,24 +273,7 @@ function bindLightboxEvents() {
     if (downloadBtn) downloadBtn.addEventListener("click", downloadCurrentPhoto);
 
     const nativeBtn = document.getElementById("galleryShareNative");
-    if (nativeBtn) {
-        nativeBtn.addEventListener("click", () => {
-            const photo = currentLightboxPhoto;
-            if (!photo) return;
-            const shareUrl = photo.galleryId
-                ? `${window.location.origin}/gallery.html?galleryId=${encodeURIComponent(photo.galleryId)}`
-                : window.location.href;
-            navigator.share({ title: photo.caption || "PSA Valencia Open", url: shareUrl })
-                .then(() => shareCurrentPhoto("share_native"))
-                .catch(() => {});
-        });
-    }
-
-    const waLink = document.getElementById("galleryShareWhatsapp");
-    if (waLink) waLink.addEventListener("click", () => shareCurrentPhoto("share_whatsapp"));
-
-    const fbLink = document.getElementById("galleryShareFacebook");
-    if (fbLink) fbLink.addEventListener("click", () => shareCurrentPhoto("share_facebook"));
+    if (nativeBtn) nativeBtn.addEventListener("click", shareCurrentPhoto);
 }
 
 function readGalleryCollection() {
