@@ -79,3 +79,113 @@ padding:20px;
 border-radius:16px;
 
 }
+
+.player-matches{
+
+margin-top:60px;
+
+}
+
+.player-matches h2{
+
+font-size:1.6rem;
+
+margin-bottom:20px;
+
+}
+
+.player-match-list{
+
+display:flex;
+
+flex-direction:column;
+
+gap:10px;
+
+}
+
+.player-match-row{
+
+display:grid;
+
+grid-template-columns:1fr 2fr 1fr 1fr;
+
+align-items:center;
+
+gap:14px;
+
+background:#102233;
+
+padding:14px 20px;
+
+border-radius:12px;
+
+border-left:4px solid #2D4861;
+
+}
+
+.player-match-row.is-win{
+
+border-left-color:#2fb772;
+
+}
+
+.player-match-row.is-loss{
+
+border-left-color:#ff5c5c;
+
+}
+
+.player-match-row.is-pending{
+
+border-left-color:#C78C32;
+
+}
+
+.player-match-round{
+
+color:#8E9BAE;
+
+font-size:.85rem;
+
+text-transform:uppercase;
+
+}
+
+.player-match-result{
+
+text-align:right;
+
+font-weight:700;
+
+}
+
+.player-match-row.is-win .player-match-result{
+
+color:#2fb772;
+
+}
+
+.player-match-row.is-loss .player-match-result{
+
+color:#ff5c5c;
+
+}
+
+.player-match-row.is-pending .player-match-result{
+
+color:#C78C32;
+
+}
+
+@media(max-width:700px){
+
+    .player-match-row{
+
+        grid-template-columns:1fr 1fr;
+
+        row-gap:6px;
+
+    }
+
+}

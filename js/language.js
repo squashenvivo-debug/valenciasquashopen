@@ -270,7 +270,7 @@ const pageTranslations = {
             allPlayers: "Todos los jugadores", allCategories: "Todas las categorías", backLink: "Salir de galería", close: "Cerrar"
         },
         psaNews: { pageTitle: "Noticias", backLink: "Volver", notFound: "Noticia no encontrada." },
-        psaPlayer: { age: "Edad", height: "Altura", hand: "Mano", handLeft: "Izquierda", handRight: "Derecha", backLink: "← Volver", notFound: "Jugador no encontrado." },
+        psaPlayer: { age: "Edad", height: "Altura", hand: "Mano", handLeft: "Izquierda", handRight: "Derecha", backLink: "← Volver", notFound: "Jugador no encontrado.", matchHistory: "Historial de partidos", won: "Victoria", lost: "Derrota", upcoming: "Próximo", vs: "vs" },
         psaLiveScores: {
             backLink: "← Volver a PSA Valencia Open", tabAll: "TODOS LOS PARTIDOS", tabLive: "EN JUEGO LIVE", tabScheduled: "PROGRAMADOS", tabCompleted: "FINALIZADOS",
             localTime: "HORA LOCAL (GMT +2)", noMatches: "No hay partidos en esta categoría.", statusLive: "● EN JUEGO LIVE", statusCompleted: "✓ FINALIZADO",
@@ -317,7 +317,7 @@ const pageTranslations = {
             allPlayers: "Tots els jugadors", allCategories: "Totes les categories", backLink: "Eixir de la galeria", close: "Tancar"
         },
         psaNews: { pageTitle: "Notícies", backLink: "Tornar", notFound: "Notícia no trobada." },
-        psaPlayer: { age: "Edat", height: "Alçada", hand: "Mà", handLeft: "Esquerra", handRight: "Dreta", backLink: "← Tornar", notFound: "Jugador no trobat." },
+        psaPlayer: { age: "Edat", height: "Alçada", hand: "Mà", handLeft: "Esquerra", handRight: "Dreta", backLink: "← Tornar", notFound: "Jugador no trobat.", matchHistory: "Historial de partits", won: "Victòria", lost: "Derrota", upcoming: "Pròxim", vs: "vs" },
         psaLiveScores: {
             backLink: "← Tornar a PSA Valencia Open", tabAll: "TOTS ELS PARTITS", tabLive: "EN JOC EN VIU", tabScheduled: "PROGRAMATS", tabCompleted: "FINALITZATS",
             localTime: "HORA LOCAL (GMT +2)", noMatches: "No hi ha partits en esta categoria.", statusLive: "● EN JOC EN VIU", statusCompleted: "✓ FINALITZAT",
@@ -364,7 +364,7 @@ const pageTranslations = {
             allPlayers: "All players", allCategories: "All categories", backLink: "Exit gallery", close: "Close"
         },
         psaNews: { pageTitle: "News", backLink: "Back", notFound: "News article not found." },
-        psaPlayer: { age: "Age", height: "Height", hand: "Hand", handLeft: "Left", handRight: "Right", backLink: "← Back", notFound: "Player not found." },
+        psaPlayer: { age: "Age", height: "Height", hand: "Hand", handLeft: "Left", handRight: "Right", backLink: "← Back", notFound: "Player not found.", matchHistory: "Match History", won: "Won", lost: "Lost", upcoming: "Upcoming", vs: "vs" },
         psaLiveScores: {
             backLink: "← Back to PSA Valencia Open", tabAll: "ALL MATCHES", tabLive: "LIVE NOW", tabScheduled: "SCHEDULED", tabCompleted: "COMPLETED",
             localTime: "LOCAL TIME (GMT +2)", noMatches: "No matches in this category.", statusLive: "● LIVE NOW", statusCompleted: "✓ COMPLETED",
@@ -411,7 +411,7 @@ const pageTranslations = {
             allPlayers: "Tous les joueurs", allCategories: "Toutes les catégories", backLink: "Quitter la galerie", close: "Fermer"
         },
         psaNews: { pageTitle: "Actualités", backLink: "Retour", notFound: "Article introuvable." },
-        psaPlayer: { age: "Âge", height: "Taille", hand: "Main", handLeft: "Gauche", handRight: "Droite", backLink: "← Retour", notFound: "Joueur introuvable." },
+        psaPlayer: { age: "Âge", height: "Taille", hand: "Main", handLeft: "Gauche", handRight: "Droite", backLink: "← Retour", notFound: "Joueur introuvable.", matchHistory: "Historique des matchs", won: "Victoire", lost: "Défaite", upcoming: "À venir", vs: "vs" },
         psaLiveScores: {
             backLink: "← Retour au PSA Valencia Open", tabAll: "TOUS LES MATCHS", tabLive: "EN DIRECT", tabScheduled: "PROGRAMMÉS", tabCompleted: "TERMINÉS",
             localTime: "HEURE LOCALE (GMT +2)", noMatches: "Aucun match dans cette catégorie.", statusLive: "● EN DIRECT", statusCompleted: "✓ TERMINÉ",

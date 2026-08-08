@@ -76,8 +76,8 @@ function findPlayer(players, id, name) {
     return null;
 }
 
-/** Busca edad/altura/mano en la API de PSA en directo, solo si ese jugador está en el torneo actual. */
-async function fetchLivePlayerDetails(name) {
+/** Trae el cuadro completo del torneo en directo (mismo proxy que usa el cuadro y las noticias). */
+async function fetchLiveTournamentSnapshot() {
     try {
         const config = window.PSA_CONFIG || {};
         const baseUrl = config.supabaseUrl || "https://texjzaanugmssmolzwgb.supabase.co";
@@ -86,18 +86,99 @@ async function fetchLivePlayerDetails(name) {
         const response = await fetch(url, { headers: { Accept: "application/json" } });
         const payload = await response.json();
         if (!response.ok || payload?.success === false) return null;
-
-        const target = normalizePlayerName(name);
-        const divisions = Array.isArray(payload.divisions) ? payload.divisions : [];
-        for (const division of divisions) {
-            const players = Array.isArray(division.players) ? division.players : [];
-            const match = players.find((p) => normalizePlayerName(p?.name) === target);
-            if (match) return match;
-        }
-        return null;
+        return payload;
     } catch (error) {
         return null;
     }
+}
+
+/** Ficha biográfica real (edad/altura/mano) del jugador, solo si está en el torneo actual. */
+function findLivePlayerDetails(divisions, name) {
+    const target = normalizePlayerName(name);
+    for (const division of divisions || []) {
+        const players = Array.isArray(division.players) ? division.players : [];
+        const match = players.find((p) => normalizePlayerName(p?.name) === target);
+        if (match) return match;
+    }
+    return null;
+}
+
+/** Todos los partidos reales (sin huecos de bye) de este jugador en el cuadro actual, en orden de ronda. */
+function getPlayerMatches(divisions, name) {
+    const target = normalizePlayerName(name);
+    const matches = [];
+
+    (divisions || []).forEach((division) => {
+        (division.brackets || []).forEach((bracket) => {
+            (bracket.matches || []).forEach((match) => {
+                if (match.bye) return;
+                const players = Array.isArray(match.players) ? match.players : [];
+                const meIdx = players.findIndex((p) => normalizePlayerName(p?.name) === target);
+                if (meIdx === -1) return;
+                const opponent = players[meIdx === 0 ? 1 : 0];
+                if (!opponent?.name) return;
+
+                matches.push({
+                    round: match.round || "",
+                    round_num: match.round_num ?? 0,
+                    status: match.status || "scheduled",
+                    date: match.date || "",
+                    time: match.time || "",
+                    scoreline: match.scoreline || "",
+                    opponentName: opponent.name,
+                    isWinner: match.winner_id !== null && match.winner_id !== undefined
+                        && String(match.winner_id) === String(players[meIdx].id)
+                });
+            });
+        });
+    });
+
+    return matches.sort((a, b) => a.round_num - b.round_num);
+}
+
+function formatMatchDate(date, time) {
+    if (!date) return "";
+    const parsed = new Date(`${date}T${time || "00:00"}`);
+    if (Number.isNaN(parsed.getTime())) return date;
+    const datePart = parsed.toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
+    return time ? `${datePart} · ${time}` : datePart;
+}
+
+function tp(key, fallback) {
+    return (typeof t === "function" ? t(`psaPlayer.${key}`) : "") || fallback;
+}
+
+function renderPlayerMatches(matches) {
+    const section = document.getElementById("playerMatchesSection");
+    const list = document.getElementById("playerMatchList");
+    if (!section || !list) return;
+
+    if (!matches.length) {
+        section.style.display = "none";
+        return;
+    }
+
+    const completedStatuses = new Set(["completed", "retired", "walkover"]);
+
+    list.innerHTML = matches.map((match) => {
+        const isDone = completedStatuses.has(match.status);
+        const resultClass = !isDone ? "is-pending" : (match.isWinner ? "is-win" : "is-loss");
+        const resultLabel = !isDone
+            ? tp("upcoming", "Próximo")
+            : (match.isWinner ? tp("won", "Victoria") : tp("lost", "Derrota"));
+        const scoreOrDate = isDone ? (match.scoreline || "") : formatMatchDate(match.date, match.time);
+
+        return `
+            <div class="player-match-row ${resultClass}">
+                <span class="player-match-round">${match.round}</span>
+                <span class="player-match-opponent">${tp("vs", "vs")} ${match.opponentName}</span>
+                <span class="player-match-score">${scoreOrDate}</span>
+                <span class="player-match-result">${resultLabel}</span>
+            </div>
+        `;
+    }).join("");
+
+    section.style.display = "";
 }
 
 function setRowVisible(rowId, spanId, value) {
@@ -154,13 +235,18 @@ async function renderPlayerPage() {
     const rankingEl = document.getElementById("player-ranking");
     if (rankingEl) rankingEl.textContent = player.ranking || player.current_world_ranking || "-";
 
-    // Edad/altura/mano: solo si tenemos el dato real de PSA para este jugador en el torneo actual.
-    const liveDetails = await fetchLivePlayerDetails(playerName);
+    // Edad/altura/mano/historial: solo si tenemos datos reales de PSA para este jugador en el torneo actual.
+    const snapshot = await fetchLiveTournamentSnapshot();
+    const divisions = Array.isArray(snapshot?.divisions) ? snapshot.divisions : [];
+
+    const liveDetails = findLivePlayerDetails(divisions, playerName);
     setRowVisible("player-age-row", "player-age", liveDetails?.age || "");
     setRowVisible("player-height-row", "player-height", liveDetails?.height_cm ? `${Math.round(Number(liveDetails.height_cm))} cm` : "");
     const handKey = liveDetails?.player_hand?.toLowerCase() === "left" ? "handLeft" : liveDetails?.player_hand ? "handRight" : "";
-    const handLabel = handKey ? ((typeof t === "function" ? t(`psaPlayer.${handKey}`) : "") || (handKey === "handLeft" ? "Izquierda" : "Derecha")) : "";
+    const handLabel = handKey ? tp(handKey, handKey === "handLeft" ? "Izquierda" : "Derecha") : "";
     setRowVisible("player-hand-row", "player-hand", handLabel);
+
+    renderPlayerMatches(getPlayerMatches(divisions, playerName));
 }
 
 document.addEventListener("DOMContentLoaded", renderPlayerPage);
