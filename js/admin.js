@@ -3385,6 +3385,70 @@ function toggleGalleryEditMode() {
     button.textContent = galleryEditMode ? "Cerrar editor" : "Editar galerías";
 }
 
+/** Cifras reales de descargas/comparticiones por foto (public.photo_events). Solo lectura
+ *  con sesión de staff autenticada — los visitantes públicos pueden escribir pero no leer. */
+async function loadPhotoStats() {
+    const panel = document.getElementById("photoStatsPanel");
+    const button = document.getElementById("loadPhotoStatsBtn");
+    if (!panel) return;
+
+    const client = window.AdminSupabase?.getClient?.();
+    if (!client) {
+        panel.style.display = "block";
+        panel.innerHTML = '<p class="admin-muted">Inicia sesión para ver las estadísticas.</p>';
+        return;
+    }
+
+    if (button) button.disabled = true;
+    panel.style.display = "block";
+    panel.innerHTML = '<p class="admin-muted">Cargando…</p>';
+
+    try {
+        const { data, error } = await client
+            .from("photo_events")
+            .select("photo_url, action")
+            .order("created_at", { ascending: false })
+            .limit(5000);
+
+        if (error) throw error;
+
+        const stats = new Map();
+        (data || []).forEach((row) => {
+            const key = row.photo_url;
+            if (!key) return;
+            if (!stats.has(key)) {
+                stats.set(key, { url: key, download: 0, share_whatsapp: 0, share_facebook: 0, share_native: 0 });
+            }
+            const entry = stats.get(key);
+            if (entry[row.action] !== undefined) entry[row.action] += 1;
+        });
+
+        const sorted = Array.from(stats.values())
+            .map((entry) => ({ ...entry, total: entry.download + entry.share_whatsapp + entry.share_facebook + entry.share_native }))
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 30);
+
+        if (sorted.length === 0) {
+            panel.innerHTML = '<p class="admin-muted">Todavía no hay descargas ni comparticiones registradas.</p>';
+            return;
+        }
+
+        panel.innerHTML = sorted.map((entry) => `
+            <article class="gallery-admin-card">
+                <img class="gallery-thumb" src="${escapeHtml(entry.url)}" alt="Foto" loading="lazy">
+                <p class="admin-muted">
+                    ⬇️ ${entry.download} descargas · 🟢 ${entry.share_whatsapp} WhatsApp · 🔵 ${entry.share_facebook} Facebook · 📤 ${entry.share_native} otros
+                </p>
+            </article>
+        `).join("");
+    } catch (error) {
+        panel.innerHTML = `<p class="admin-muted">No se pudieron cargar las estadísticas: ${escapeHtml(error?.message || "error inesperado")}</p>`;
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
+window.loadPhotoStats = loadPhotoStats;
+
 async function saveNewGallery() {
     const title = getLocalizedFromInputs("newGalleryTitle");
     const galleryMeta = readNewGalleryMetaInputs();

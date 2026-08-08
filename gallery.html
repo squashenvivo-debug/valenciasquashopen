@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/gallery.css">
+<link rel="stylesheet" href="css/gallery.css?v=20260808-v1">
 </head>
 <body class="gallery-page">
 
@@ -29,6 +29,16 @@
     <button id="galleryLightboxClose" class="gallery-lightbox-close" type="button" aria-label="Cerrar">X</button>
     <img id="galleryLightboxImage" class="gallery-lightbox-image" alt="Foto ampliada">
     <p id="galleryLightboxCaption" class="gallery-lightbox-caption"></p>
+    <div class="gallery-lightbox-actions">
+        <button type="button" id="galleryDownloadBtn" class="gallery-action-btn gallery-action-download">
+            ⬇️ <span data-i18n="psaGallery.download">Descargar</span>
+        </button>
+        <a id="galleryShareWhatsapp" class="gallery-action-btn gallery-action-whatsapp" target="_blank" rel="noopener noreferrer">🟢 WhatsApp</a>
+        <a id="galleryShareFacebook" class="gallery-action-btn gallery-action-facebook" target="_blank" rel="noopener noreferrer">🔵 Facebook</a>
+        <button type="button" id="galleryShareNative" class="gallery-action-btn gallery-action-native" style="display:none;">
+            📤 <span data-i18n="psaGallery.shareMore">Más opciones</span>
+        </button>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -37,7 +47,8 @@
 <script src="js/runtime-optimizations.js?v=20260803-1"></script>
 <script src="js/cloud-store.js?v=20260726-4"></script>
 <script src="js/visit-analytics.js?v=20260726-1"></script>
+<script src="js/photo-analytics.js?v=20260808-v1"></script>
 <script src="js/language.js?v=20260808-v3"></script>
-<script src="js/gallery.js?v=20260803-5"></script>
+<script src="js/gallery.js?v=20260808-v6"></script>
 </body>
 </html>

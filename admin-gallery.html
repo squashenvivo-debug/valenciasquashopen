@@ -388,6 +388,12 @@
                 <h3 class="gallery-admin-subtitle">Editor de galerías</h3>
                 <div id="galleryAdminList" class="gallery-admin-list"></div>
             </div>
+
+            <h3 class="gallery-admin-subtitle">Estadísticas de fotos (descargas y comparticiones)</h3>
+            <div class="gallery-admin-actions">
+                <button id="loadPhotoStatsBtn" type="button" class="btn-gallery-save" onclick="loadPhotoStats()">Cargar estadísticas</button>
+            </div>
+            <div id="photoStatsPanel" class="gallery-admin-list" style="display:none;"></div>
         </section>
 
         <section class="admin-card" id="draw-schedule-panel">
@@ -480,7 +486,7 @@
 window.ADMIN_DEFAULT_SECTION = "gallery-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260803-9"></script>
+<script src="js/admin.js?v=20260808-v1"></script>
 
 </body>
 

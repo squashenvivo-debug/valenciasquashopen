@@ -151,7 +151,9 @@ function normalizeGalleryItem(item) {
     };
 }
 
-function openLightbox(src, caption) {
+let currentLightboxPhoto = null;
+
+function openLightbox(src, caption, photoMeta = {}) {
     const lightbox = document.getElementById("galleryLightbox");
     const image = document.getElementById("galleryLightboxImage");
     const captionEl = document.getElementById("galleryLightboxCaption");
@@ -162,6 +164,68 @@ function openLightbox(src, caption) {
     lightbox.classList.add("is-open");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+
+    currentLightboxPhoto = { imageSrc: src, caption: caption || "", ...photoMeta };
+    updateLightboxActions(currentLightboxPhoto);
+}
+
+/** Descarga la foto de verdad (no solo abrirla) trayéndola como blob — un <a download> normal
+ *  no funciona en imágenes de otro origen (Supabase Storage), el navegador solo la abriría. */
+async function downloadCurrentPhoto() {
+    const photo = currentLightboxPhoto;
+    if (!photo?.imageSrc) return;
+
+    try {
+        const response = await fetch(photo.imageSrc, { mode: "cors" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = `psa-valencia-open-${photo.photoId || Date.now()}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+        window.open(photo.imageSrc, "_blank", "noopener");
+    }
+
+    window.PSAPhotoAnalytics?.trackEvent?.("download", {
+        galleryId: photo.galleryId,
+        photoId: photo.photoId,
+        photoUrl: photo.imageSrc
+    });
+}
+
+function shareCurrentPhoto(action) {
+    const photo = currentLightboxPhoto;
+    if (!photo?.imageSrc) return;
+
+    window.PSAPhotoAnalytics?.trackEvent?.(action, {
+        galleryId: photo.galleryId,
+        photoId: photo.photoId,
+        photoUrl: photo.imageSrc
+    });
+}
+
+function updateLightboxActions(photo) {
+    const shareText = photo.caption || "PSA Valencia Open";
+    const shareUrl = photo.galleryId
+        ? `${window.location.origin}/gallery.html?galleryId=${encodeURIComponent(photo.galleryId)}`
+        : window.location.href;
+
+    const waLink = document.getElementById("galleryShareWhatsapp");
+    if (waLink) waLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+
+    const fbLink = document.getElementById("galleryShareFacebook");
+    if (fbLink) fbLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+    const nativeBtn = document.getElementById("galleryShareNative");
+    if (nativeBtn) {
+        nativeBtn.style.display = typeof navigator.share === "function" ? "" : "none";
+    }
 }
 
 function closeLightbox() {
@@ -192,6 +256,29 @@ function bindLightboxEvents() {
             closeLightbox();
         }
     });
+
+    const downloadBtn = document.getElementById("galleryDownloadBtn");
+    if (downloadBtn) downloadBtn.addEventListener("click", downloadCurrentPhoto);
+
+    const nativeBtn = document.getElementById("galleryShareNative");
+    if (nativeBtn) {
+        nativeBtn.addEventListener("click", () => {
+            const photo = currentLightboxPhoto;
+            if (!photo) return;
+            const shareUrl = photo.galleryId
+                ? `${window.location.origin}/gallery.html?galleryId=${encodeURIComponent(photo.galleryId)}`
+                : window.location.href;
+            navigator.share({ title: photo.caption || "PSA Valencia Open", url: shareUrl })
+                .then(() => shareCurrentPhoto("share_native"))
+                .catch(() => {});
+        });
+    }
+
+    const waLink = document.getElementById("galleryShareWhatsapp");
+    if (waLink) waLink.addEventListener("click", () => shareCurrentPhoto("share_whatsapp"));
+
+    const fbLink = document.getElementById("galleryShareFacebook");
+    if (fbLink) fbLink.addEventListener("click", () => shareCurrentPhoto("share_facebook"));
 }
 
 function readGalleryCollection() {
@@ -397,7 +484,7 @@ function renderGalleryArchive() {
             image.loading = "lazy";
             image.decoding = "async";
             image.addEventListener("click", () => {
-                openLightbox(photo.imageSrc, photo.caption || "");
+                openLightbox(photo.imageSrc, photo.caption || "", { galleryId: photo.galleryId, photoId: photo.id });
             });
         }
         grid.appendChild(card);

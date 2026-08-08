@@ -267,7 +267,8 @@ const pageTranslations = {
             archiveTitle: "Archivo de galerías", defaultTitle: "Galería",
             noPhotos: "No hay fotos disponibles en esta galería.", noMatch: "Ninguna foto coincide con los filtros seleccionados.",
             photosOfLabel: "foto(s) de", allTournaments: "Todos los torneos", allClubs: "Todos los clubs", allDates: "Todas las fechas",
-            allPlayers: "Todos los jugadores", allCategories: "Todas las categorías", backLink: "Salir de galería", close: "Cerrar"
+            allPlayers: "Todos los jugadores", allCategories: "Todas las categorías", backLink: "Salir de galería", close: "Cerrar",
+            download: "Descargar", shareMore: "Más opciones"
         },
         psaNews: { pageTitle: "Noticias", backLink: "Volver", notFound: "Noticia no encontrada.", shareLabel: "Compartir", shareMore: "Más opciones" },
         psaPlayer: { age: "Edad", height: "Altura", hand: "Mano", handLeft: "Izquierda", handRight: "Derecha", backLink: "← Volver", notFound: "Jugador no encontrado.", loading: "Cargando...", matchHistory: "Historial de partidos", recentMeetings: "Últimos enfrentamientos", won: "Victoria", lost: "Derrota", upcoming: "Próximo", vs: "vs" },
@@ -314,7 +315,8 @@ const pageTranslations = {
             archiveTitle: "Arxiu de galeries", defaultTitle: "Galeria",
             noPhotos: "No hi ha fotos disponibles en esta galeria.", noMatch: "Cap foto coincidix amb els filtres seleccionats.",
             photosOfLabel: "foto(s) de", allTournaments: "Tots els torneigs", allClubs: "Tots els clubs", allDates: "Totes les dates",
-            allPlayers: "Tots els jugadors", allCategories: "Totes les categories", backLink: "Eixir de la galeria", close: "Tancar"
+            allPlayers: "Tots els jugadors", allCategories: "Totes les categories", backLink: "Eixir de la galeria", close: "Tancar",
+            download: "Descarregar", shareMore: "Més opcions"
         },
         psaNews: { pageTitle: "Notícies", backLink: "Tornar", notFound: "Notícia no trobada.", shareLabel: "Compartir", shareMore: "Més opcions" },
         psaPlayer: { age: "Edat", height: "Alçada", hand: "Mà", handLeft: "Esquerra", handRight: "Dreta", backLink: "← Tornar", notFound: "Jugador no trobat.", loading: "Carregant...", matchHistory: "Historial de partits", recentMeetings: "Últims enfrontaments", won: "Victòria", lost: "Derrota", upcoming: "Pròxim", vs: "vs" },
@@ -361,7 +363,8 @@ const pageTranslations = {
             archiveTitle: "Gallery archive", defaultTitle: "Gallery",
             noPhotos: "No photos available in this gallery.", noMatch: "No photos match the selected filters.",
             photosOfLabel: "photo(s) of", allTournaments: "All tournaments", allClubs: "All clubs", allDates: "All dates",
-            allPlayers: "All players", allCategories: "All categories", backLink: "Exit gallery", close: "Close"
+            allPlayers: "All players", allCategories: "All categories", backLink: "Exit gallery", close: "Close",
+            download: "Download", shareMore: "More options"
         },
         psaNews: { pageTitle: "News", backLink: "Back", notFound: "News article not found.", shareLabel: "Share", shareMore: "More options" },
         psaPlayer: { age: "Age", height: "Height", hand: "Hand", handLeft: "Left", handRight: "Right", backLink: "← Back", notFound: "Player not found.", loading: "Loading...", matchHistory: "Match History", recentMeetings: "Recent Meetings", won: "Won", lost: "Lost", upcoming: "Upcoming", vs: "vs" },
@@ -408,7 +411,8 @@ const pageTranslations = {
             archiveTitle: "Archives des galeries", defaultTitle: "Galerie",
             noPhotos: "Aucune photo disponible dans cette galerie.", noMatch: "Aucune photo ne correspond aux filtres sélectionnés.",
             photosOfLabel: "photo(s) sur", allTournaments: "Tous les tournois", allClubs: "Tous les clubs", allDates: "Toutes les dates",
-            allPlayers: "Tous les joueurs", allCategories: "Toutes les catégories", backLink: "Quitter la galerie", close: "Fermer"
+            allPlayers: "Tous les joueurs", allCategories: "Toutes les catégories", backLink: "Quitter la galerie", close: "Fermer",
+            download: "Télécharger", shareMore: "Plus d'options"
         },
         psaNews: { pageTitle: "Actualités", backLink: "Retour", notFound: "Article introuvable.", shareLabel: "Partager", shareMore: "Plus d'options" },
         psaPlayer: { age: "Âge", height: "Taille", hand: "Main", handLeft: "Gauche", handRight: "Droite", backLink: "← Retour", notFound: "Joueur introuvable.", loading: "Chargement...", matchHistory: "Historique des matchs", recentMeetings: "Derniers face-à-face", won: "Victoire", lost: "Défaite", upcoming: "À venir", vs: "vs" },
