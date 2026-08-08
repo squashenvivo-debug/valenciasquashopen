@@ -1799,10 +1799,38 @@ function hasAllLanguages(localizedMap) {
     return LANGS.every((lang) => String(localizedMap?.[lang] || "").trim().length > 0);
 }
 
+// Los proveedores gratuitos (Google/MyMemory) truncan peticiones de texto muy largas.
+// Con un artículo HTML completo (varios miles de caracteres) eso corta a mitad de una
+// etiqueta y corrompe el HTML de esa versión (visto en producción con un artículo en
+// valenciano). Por encima de este tamaño, troceamos por párrafos antes de traducir.
+const TRANSLATE_CHUNK_MAX_CHARS = 1500;
+
 async function translateFromSpanish(text, targetLang) {
     const source = String(text || "").trim();
     if (!source) return "";
     if (targetLang === "es") return source;
+
+    if (source.length <= TRANSLATE_CHUNK_MAX_CHARS) {
+        return translateChunkFromSpanish(source, targetLang);
+    }
+
+    // Partimos conservando los separadores (líneas en blanco) para reconstruir el
+    // documento exactamente igual, solo con cada fragmento de texto ya traducido.
+    const parts = source.split(/(\n\s*\n)/);
+    const translatedParts = [];
+    for (const part of parts) {
+        if (!part.trim() || /^\n\s*\n$/.test(part)) {
+            translatedParts.push(part);
+            continue;
+        }
+        translatedParts.push(await translateChunkFromSpanish(part, targetLang));
+    }
+    return translatedParts.join("");
+}
+
+async function translateChunkFromSpanish(text, targetLang) {
+    const source = String(text || "").trim();
+    if (!source) return "";
 
     const langMap = { va: "ca", en: "en", fr: "fr" };
     const target = langMap[targetLang] || targetLang;
