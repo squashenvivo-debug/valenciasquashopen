@@ -142,6 +142,13 @@ function getNewsSlugFromUrl() {
     return slugifyText(params.get("slug") || "");
 }
 
+/** Token de vista previa: debe coincidir con el id real (no adivinable) de la noticia
+ *  para poder ver un borrador/programada antes de que se publique. */
+function getPreviewTokenFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return String(params.get("preview") || "").trim();
+}
+
 function ensureMetaTag(name) {
     let tag = document.querySelector(`meta[name="${name}"]`);
     if (!tag) {
@@ -175,13 +182,14 @@ function readNewsCollectionSync() {
     return null;
 }
 
-async function readNewsCollection() {
+async function readNewsCollection(includeUnpublished = false) {
     try {
         const raw = localStorage.getItem(NEWS_COLLECTION_KEY);
         if (raw) {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed)) {
-                return parsed.map(normalizeNewsItem).filter((item) => isNewsPublished(item));
+                const items = parsed.map(normalizeNewsItem);
+                return includeUnpublished ? items : items.filter((item) => isNewsPublished(item));
             }
         }
     } catch (error) {
@@ -283,21 +291,37 @@ async function renderNewsDetail() {
     const lang = getCurrentLanguage();
     const newsId = getNewsIdFromUrl();
     const newsSlug = getNewsSlugFromUrl();
-    const collection = await readNewsCollection(true);
+    const previewToken = getPreviewTokenFromUrl();
+
+    // Solo pedimos la colección sin filtrar cuando hay un token de vista previa en la URL
+    // (?preview=<id real de la noticia>) — para el resto de visitas seguimos usando solo
+    // noticias publicadas, igual que antes.
+    const collection = await readNewsCollection(Boolean(previewToken));
     let item = collection.find((entry) => {
         if (newsId && entry.id === newsId) return true;
         if (newsSlug && (slugifyText(entry?.seo?.slug || "") === newsSlug || slugifyText(entry?.title?.es || "") === newsSlug)) return true;
         return false;
     });
 
+    // El token de vista previa solo vale si coincide EXACTAMENTE con el id real (no
+    // adivinable) de esa noticia concreta — así ?preview=1 no destapa borradores ajenos.
+    const isPreview = Boolean(item) && !isNewsPublished(item);
+    if (isPreview && item.id !== previewToken) {
+        item = null;
+    }
+
     // Si no se pidió una noticia concreta (news.html sin parámetros), mostramos la más
     // reciente como valor por defecto. Pero si SÍ se pidió un slug/id concreto y no está
-    // entre las publicadas (borrador, programada para el futuro, o slug inexistente), no
-    // sustituimos por otra noticia distinta sin avisar — mostramos el estado de "no
-    // encontrada" en vez de confundir mostrando un artículo que no es el pedido.
-    if (!item && !newsId && !newsSlug && collection.length > 0) {
+    // entre las publicadas (borrador, programada para el futuro, o slug inexistente) ni
+    // tiene un token de vista previa válido, no sustituimos por otra noticia distinta sin
+    // avisar — mostramos el estado de "no encontrada" en vez de confundir mostrando un
+    // artículo que no es el pedido.
+    if (!item && !newsId && !newsSlug && !previewToken && collection.length > 0) {
         item = collection[0];
     }
+
+    const previewBanner = document.getElementById("newsPreviewBanner");
+    if (previewBanner) previewBanner.style.display = isPreview && item ? "block" : "none";
 
     if (!item) {
         card.style.display = "none";
