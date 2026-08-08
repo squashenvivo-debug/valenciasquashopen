@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/news.css">
+<link rel="stylesheet" href="css/news.css?v=20260808-v14">
 <link rel="stylesheet" href="css/gallery.css">
 </head>
 <body class="gallery-page">
@@ -35,6 +35,15 @@
                 <h2 id="newsPageHeading"></h2>
                 <div id="newsPageBody" class="news-content-body"></div>
                 <p id="newsPageTags" class="admin-muted"></p>
+
+                <div id="newsShareBar" class="news-share-bar" style="display:none;">
+                    <span class="news-share-label" data-i18n="psaNews.shareLabel">Compartir</span>
+                    <a id="newsShareWhatsapp" class="news-share-btn news-share-whatsapp" target="_blank" rel="noopener noreferrer">🟢 WhatsApp</a>
+                    <a id="newsShareFacebook" class="news-share-btn news-share-facebook" target="_blank" rel="noopener noreferrer">🔵 Facebook</a>
+                    <button type="button" id="newsShareNative" class="news-share-btn news-share-native" style="display:none;">
+                        📤 <span data-i18n="psaNews.shareMore">Más opciones</span>
+                    </button>
+                </div>
             </div>
         </article>
 
@@ -48,7 +57,7 @@
 <script src="js/runtime-optimizations.js?v=20260803-1"></script>
 <script src="js/cloud-store.js?v=20260726-4"></script>
 <script src="js/visit-analytics.js?v=20260726-1"></script>
-<script src="js/language.js?v=20260808-v2"></script>
-<script src="js/news.js?v=20260807-v13"></script>
+<script src="js/language.js?v=20260808-v3"></script>
+<script src="js/news.js?v=20260807-v14"></script>
 </body>
 </html>

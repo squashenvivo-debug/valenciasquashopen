@@ -269,7 +269,7 @@ const pageTranslations = {
             photosOfLabel: "foto(s) de", allTournaments: "Todos los torneos", allClubs: "Todos los clubs", allDates: "Todas las fechas",
             allPlayers: "Todos los jugadores", allCategories: "Todas las categorías", backLink: "Salir de galería", close: "Cerrar"
         },
-        psaNews: { pageTitle: "Noticias", backLink: "Volver", notFound: "Noticia no encontrada." },
+        psaNews: { pageTitle: "Noticias", backLink: "Volver", notFound: "Noticia no encontrada.", shareLabel: "Compartir", shareMore: "Más opciones" },
         psaPlayer: { age: "Edad", height: "Altura", hand: "Mano", handLeft: "Izquierda", handRight: "Derecha", backLink: "← Volver", notFound: "Jugador no encontrado.", loading: "Cargando...", matchHistory: "Historial de partidos", recentMeetings: "Últimos enfrentamientos", won: "Victoria", lost: "Derrota", upcoming: "Próximo", vs: "vs" },
         psaLiveScores: {
             backLink: "← Volver a PSA Valencia Open", tabAll: "TODOS LOS PARTIDOS", tabLive: "EN JUEGO LIVE", tabScheduled: "PROGRAMADOS", tabCompleted: "FINALIZADOS",
@@ -316,7 +316,7 @@ const pageTranslations = {
             photosOfLabel: "foto(s) de", allTournaments: "Tots els torneigs", allClubs: "Tots els clubs", allDates: "Totes les dates",
             allPlayers: "Tots els jugadors", allCategories: "Totes les categories", backLink: "Eixir de la galeria", close: "Tancar"
         },
-        psaNews: { pageTitle: "Notícies", backLink: "Tornar", notFound: "Notícia no trobada." },
+        psaNews: { pageTitle: "Notícies", backLink: "Tornar", notFound: "Notícia no trobada.", shareLabel: "Compartir", shareMore: "Més opcions" },
         psaPlayer: { age: "Edat", height: "Alçada", hand: "Mà", handLeft: "Esquerra", handRight: "Dreta", backLink: "← Tornar", notFound: "Jugador no trobat.", loading: "Carregant...", matchHistory: "Historial de partits", recentMeetings: "Últims enfrontaments", won: "Victòria", lost: "Derrota", upcoming: "Pròxim", vs: "vs" },
         psaLiveScores: {
             backLink: "← Tornar a PSA Valencia Open", tabAll: "TOTS ELS PARTITS", tabLive: "EN JOC EN VIU", tabScheduled: "PROGRAMATS", tabCompleted: "FINALITZATS",
@@ -363,7 +363,7 @@ const pageTranslations = {
             photosOfLabel: "photo(s) of", allTournaments: "All tournaments", allClubs: "All clubs", allDates: "All dates",
             allPlayers: "All players", allCategories: "All categories", backLink: "Exit gallery", close: "Close"
         },
-        psaNews: { pageTitle: "News", backLink: "Back", notFound: "News article not found." },
+        psaNews: { pageTitle: "News", backLink: "Back", notFound: "News article not found.", shareLabel: "Share", shareMore: "More options" },
         psaPlayer: { age: "Age", height: "Height", hand: "Hand", handLeft: "Left", handRight: "Right", backLink: "← Back", notFound: "Player not found.", loading: "Loading...", matchHistory: "Match History", recentMeetings: "Recent Meetings", won: "Won", lost: "Lost", upcoming: "Upcoming", vs: "vs" },
         psaLiveScores: {
             backLink: "← Back to PSA Valencia Open", tabAll: "ALL MATCHES", tabLive: "LIVE NOW", tabScheduled: "SCHEDULED", tabCompleted: "COMPLETED",
@@ -410,7 +410,7 @@ const pageTranslations = {
             photosOfLabel: "photo(s) sur", allTournaments: "Tous les tournois", allClubs: "Tous les clubs", allDates: "Toutes les dates",
             allPlayers: "Tous les joueurs", allCategories: "Toutes les catégories", backLink: "Quitter la galerie", close: "Fermer"
         },
-        psaNews: { pageTitle: "Actualités", backLink: "Retour", notFound: "Article introuvable." },
+        psaNews: { pageTitle: "Actualités", backLink: "Retour", notFound: "Article introuvable.", shareLabel: "Partager", shareMore: "Plus d'options" },
         psaPlayer: { age: "Âge", height: "Taille", hand: "Main", handLeft: "Gauche", handRight: "Droite", backLink: "← Retour", notFound: "Joueur introuvable.", loading: "Chargement...", matchHistory: "Historique des matchs", recentMeetings: "Derniers face-à-face", won: "Victoire", lost: "Défaite", upcoming: "À venir", vs: "vs" },
         psaLiveScores: {
             backLink: "← Retour au PSA Valencia Open", tabAll: "TOUS LES MATCHS", tabLive: "EN DIRECT", tabScheduled: "PROGRAMMÉS", tabCompleted: "TERMINÉS",

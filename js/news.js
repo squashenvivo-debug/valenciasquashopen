@@ -390,6 +390,52 @@ async function renderNewsDetail() {
     if (player) player.textContent = item.player ? `Jugador: ${item.player}` : "";
     if (tags) tags.textContent = normalizeStringArray(item.tags).map((tag) => `#${tag}`).join(" · ");
     applyNewsSeo(item, lang, title, article);
+    renderNewsShareBar(item, title, article, isPreview);
+}
+
+/**
+ * WhatsApp y Facebook sí tienen un enlace de "compartir" público que cualquier web puede
+ * usar sin login ni API. Instagram, a propósito, NO lo tiene — no existe forma de que una
+ * página web abra "publicar esto en Instagram" (solo su propia app puede hacerlo). Para eso
+ * usamos el "compartir" nativo del propio móvil/navegador (Web Share API): en el sistema
+ * operativo del usuario, ese panel de compartir SÍ incluye Instagram (y WhatsApp, Telegram,
+ * etc.) entre las apps a elegir. Solo aparece donde el navegador lo soporta (sobre todo
+ * móvil); si no está disponible, el botón se oculta en vez de fingir que hace algo.
+ */
+function renderNewsShareBar(item, title, article, isPreview) {
+    const bar = document.getElementById("newsShareBar");
+    if (!bar) return;
+
+    if (isPreview) {
+        bar.style.display = "none";
+        return;
+    }
+
+    const slug = item?.seo?.slug || "";
+    const shareUrl = slug
+        ? `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}`
+        : window.location.href.split("&preview=")[0];
+    const shareText = title || deriveTitleFromArticleHtml(article, 100) || "PSA Valencia Open";
+
+    const waLink = document.getElementById("newsShareWhatsapp");
+    if (waLink) waLink.href = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+
+    const fbLink = document.getElementById("newsShareFacebook");
+    if (fbLink) fbLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+    const nativeBtn = document.getElementById("newsShareNative");
+    if (nativeBtn) {
+        if (typeof navigator.share === "function") {
+            nativeBtn.style.display = "";
+            nativeBtn.onclick = () => {
+                navigator.share({ title: shareText, url: shareUrl }).catch(() => {});
+            };
+        } else {
+            nativeBtn.style.display = "none";
+        }
+    }
+
+    bar.style.display = "";
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
