@@ -104,6 +104,18 @@ function findLivePlayerDetails(divisions, name) {
     return null;
 }
 
+/** Traduce el nombre de ronda que da PSA en crudo ("Round 1", "Quarter-Final"...) usando las
+ *  mismas claves psaDraw.* que ya usa el cuadro, en vez de mostrar el texto en inglés tal cual. */
+function translateRoundLabel(round) {
+    const raw = String(round || "").toLowerCase();
+    let key = "round1";
+    if (/\bfinal\b/.test(raw) && !raw.includes("semi") && !raw.includes("quarter")) key = "final";
+    else if (raw.includes("semi")) key = "semis";
+    else if (raw.includes("quarter")) key = "quarters";
+    else if (raw.includes("round 2")) key = "round2";
+    return (typeof t === "function" ? t(`psaDraw.${key}`) : "") || round;
+}
+
 /** Todos los partidos reales (sin huecos de bye) de este jugador en el cuadro actual, en orden de ronda. */
 function getPlayerMatches(divisions, name) {
     const target = normalizePlayerName(name);
@@ -194,7 +206,7 @@ function renderPlayerRecentMeetings(meetings, sectionId, listId) {
     list.innerHTML = meetings.map((meeting) => {
         const resultClass = meeting.isWinner ? "is-win" : "is-loss";
         const resultLabel = meeting.isWinner ? tp("won", "Victoria") : tp("lost", "Derrota");
-        const context = [meeting.round, meeting.tournament].filter(Boolean).join(" · ");
+        const context = [translateRoundLabel(meeting.round), meeting.tournament].filter(Boolean).join(" · ");
 
         return `
             <div class="player-match-row ${resultClass}">
@@ -243,7 +255,7 @@ function renderPlayerMatches(matches, sectionId, listId) {
 
         return `
             <div class="player-match-row ${resultClass}">
-                <span class="player-match-round">${match.round}</span>
+                <span class="player-match-round">${translateRoundLabel(match.round)}</span>
                 <span class="player-match-opponent">${tp("vs", "vs")} ${match.opponentName}</span>
                 <span class="player-match-score">${scoreOrDate}</span>
                 <span class="player-match-result">${resultLabel}</span>

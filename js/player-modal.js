@@ -28,8 +28,8 @@
             <div class="psa-modal-card player-modal-card">
                 <button class="psa-modal-close" onclick="closePlayerModal()">&times;</button>
 
-                <p id="playerModalLoading" class="gallery-empty">${tm("loading", "Cargando...")}</p>
-                <p id="playerModalNotFound" class="gallery-empty" style="display:none;">${tm("notFound", "Jugador no encontrado.")}</p>
+                <p id="playerModalLoading" class="gallery-empty" data-i18n="psaPlayer.loading">${tm("loading", "Cargando...")}</p>
+                <p id="playerModalNotFound" class="gallery-empty" style="display:none;" data-i18n="psaPlayer.notFound">${tm("notFound", "Jugador no encontrado.")}</p>
 
                 <div class="player-header" id="playerModalHeader" style="display:none;">
                     <div class="player-photo">
@@ -43,20 +43,20 @@
                         </div>
                         <div class="player-ranking">World Nº <span id="playerModalRanking">-</span></div>
                         <div class="player-info-grid">
-                            <div id="playerModalAgeRow"><strong>${tm("age", "Edad")}</strong> <span id="playerModalAge"></span></div>
-                            <div id="playerModalHeightRow"><strong>${tm("height", "Altura")}</strong> <span id="playerModalHeight"></span></div>
-                            <div id="playerModalHandRow"><strong>${tm("hand", "Mano")}</strong> <span id="playerModalHand"></span></div>
+                            <div id="playerModalAgeRow"><strong data-i18n="psaPlayer.age">${tm("age", "Edad")}</strong> <span id="playerModalAge"></span></div>
+                            <div id="playerModalHeightRow"><strong data-i18n="psaPlayer.height">${tm("height", "Altura")}</strong> <span id="playerModalHeight"></span></div>
+                            <div id="playerModalHandRow"><strong data-i18n="psaPlayer.hand">${tm("hand", "Mano")}</strong> <span id="playerModalHand"></span></div>
                         </div>
                     </div>
                 </div>
 
                 <section id="playerModalMatchesSection" class="player-matches" style="display:none;">
-                    <h2>${tm("matchHistory", "Historial de partidos")}</h2>
+                    <h2 data-i18n="psaPlayer.matchHistory">${tm("matchHistory", "Historial de partidos")}</h2>
                     <div id="playerModalMatchList" class="player-match-list"></div>
                 </section>
 
                 <section id="playerModalMeetingsSection" class="player-matches" style="display:none;">
-                    <h2>${tm("recentMeetings", "Últimos enfrentamientos")}</h2>
+                    <h2 data-i18n="psaPlayer.recentMeetings">${tm("recentMeetings", "Últimos enfrentamientos")}</h2>
                     <div id="playerModalMeetingsList" class="player-match-list"></div>
                 </section>
             </div>
