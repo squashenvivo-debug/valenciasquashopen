@@ -27,7 +27,11 @@ content="width=device-width, initial-scale=1.0">
 
 <div class="container">
 
-<div class="player-header">
+<a class="gallery-back-link" href="index.html#players" data-i18n="psaPlayer.backLink">← Volver</a>
+
+<p id="playerNotFound" class="gallery-empty" style="display:none;" data-i18n="psaPlayer.notFound">Jugador no encontrado.</p>
+
+<div class="player-header" id="playerHeaderCard">
 
 <div class="player-photo">
 
@@ -65,7 +69,7 @@ World Nº <span id="player-ranking">1</span>
 
 <div class="player-info-grid">
 
-<div>
+<div id="player-age-row">
 
 <strong data-i18n="psaPlayer.age">Edad</strong>
 
@@ -73,7 +77,7 @@ World Nº <span id="player-ranking">1</span>
 
 </div>
 
-<div>
+<div id="player-height-row">
 
 <strong data-i18n="psaPlayer.height">Altura</strong>
 
@@ -81,15 +85,7 @@ World Nº <span id="player-ranking">1</span>
 
 </div>
 
-<div>
-
-<strong data-i18n="psaPlayer.weight">Peso</strong>
-
-<span id="player-weight">78 kg</span>
-
-</div>
-
-<div>
+<div id="player-hand-row">
 
 <strong data-i18n="psaPlayer.hand">Mano</strong>
 
@@ -112,10 +108,10 @@ World Nº <span id="player-ranking">1</span>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="supabase.js"></script>
+<script src="js/cloud-store.js?v=20260726-4"></script>
 <script src="js/visit-analytics.js?v=20260726-1"></script>
 <script src="js/language.js?v=20260808-v1"></script>
-<script src="js/api.js"></script>
-<script src="js/player.js"></script>
+<script src="js/player.js?v=20260808-v1"></script>
 
 </body>
 

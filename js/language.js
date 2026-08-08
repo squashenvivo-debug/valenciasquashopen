@@ -260,7 +260,7 @@ const pageTranslations = {
             matchSingular: "partido", matchPlural: "partidos",
             h2hTitle: "Estadísticas Head-to-head", h2hSubtitle: "Histórico de enfrentamientos en el PSA World Tour",
             h2hMatches: "Enfrentamientos directos:", h2hLastMeeting: "Último duelo:", h2hFirstMeeting: "Primer enfrentamiento oficial",
-            h2hBtn: "Head-to-head"
+            h2hBtn: "Head-to-head", viewFullDraw: "Ver Cuadro Completo PSA"
         },
         psaGallery: {
             notFoundTitle: "Galería no encontrada", notFoundText: "Esta galería no existe o fue eliminada.",
@@ -270,7 +270,7 @@ const pageTranslations = {
             allPlayers: "Todos los jugadores", allCategories: "Todas las categorías", backLink: "Salir de galería", close: "Cerrar"
         },
         psaNews: { pageTitle: "Noticias", backLink: "Volver", notFound: "Noticia no encontrada." },
-        psaPlayer: { age: "Edad", height: "Altura", weight: "Peso", hand: "Mano" },
+        psaPlayer: { age: "Edad", height: "Altura", hand: "Mano", handLeft: "Izquierda", handRight: "Derecha", backLink: "← Volver", notFound: "Jugador no encontrado." },
         psaLiveScores: {
             backLink: "← Volver a PSA Valencia Open", tabAll: "TODOS LOS PARTIDOS", tabLive: "EN JUEGO LIVE", tabScheduled: "PROGRAMADOS", tabCompleted: "FINALIZADOS",
             localTime: "HORA LOCAL (GMT +2)", noMatches: "No hay partidos en esta categoría.", statusLive: "● EN JUEGO LIVE", statusCompleted: "✓ FINALIZADO",
@@ -307,7 +307,7 @@ const pageTranslations = {
             matchSingular: "partit", matchPlural: "partits",
             h2hTitle: "Estadístiques Head-to-head", h2hSubtitle: "Historial d'enfrontaments al PSA World Tour",
             h2hMatches: "Enfrontaments directes:", h2hLastMeeting: "Últim duel:", h2hFirstMeeting: "Primer enfrontament oficial",
-            h2hBtn: "Head-to-head"
+            h2hBtn: "Head-to-head", viewFullDraw: "Veure Quadre Complet PSA"
         },
         psaGallery: {
             notFoundTitle: "Galeria no trobada", notFoundText: "Esta galeria no existix o ha sigut eliminada.",
@@ -317,7 +317,7 @@ const pageTranslations = {
             allPlayers: "Tots els jugadors", allCategories: "Totes les categories", backLink: "Eixir de la galeria", close: "Tancar"
         },
         psaNews: { pageTitle: "Notícies", backLink: "Tornar", notFound: "Notícia no trobada." },
-        psaPlayer: { age: "Edat", height: "Alçada", weight: "Pes", hand: "Mà" },
+        psaPlayer: { age: "Edat", height: "Alçada", hand: "Mà", handLeft: "Esquerra", handRight: "Dreta", backLink: "← Tornar", notFound: "Jugador no trobat." },
         psaLiveScores: {
             backLink: "← Tornar a PSA Valencia Open", tabAll: "TOTS ELS PARTITS", tabLive: "EN JOC EN VIU", tabScheduled: "PROGRAMATS", tabCompleted: "FINALITZATS",
             localTime: "HORA LOCAL (GMT +2)", noMatches: "No hi ha partits en esta categoria.", statusLive: "● EN JOC EN VIU", statusCompleted: "✓ FINALITZAT",
@@ -354,7 +354,7 @@ const pageTranslations = {
             matchSingular: "match", matchPlural: "matches",
             h2hTitle: "Head-to-head Stats", h2hSubtitle: "Head-to-head history on the PSA World Tour",
             h2hMatches: "Head-to-head record:", h2hLastMeeting: "Last meeting:", h2hFirstMeeting: "First official meeting",
-            h2hBtn: "Head-to-head"
+            h2hBtn: "Head-to-head", viewFullDraw: "View Full PSA Draw"
         },
         psaGallery: {
             notFoundTitle: "Gallery not found", notFoundText: "This gallery doesn't exist or was removed.",
@@ -364,7 +364,7 @@ const pageTranslations = {
             allPlayers: "All players", allCategories: "All categories", backLink: "Exit gallery", close: "Close"
         },
         psaNews: { pageTitle: "News", backLink: "Back", notFound: "News article not found." },
-        psaPlayer: { age: "Age", height: "Height", weight: "Weight", hand: "Hand" },
+        psaPlayer: { age: "Age", height: "Height", hand: "Hand", handLeft: "Left", handRight: "Right", backLink: "← Back", notFound: "Player not found." },
         psaLiveScores: {
             backLink: "← Back to PSA Valencia Open", tabAll: "ALL MATCHES", tabLive: "LIVE NOW", tabScheduled: "SCHEDULED", tabCompleted: "COMPLETED",
             localTime: "LOCAL TIME (GMT +2)", noMatches: "No matches in this category.", statusLive: "● LIVE NOW", statusCompleted: "✓ COMPLETED",
@@ -401,7 +401,7 @@ const pageTranslations = {
             matchSingular: "match", matchPlural: "matchs",
             h2hTitle: "Statistiques Head-to-head", h2hSubtitle: "Historique des confrontations sur le PSA World Tour",
             h2hMatches: "Confrontations directes:", h2hLastMeeting: "Dernière confrontation:", h2hFirstMeeting: "Première confrontation officielle",
-            h2hBtn: "Head-to-head"
+            h2hBtn: "Head-to-head", viewFullDraw: "Voir le Tableau Complet PSA"
         },
         psaGallery: {
             notFoundTitle: "Galerie introuvable", notFoundText: "Cette galerie n'existe pas ou a été supprimée.",
@@ -411,7 +411,7 @@ const pageTranslations = {
             allPlayers: "Tous les joueurs", allCategories: "Toutes les catégories", backLink: "Quitter la galerie", close: "Fermer"
         },
         psaNews: { pageTitle: "Actualités", backLink: "Retour", notFound: "Article introuvable." },
-        psaPlayer: { age: "Âge", height: "Taille", weight: "Poids", hand: "Main" },
+        psaPlayer: { age: "Âge", height: "Taille", hand: "Main", handLeft: "Gauche", handRight: "Droite", backLink: "← Retour", notFound: "Joueur introuvable." },
         psaLiveScores: {
             backLink: "← Retour au PSA Valencia Open", tabAll: "TOUS LES MATCHS", tabLive: "EN DIRECT", tabScheduled: "PROGRAMMÉS", tabCompleted: "TERMINÉS",
             localTime: "HEURE LOCALE (GMT +2)", noMatches: "Aucun match dans cette catégorie.", statusLive: "● EN DIRECT", statusCompleted: "✓ TERMINÉ",

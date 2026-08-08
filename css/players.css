@@ -32,6 +32,12 @@ PLAYERS
 
     background:#0E2436;
 
+    text-decoration:none;
+
+    color:inherit;
+
+    cursor:pointer;
+
     transition:.35s;
 
     border:1px solid rgba(255,255,255,.08);

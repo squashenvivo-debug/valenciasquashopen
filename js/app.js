@@ -67,17 +67,6 @@
         window.PSAOptimizations?.logError?.(scope, message);
     }
 
-    async function syncPublicStateFromCloud() {
-        try {
-            if (window.PSACloudStore && window.PSACloudStore.isReady()) {
-                await window.PSACloudStore.syncLocalStorageFromCloud(CLOUD_PUBLIC_KEYS);
-                console.log("[CloudSync] Successfully synced public state from Supabase cloud.");
-            }
-        } catch (err) {
-            console.warn("[CloudSync] Could not sync from Supabase cloud:", err);
-        }
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
 
         await syncPublicStateFromCloud();
@@ -361,10 +350,11 @@
                     : "";
 
                 const imageSrc = resolvePlayerImageSrc(player.image || player.imageSrc || "");
+                const playerLinkParam = player.id ? `id=${encodeURIComponent(player.id)}` : `name=${encodeURIComponent(player.name)}`;
 
                 grid.innerHTML += `
 
-                <article class="player-card">
+                <a class="player-card" href="player.html?${playerLinkParam}">
 
                     <div class="player-photo">
                         <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${player.name}" loading="lazy" decoding="async"${positionStyle}>
@@ -390,7 +380,7 @@
 
                     </div>
 
-                </article>
+                </a>
 
             `;
 
@@ -427,6 +417,7 @@
 
             const list = parsed
                 .map((player) => ({
+                    id: String(player?.id || "").trim(),
                     name: String(player?.name || "").trim(),
                     country: String(player?.country || "").trim().toUpperCase(),
                     ranking: player?.ranking ?? "",

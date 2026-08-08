@@ -26,6 +26,9 @@ type TournamentPlayer = {
   country?: string | null;
   current_world_ranking?: number | null;
   profile_photo_url?: string | null;
+  age?: number | null;
+  height_cm?: string | number | null;
+  player_hand?: string | null;
   entry?: {
     seed_number?: number | null;
     status?: string | null;
@@ -314,6 +317,9 @@ function simplifyDivision(division: TournamentDivision, tournamentStreamUrl: str
       country: player.country || null,
       current_world_ranking: player.current_world_ranking ?? null,
       profile_photo_url: player.profile_photo_url || null,
+      age: player.age ?? null,
+      height_cm: player.height_cm ?? null,
+      player_hand: player.player_hand || null,
       entry: {
         seed_number: player.entry?.seed_number ?? null,
         draw_type: player.entry?.draw_type || null,
