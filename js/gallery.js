@@ -198,11 +198,34 @@ async function downloadCurrentPhoto() {
     });
 }
 
+/** Trae la foto como File para compartirla de verdad (no solo el enlace). Esto es lo que
+ *  hace que Instagram ofrezca "Historia"/"Reel" en su propio selector: si solo le mandas
+ *  texto/enlace, Instagram lo trata como contenido no visual y únicamente deja reenviarlo
+ *  como mensaje directo. Compartiendo la imagen real, sí aparecen esas opciones. */
+async function fetchShareableImageFile(imageUrl, filename) {
+    try {
+        const response = await fetch(imageUrl, { mode: "cors" });
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+        return new File([blob], `${filename}.${ext}`, { type: blob.type });
+    } catch (error) {
+        return null;
+    }
+}
+
 /** Un único botón "Compartir": panel nativo del dispositivo (ahí elige Instagram, WhatsApp,
  *  Facebook, etc. — Instagram no tiene enlace público de compartir, solo esta vía funciona).
  *  Si el navegador no lo soporta, copiamos el enlace en vez de ocultar el botón. */
-function shareOrCopyLink(button, shareTitle, shareUrl, onShared) {
+async function shareOrCopyLink(button, shareTitle, shareUrl, onShared, imageUrl) {
     if (typeof navigator.share === "function") {
+        if (imageUrl && typeof navigator.canShare === "function") {
+            const file = await fetchShareableImageFile(imageUrl, "psa-valencia-open");
+            if (file && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: shareTitle, text: shareTitle, url: shareUrl }).then(onShared).catch(() => {});
+                return;
+            }
+        }
         navigator.share({ title: shareTitle, url: shareUrl }).then(onShared).catch(() => {});
         return;
     }
@@ -237,7 +260,7 @@ function shareCurrentPhoto() {
             photoId: photo.photoId,
             photoUrl: photo.imageSrc
         });
-    });
+    }, photo.imageSrc);
 }
 
 function closeLightbox() {
