@@ -267,16 +267,16 @@
         headToHeadMap = buildHeadToHeadMap(matches);
         const groups = groupMatchesByRound(matches);
 
-        // Los cabezas de serie con bye directo a Round 2 aparecen en los datos de PSA como su
-        // partido de Round 2 con un único jugador (rival aún por determinar), no como un
-        // enfrentamiento "vs BYE" en Round 1. Los reconstruimos aquí para mantener las 16
-        // tarjetas visuales de Round 1 (8 partidos reales + 8 byes) que ya conocía el diseño.
-        const byePlayers = groups.round2
-            .filter((match) => (match.players || []).length === 1)
-            .map((match) => toDisplayPlayer(match.players[0], playerById, curatedMap))
+        // PSA marca explícitamente los huecos de bye dentro de Round 1 con "bye": true (un
+        // partido de un solo jugador, el cabeza de serie que pasa directo a Round 2). Usamos esa
+        // señal directa en vez de inferirla — así sigue funcionando igual de bien tanto ahora
+        // como cuando Round 1 esté completo y Round 2 ya tenga los dos jugadores decididos.
+        const byePlayers = groups.round1
+            .filter((match) => match.bye)
+            .map((match) => toDisplayPlayer(match.players?.[0], playerById, curatedMap))
             .filter(Boolean);
 
-        const realRound1 = groups.round1.filter((match) => (match.players || []).length === 2);
+        const realRound1 = groups.round1.filter((match) => !match.bye && (match.players || []).length === 2);
         let round1Html = "";
         let byeIndex = 0;
         realRound1.forEach((match, idx) => {
@@ -298,11 +298,15 @@
         });
         renderColumn("r1Matches", round1Html);
 
+        // El rival de Round 2 empieza como TBD (aún no ha terminado su partido de Round 1),
+        // pero en cuanto PSA lo resuelve, match.players[1] ya viene relleno con el ganador —
+        // por eso lo leemos de los datos reales en vez de fijarlo a "TBD".
         const round2Html = groups.round2.map((match) => renderMatchCard({
+            id: match.id,
             dateTime: formatMatchDateTime(match),
             status: match.status,
             player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
-            player2: { name: "TBD" }
+            player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");
         renderColumn("r2Matches", round2Html);
 
