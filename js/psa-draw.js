@@ -81,8 +81,9 @@
         const seed = seedNumber ? `(${seedNumber})` : (full?.entry?.is_wildcard ? "WC" : "");
         const curatedPhoto = curatedMap.get(normalizeName(name));
         const mugshot = curatedPhoto || full?.profile_photo_url || "";
+        const id = matchPlayer.id ?? full?.id ?? null;
 
-        return { name, country, ranking, seed, mugshot };
+        return { id, name, country, ranking, seed, mugshot };
     }
 
     function formatMatchDateTime(match) {
@@ -141,6 +142,8 @@
         const p1Safe = p1Name.replace(/'/g, "\\'");
         const p2Safe = p2Name.replace(/'/g, "\\'");
         const matchId = match.id !== undefined && match.id !== null ? String(match.id) : "";
+        const p1Id = match.player1?.id !== undefined && match.player1?.id !== null ? String(match.player1.id) : "";
+        const p2Id = match.player2?.id !== undefined && match.player2?.id !== null ? String(match.player2.id) : "";
 
         return `
             <div class="psa-match-item ${isLive ? "is-live" : ""}">
@@ -149,7 +152,7 @@
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
                     ${showH2H
-                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}', '${matchId}')">Head-to-head</button>`
+                        ? `<button class="psa-h2h-btn" onclick="openH2HModal('${p1Safe}', '${p2Safe}', '${matchId}', '${p1Id}', '${p2Id}')">Head-to-head</button>`
                         : ""}
                 </div>
             </div>
@@ -244,6 +247,10 @@
     /** id de partido -> estadísticas head_to_head, cuando el proxy las incluya. */
     let headToHeadMap = new Map();
 
+    /** id de jugador -> ficha completa (ranking, altura, DOB, ciudad, stats de carrera...),
+     *  para poder pintar la comparativa del modal Head-to-head sin volver a pedir nada. */
+    let currentPlayerById = new Map();
+
     function buildHeadToHeadMap(matches) {
         const map = new Map();
         (Array.isArray(matches) ? matches : []).forEach((match) => {
@@ -288,6 +295,7 @@
         document.querySelectorAll(".psa-live-indicator").forEach((el) => { el.style.display = ""; });
 
         const playerById = buildPlayerLookup(division.players);
+        currentPlayerById = playerById;
         const curatedMap = getCuratedPhotoMap();
         const matches = (Array.isArray(division.brackets) ? division.brackets : []).flatMap((bracket) => Array.isArray(bracket.matches) ? bracket.matches : []);
         headToHeadMap = buildHeadToHeadMap(matches);
@@ -432,10 +440,42 @@
         return parsed.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
     }
 
-    // Modal Head to Head — usa el histórico real que devuelve la API de PSA (fetchHeadToHeadMap).
-    // Si esta pareja de jugadores no tiene enfrentamientos previos registrados (lo habitual: la
-    // mayoría son primeros cruces), se muestra ese estado honesto en vez de inventar cifras.
-    window.openH2HModal = function (p1Name, p2Name, matchId) {
+    function tdraw(key, fallback) {
+        return (typeof t === "function" ? t(`psaDraw.${key}`) : "") || fallback;
+    }
+
+    /** Ficha bio/carrera real de un jugador (ranking, altura, fecha de nacimiento, ciudad,
+     *  victorias y títulos de carrera) — todo tal cual lo da la API de PSA, sin inventar nada.
+     *  El peso y el ranking "Road to Tour Finals" no están en nuestros datos (nuestra API key
+     *  no tiene acceso al endpoint de rankings de PSA), así que esas dos filas no se muestran. */
+    function buildH2HCompareRows(p1, p2) {
+        const rows = [
+            [tdraw("h2hRanking", "Ranking Mundial"), p1?.current_world_ranking ? `#${p1.current_world_ranking}` : "", p2?.current_world_ranking ? `#${p2.current_world_ranking}` : ""],
+            [tdraw("h2hWins", "Victorias (carrera)"), p1?.stats?.matches_won ?? "", p2?.stats?.matches_won ?? ""],
+            [tdraw("h2hTitles", "Títulos"), p1?.stats?.titles_count ?? "", p2?.stats?.titles_count ?? ""],
+            [tdraw("h2hHeight", "Altura"), p1?.height_cm ? `${Math.round(Number(p1.height_cm))} cm` : "", p2?.height_cm ? `${Math.round(Number(p2.height_cm))} cm` : ""],
+            [tdraw("h2hCity", "Ciudad"), p1?.city || "", p2?.city || ""],
+            [tdraw("h2hDob", "Fecha de nacimiento"), p1?.date_of_birth ? formatH2HDate(p1.date_of_birth) : "", p2?.date_of_birth ? formatH2HDate(p2.date_of_birth) : ""],
+        ];
+
+        return rows
+            .filter(([, v1, v2]) => v1 !== "" || v2 !== "")
+            .map(([label, v1, v2]) => `
+                <div class="psa-h2h-compare-row">
+                    <span class="psa-h2h-compare-value">${v1 || "-"}</span>
+                    <span class="psa-h2h-compare-label">${label}</span>
+                    <span class="psa-h2h-compare-value">${v2 || "-"}</span>
+                </div>
+            `)
+            .join("");
+    }
+
+    // Modal Head to Head — usa el histórico real que devuelve la API de PSA (fetchHeadToHeadMap)
+    // más la ficha bio/carrera real de cada jugador (currentPlayerById). Si esta pareja de
+    // jugadores no tiene enfrentamientos previos registrados (lo habitual: la mayoría son
+    // primeros cruces) o algún dato bio no está disponible, se muestra ese estado honesto en
+    // vez de inventar cifras.
+    window.openH2HModal = function (p1Name, p2Name, matchId, p1Id, p2Id) {
         let modal = document.getElementById("h2hModal");
         if (!modal) {
             modal = document.createElement("div");
@@ -466,6 +506,10 @@
                         <span style="color: var(--psa-text-muted, #8E9BAE);">Último duelo:</span>
                         <strong id="h2hStatLast">Primer enfrentamiento oficial</strong>
                     </div>
+                    <div id="h2hCompareSection" style="display:none;">
+                        <div class="psa-h2h-compare-title">${tdraw("h2hCompareTitle", "Perfil de los jugadores")}</div>
+                        <div id="h2hCompareStats"></div>
+                    </div>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -492,6 +536,14 @@
             if (matchesEl) matchesEl.textContent = "0 - 0";
             if (lastEl) lastEl.textContent = "Primer enfrentamiento oficial";
         }
+
+        const p1Full = p1Id ? currentPlayerById.get(String(p1Id)) : null;
+        const p2Full = p2Id ? currentPlayerById.get(String(p2Id)) : null;
+        const compareSection = document.getElementById("h2hCompareSection");
+        const compareStats = document.getElementById("h2hCompareStats");
+        const compareHtml = buildH2HCompareRows(p1Full, p2Full);
+        if (compareStats) compareStats.innerHTML = compareHtml;
+        if (compareSection) compareSection.style.display = compareHtml ? "" : "none";
 
         modal.classList.add("active");
     };

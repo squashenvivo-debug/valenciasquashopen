@@ -508,3 +508,54 @@ body {
     border-radius: 8px;
     font-size: 0.9rem;
 }
+
+.psa-h2h-compare-title {
+    margin: 18px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--psa-text-muted, #8E9BAE);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.psa-h2h-compare-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
+}
+
+.psa-h2h-compare-row:last-child {
+    border-bottom: none;
+}
+
+.psa-h2h-compare-value {
+    font-weight: 800;
+    color: #fff;
+}
+
+.psa-h2h-compare-row:first-child .psa-h2h-compare-value {
+    color: var(--psa-green, #00E676);
+}
+
+.psa-h2h-compare-value:first-child {
+    text-align: left;
+}
+
+.psa-h2h-compare-value:last-child {
+    text-align: right;
+}
+
+.psa-h2h-compare-label {
+    text-align: center;
+    color: var(--psa-text-muted, #8E9BAE);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}

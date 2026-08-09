@@ -276,7 +276,10 @@ const pageTranslations = {
             matchSingular: "partido", matchPlural: "partidos",
             h2hTitle: "Estadísticas Head-to-head", h2hSubtitle: "Histórico de enfrentamientos en el PSA World Tour",
             h2hMatches: "Enfrentamientos directos:", h2hLastMeeting: "Último duelo:", h2hFirstMeeting: "Primer enfrentamiento oficial",
-            h2hBtn: "Head-to-head", viewFullDraw: "Ver Cuadro Completo PSA"
+            h2hBtn: "Head-to-head", viewFullDraw: "Ver Cuadro Completo PSA",
+            h2hCompareTitle: "Perfil de los jugadores",
+            h2hRanking: "Ranking Mundial", h2hHeight: "Altura", h2hDob: "Fecha de nacimiento", h2hCity: "Ciudad",
+            h2hWins: "Victorias (carrera)", h2hTitles: "Títulos"
         },
         psaGallery: {
             notFoundTitle: "Galería no encontrada", notFoundText: "Esta galería no existe o fue eliminada.",
@@ -324,7 +327,10 @@ const pageTranslations = {
             matchSingular: "partit", matchPlural: "partits",
             h2hTitle: "Estadístiques Head-to-head", h2hSubtitle: "Historial d'enfrontaments al PSA World Tour",
             h2hMatches: "Enfrontaments directes:", h2hLastMeeting: "Últim duel:", h2hFirstMeeting: "Primer enfrontament oficial",
-            h2hBtn: "Head-to-head", viewFullDraw: "Veure Quadre Complet PSA"
+            h2hBtn: "Head-to-head", viewFullDraw: "Veure Quadre Complet PSA",
+            h2hCompareTitle: "Perfil dels jugadors",
+            h2hRanking: "Ranking Mundial", h2hHeight: "Alçada", h2hDob: "Data de naixement", h2hCity: "Ciutat",
+            h2hWins: "Victòries (carrera)", h2hTitles: "Títols"
         },
         psaGallery: {
             notFoundTitle: "Galeria no trobada", notFoundText: "Esta galeria no existix o ha sigut eliminada.",
@@ -372,7 +378,10 @@ const pageTranslations = {
             matchSingular: "match", matchPlural: "matches",
             h2hTitle: "Head-to-head Stats", h2hSubtitle: "Head-to-head history on the PSA World Tour",
             h2hMatches: "Head-to-head record:", h2hLastMeeting: "Last meeting:", h2hFirstMeeting: "First official meeting",
-            h2hBtn: "Head-to-head", viewFullDraw: "View Full PSA Draw"
+            h2hBtn: "Head-to-head", viewFullDraw: "View Full PSA Draw",
+            h2hCompareTitle: "Player profile",
+            h2hRanking: "World Ranking", h2hHeight: "Height", h2hDob: "Date of birth", h2hCity: "City",
+            h2hWins: "Career wins", h2hTitles: "Titles"
         },
         psaGallery: {
             notFoundTitle: "Gallery not found", notFoundText: "This gallery doesn't exist or was removed.",
@@ -420,7 +429,10 @@ const pageTranslations = {
             matchSingular: "match", matchPlural: "matchs",
             h2hTitle: "Statistiques Head-to-head", h2hSubtitle: "Historique des confrontations sur le PSA World Tour",
             h2hMatches: "Confrontations directes:", h2hLastMeeting: "Dernière confrontation:", h2hFirstMeeting: "Première confrontation officielle",
-            h2hBtn: "Head-to-head", viewFullDraw: "Voir le Tableau Complet PSA"
+            h2hBtn: "Head-to-head", viewFullDraw: "Voir le Tableau Complet PSA",
+            h2hCompareTitle: "Profil des joueurs",
+            h2hRanking: "Classement Mondial", h2hHeight: "Taille", h2hDob: "Date de naissance", h2hCity: "Ville",
+            h2hWins: "Victoires (carrière)", h2hTitles: "Titres"
         },
         psaGallery: {
             notFoundTitle: "Galerie introuvable", notFoundText: "Cette galerie n'existe pas ou a été supprimée.",

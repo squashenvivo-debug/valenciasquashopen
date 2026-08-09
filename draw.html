@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cuadro Oficial PSA | PSA Valencia Open 2026</title>
 <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
-<link rel="stylesheet" href="css/psa-draw.css?v=20260809-v4">
+<link rel="stylesheet" href="css/psa-draw.css?v=20260810-v5">
 <link rel="stylesheet" href="css/draw.css?v=20260806-v5">
 </head>
 <body>
@@ -120,6 +120,11 @@
             <span style="color: var(--psa-text-muted);" data-i18n="psaDraw.h2hLastMeeting">Último duelo:</span>
             <strong id="h2hStatLast">Primer enfrentamiento oficial</strong>
         </div>
+
+        <div id="h2hCompareSection" style="display:none;">
+            <div class="psa-h2h-compare-title" data-i18n="psaDraw.h2hCompareTitle">Perfil de los jugadores</div>
+            <div id="h2hCompareStats"></div>
+        </div>
     </div>
 </div>
 
@@ -127,9 +132,9 @@
 <script src="config.js"></script>
 <script src="supabase.js"></script>
 <script src="js/cloud-store.js?v=20260806-v12"></script>
-<script src="js/language.js?v=20260809-v5"></script>
+<script src="js/language.js?v=20260810-v6"></script>
 <script src="js/draw-viewer.js?v=20260806-v12"></script>
-<script src="js/psa-draw.js?v=20260809-v2"></script>
+<script src="js/psa-draw.js?v=20260810-v3"></script>
 <script>
 (function () {
     function showManual() {
