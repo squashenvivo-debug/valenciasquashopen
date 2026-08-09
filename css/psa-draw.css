@@ -130,6 +130,17 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+/* Solo en la portada (id="draw", no existe en draw.html): el cuadro no puede alargar tanto
+   la página que haga falta un scroll enorme para llegar a la siguiente sección. Las tarjetas
+   dentro siguen a tamaño completo, legible — es la ALTURA del bloque la que se limita, con
+   scroll propio dentro. Esta regla deja de aplicar en cuanto js/draw-modal.js mueve el cuadro
+   dentro del modal "Cuadro completo" (ya no está bajo #draw), así el modal sigue mostrándolo
+   entero sin límite, como debe ser. */
+#draw .psa-bracket-viewport {
+    max-height: 900px;
+    overflow-y: auto;
+}
+
 .psa-bracket-viewport::-webkit-scrollbar {
     height: 8px;
 }
