@@ -492,8 +492,24 @@ const languageNames = {
 
 };
 
+/** Permite compartir un enlace directo a un idioma concreto (?lang=en) — por ejemplo, el
+ *  enlace en inglés de una noticia para redes internacionales — sin depender de que el
+ *  visitante cambie el idioma a mano. Si el parámetro es válido, se guarda igual que si lo
+ *  hubiese elegido en el selector, así el resto de la navegación se queda en ese idioma. */
+function getLanguageFromUrl() {
+    try {
+        const requested = new URLSearchParams(window.location.search).get("lang");
+        return ["es", "va", "en", "fr"].includes(requested) ? requested : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+const urlLanguage = getLanguageFromUrl();
+if (urlLanguage) localStorage.setItem("language", urlLanguage);
+
 let currentLanguage =
-localStorage.getItem("language") || "es";
+urlLanguage || localStorage.getItem("language") || "es";
 
 const TOURNAMENT_MODE_KEY = "tournamentContentMode";
 const TOURNAMENT_API_URL_KEY = "tournamentApiUrl";
