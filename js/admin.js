@@ -5317,6 +5317,9 @@ function normalizeProgrammingItem(item, index = 0) {
     return {
         id: String(item?.id || createId("program")).trim(),
         dateTime: String(item?.dateTime || item?.date || "").trim(),
+        // Fecha real (YYYY-MM-DD) del día al que pertenece este acto — la portada la usa
+        // para ocultarlo solo en cuanto ese día termine, sin borrarlo a mano.
+        eventDate: String(item?.eventDate || "").trim(),
         title,
         subtitle,
         order: Number(item?.order) || index + 1
@@ -5484,8 +5487,12 @@ async function initProgrammingAdmin() {
     const panel = document.getElementById("programming-admin-panel");
     if (!panel) return;
 
+    // OJO: leer NUNCA debe guardar. Si la sincronización con la nube va lenta o falla en el
+    // momento justo en que se abre esta sección, readProgrammingCollection() puede devolver
+    // el ejemplo por defecto (localStorage vacío en ese instante) — guardarlo aquí de vuelta
+    // sobrescribiría silenciosamente la programación real ya guardada en la nube. Por eso solo
+    // se guarda cuando el admin pulsa explícitamente "Añadir", "Guardar" o "Restaurar ejemplo".
     let collection = readProgrammingCollection();
-    saveProgrammingCollection(collection);
     renderProgrammingAdminList(collection);
     bindProgrammingRowActions();
 

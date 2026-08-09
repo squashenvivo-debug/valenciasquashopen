@@ -810,10 +810,29 @@
         return {
             id: String(item?.id || `program_${index}`).trim(),
             dateTime: String(item?.dateTime || item?.date || "").trim(),
+            // Fecha real (YYYY-MM-DD) del día al que pertenece este acto — se usa solo para
+            // saber cuándo ocultarlo automáticamente, no se muestra tal cual (para eso está
+            // dateTime, el texto ya formateado). Si no tiene fecha real, nunca se oculta.
+            eventDate: String(item?.eventDate || "").trim(),
             title: normalizeLocalizedText(item?.title || ""),
             subtitle: normalizeLocalizedText(item?.subtitle || ""),
             order: Number(item?.order) || index + 1
         };
+    }
+
+    /** Un acto sigue "vigente" mientras su día (fecha real, no el texto) no haya terminado
+     *  todavía — así el martes desaparece solo en cuanto empieza el miércoles, sin tener que
+     *  borrarlo a mano cada día. Los actos sin fecha real (dato antiguo) nunca se ocultan. */
+    function isProgrammingItemUpcoming(item) {
+        const eventDate = String(item?.eventDate || "").trim();
+        if (!eventDate) return true;
+
+        const parsed = new Date(`${eventDate}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) return true;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return parsed.getTime() >= today.getTime();
     }
 
     function readProgrammingCollection() {
@@ -840,7 +859,7 @@
 
         try {
             const lang = getCurrentLanguage();
-            const collection = readProgrammingCollection();
+            const collection = readProgrammingCollection().filter(isProgrammingItemUpcoming);
 
             list.innerHTML = collection.map((item) => {
                 const title = getLocalizedText(item.title, lang);
