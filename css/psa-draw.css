@@ -428,6 +428,19 @@ body {
     overflow-x: auto;
 }
 
+/* Con poco padding, la propia rueda del cuadro (con su SVG/z-index propios) queda pegada al
+   botón de cerrar y le roba el clic — le damos fondo propio y z-index por encima de todo. */
+.draw-full-modal-card .psa-modal-close {
+    z-index: 5;
+    background: rgba(5, 16, 26, 0.75);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .psa-modal-close {
     position: absolute;
     top: 16px;
