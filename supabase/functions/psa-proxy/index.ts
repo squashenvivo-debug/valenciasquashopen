@@ -25,10 +25,23 @@ type TournamentPlayer = {
   name?: string | null;
   country?: string | null;
   current_world_ranking?: number | null;
+  highest_world_ranking?: number | null;
   profile_photo_url?: string | null;
   age?: number | null;
+  date_of_birth?: string | null;
   height_cm?: string | number | null;
   player_hand?: string | null;
+  city?: string | null;
+  turned_pro?: number | null;
+  stats?: {
+    total_matches?: number | null;
+    matches_won?: number | null;
+    matches_lost?: number | null;
+    match_win_percentage?: number | null;
+    titles_count?: number | null;
+    finals_count?: number | null;
+    tournaments_count?: number | null;
+  } | null;
   entry?: {
     seed_number?: number | null;
     status?: string | null;
@@ -316,10 +329,25 @@ function simplifyDivision(division: TournamentDivision, tournamentStreamUrl: str
       name: player.name || null,
       country: player.country || null,
       current_world_ranking: player.current_world_ranking ?? null,
+      highest_world_ranking: player.highest_world_ranking ?? null,
       profile_photo_url: player.profile_photo_url || null,
       age: player.age ?? null,
+      date_of_birth: player.date_of_birth || null,
       height_cm: player.height_cm ?? null,
       player_hand: player.player_hand || null,
+      city: player.city || null,
+      turned_pro: player.turned_pro ?? null,
+      stats: player.stats
+        ? {
+            total_matches: player.stats.total_matches ?? null,
+            matches_won: player.stats.matches_won ?? null,
+            matches_lost: player.stats.matches_lost ?? null,
+            match_win_percentage: player.stats.match_win_percentage ?? null,
+            titles_count: player.stats.titles_count ?? null,
+            finals_count: player.stats.finals_count ?? null,
+            tournaments_count: player.stats.tournaments_count ?? null,
+          }
+        : null,
       entry: {
         seed_number: player.entry?.seed_number ?? null,
         draw_type: player.entry?.draw_type || null,
