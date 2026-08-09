@@ -198,17 +198,58 @@ async function downloadCurrentPhoto() {
     });
 }
 
-/** Trae la foto como File para compartirla de verdad (no solo el enlace). Esto es lo que
- *  hace que Instagram ofrezca "Historia"/"Reel" en su propio selector: si solo le mandas
+function loadImageForCanvas(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("No se pudo cargar la imagen"));
+        img.src = src;
+    });
+}
+
+/** Solo la foto, a su resolución real, con la marca "psavalenciaopen.com" al pie (escalada
+ *  según el tamaño de la imagen) — así queda visible se comparta donde se comparta, en vez
+ *  de una etiqueta separable que se pueda perder al reenviar. */
+async function buildWatermarkedPhoto(imageUrl) {
+    try {
+        const img = await loadImageForCanvas(imageUrl);
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const label = "psavalenciaopen.com";
+        const fontSize = Math.max(20, Math.round(width * 0.024));
+        const paddingX = Math.round(fontSize * 0.7);
+        const boxHeight = Math.round(fontSize * 1.8);
+        ctx.font = `600 ${fontSize}px Arial, Helvetica, sans-serif`;
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillStyle = "rgba(13, 35, 64, 0.8)";
+        ctx.fillRect(0, height - boxHeight, textWidth + paddingX * 2, boxHeight);
+        ctx.fillStyle = "#ffffff";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, paddingX, height - boxHeight / 2 + 1);
+
+        return await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+    } catch (error) {
+        return null;
+    }
+}
+
+/** Trae la foto marcada como File para compartirla de verdad (no solo el enlace). Esto es lo
+ *  que hace que Instagram ofrezca "Historia"/"Reel" en su propio selector: si solo le mandas
  *  texto/enlace, Instagram lo trata como contenido no visual y únicamente deja reenviarlo
  *  como mensaje directo. Compartiendo la imagen real, sí aparecen esas opciones. */
 async function fetchShareableImageFile(imageUrl, filename) {
     try {
-        const response = await fetch(imageUrl, { mode: "cors" });
-        if (!response.ok) return null;
-        const blob = await response.blob();
-        const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
-        return new File([blob], `${filename}.${ext}`, { type: blob.type });
+        const blob = await buildWatermarkedPhoto(imageUrl);
+        if (!blob) return null;
+        return new File([blob], `${filename}.jpg`, { type: "image/jpeg" });
     } catch (error) {
         return null;
     }
