@@ -406,13 +406,21 @@ async function renderNewsDetail() {
     renderNewsShareBar(item, title, article, isPreview, lang);
 }
 
-function loadImageForCanvas(src) {
+/** Trae la imagen como blob con un fetch CORS explícito y la carga desde un blob: URL (mismo
+ *  origen, nunca "contamina" el lienzo). Si en vez de esto se pone crossOrigin="anonymous" en
+ *  un <img> normal, el navegador puede reutilizar en caché la copia YA cargada sin ese
+ *  permiso en otra parte de la página (p.ej. la foto grande del propio artículo) y el
+ *  lienzo queda contaminado — toBlob() falla en silencio y todo cae al modo solo-texto. */
+async function loadImageForCanvas(src) {
+    const response = await fetch(src, { mode: "cors", cache: "reload" });
+    if (!response.ok) throw new Error(`No se pudo cargar la imagen (HTTP ${response.status})`);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
         img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error("No se pudo cargar la imagen"));
-        img.src = src;
+        img.onerror = () => reject(new Error("No se pudo decodificar la imagen"));
+        img.src = objectUrl;
     });
 }
 
