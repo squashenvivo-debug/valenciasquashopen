@@ -403,7 +403,7 @@ async function renderNewsDetail() {
     if (player) player.textContent = item.player ? `Jugador: ${item.player}` : "";
     if (tags) tags.textContent = normalizeStringArray(item.tags).map((tag) => `#${tag}`).join(" · ");
     applyNewsSeo(item, lang, title, article);
-    renderNewsShareBar(item, title, article, isPreview);
+    renderNewsShareBar(item, title, article, isPreview, lang);
 }
 
 function loadImageForCanvas(src) {
@@ -416,35 +416,129 @@ function loadImageForCanvas(src) {
     });
 }
 
-/** Genera la miniatura tal cual se ve en la tarjeta de la portada (mismo recorte 5:3 que
- *  css/news.css usa para .news-card img) y le añade la marca "psavalenciaopen.com" abajo a
- *  la izquierda — esta es la imagen que se comparte, no la foto original sin marcar. */
-async function buildShareThumbnail(imageUrl) {
+/** Reparte un texto en líneas que caben en maxWidth, hasta maxLines; si sobra texto, la
+ *  última línea visible acaba en "…" en vez de cortarse a media palabra. */
+function wrapTextLines(ctx, text, font, maxWidth, maxLines) {
+    ctx.font = font;
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = "";
+    let truncated = false;
+
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const test = current ? `${current} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && current) {
+            lines.push(current);
+            current = word;
+            if (lines.length === maxLines) {
+                truncated = i < words.length - 1;
+                current = "";
+                break;
+            }
+        } else {
+            current = test;
+        }
+    }
+    if (current && lines.length < maxLines) lines.push(current);
+    else if (current) truncated = true;
+
+    if (truncated && lines.length) {
+        let last = lines[lines.length - 1];
+        while (ctx.measureText(`${last}…`).width > maxWidth && last.includes(" ")) {
+            last = last.slice(0, last.lastIndexOf(" "));
+        }
+        lines[lines.length - 1] = `${last}…`;
+    }
+    return lines;
+}
+
+/** Genera la misma tarjeta que se ve en la portada (foto recortada + fecha + título +
+ *  resumen, sin el botón "Leer más") con la marca "psavalenciaopen.com" abajo a la
+ *  izquierda — esta imagen es la que se comparte, no la foto original suelta. */
+async function buildShareThumbnail(item, lang) {
     try {
-        const img = await loadImageForCanvas(imageUrl);
-        const width = 1200;
-        const height = 720; // misma proporción 5:3 que .news-card img (100% × 240px)
+        const img = await loadImageForCanvas(item.imageSrc);
+
+        const width = 900;
+        const imageHeight = 540;
+        const padding = 36;
+        const maxTextWidth = width - padding * 2;
+
+        const title = getLocalizedText(item.title, lang) || deriveTitleFromArticleHtml(getLocalizedText(item.article, lang), 100) || "PSA Valencia Open";
+        const articleHtml = getLocalizedText(item.article, lang);
+        const seoDescription = getLocalizedText(item.seo?.description, lang);
+        const summaryText = stripHtmlTagsForSummary(seoDescription || articleHtml, 220);
+        const dateText = formatNewsDate(item.publishAt || item.createdAt, lang);
+
+        const titleFont = "700 34px Arial, Helvetica, sans-serif";
+        const summaryFont = "400 24px Arial, Helvetica, sans-serif";
+        const dateFont = "700 20px Arial, Helvetica, sans-serif";
+
+        const measureCtx = document.createElement("canvas").getContext("2d");
+        const titleLines = wrapTextLines(measureCtx, title, titleFont, maxTextWidth, 3);
+        const summaryLines = wrapTextLines(measureCtx, summaryText, summaryFont, maxTextWidth, 4);
+
+        const dateBlockHeight = 34;
+        const titleLineHeight = 42;
+        const summaryLineHeight = 32;
+        const gapAfterDate = 12;
+        const gapAfterTitle = 14;
+        const contentHeight = padding
+            + dateBlockHeight + gapAfterDate
+            + titleLines.length * titleLineHeight + gapAfterTitle
+            + summaryLines.length * summaryLineHeight
+            + padding;
 
         const canvas = document.createElement("canvas");
         canvas.width = width;
-        canvas.height = height;
+        canvas.height = imageHeight + contentHeight;
         const ctx = canvas.getContext("2d");
 
-        const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+        // Foto recortada igual que .news-card img (object-fit: cover)
+        const scale = Math.max(width / img.naturalWidth, imageHeight / img.naturalHeight);
         const drawWidth = img.naturalWidth * scale;
         const drawHeight = img.naturalHeight * scale;
-        ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+        ctx.drawImage(img, (width - drawWidth) / 2, (imageHeight - drawHeight) / 2, drawWidth, drawHeight);
 
+        // Fondo de la tarjeta
+        ctx.fillStyle = "#0E2436";
+        ctx.fillRect(0, imageHeight, width, contentHeight);
+
+        ctx.textBaseline = "top";
+        let y = imageHeight + padding;
+
+        ctx.font = dateFont;
+        ctx.fillStyle = "#C78C32";
+        ctx.fillText(dateText, padding, y);
+        y += dateBlockHeight + gapAfterDate;
+
+        ctx.font = titleFont;
+        ctx.fillStyle = "#ffffff";
+        titleLines.forEach((line) => {
+            ctx.fillText(line, padding, y);
+            y += titleLineHeight;
+        });
+        y += gapAfterTitle;
+
+        ctx.font = summaryFont;
+        ctx.fillStyle = "#B7C4D1";
+        summaryLines.forEach((line) => {
+            ctx.fillText(line, padding, y);
+            y += summaryLineHeight;
+        });
+
+        // Marca "psavalenciaopen.com" al pie izquierdo de toda la miniatura
         const label = "psavalenciaopen.com";
-        const paddingX = 18;
-        const boxHeight = 46;
-        ctx.font = "600 26px Arial, Helvetica, sans-serif";
-        const textWidth = ctx.measureText(label).width;
-        ctx.fillStyle = "rgba(13, 35, 64, 0.78)";
-        ctx.fillRect(0, height - boxHeight, textWidth + paddingX * 2, boxHeight);
+        const labelPaddingX = 18;
+        const labelBoxHeight = 40;
+        ctx.font = "600 22px Arial, Helvetica, sans-serif";
+        const labelWidth = ctx.measureText(label).width;
+        ctx.fillStyle = "rgba(13, 35, 64, 0.85)";
+        ctx.fillRect(0, canvas.height - labelBoxHeight, labelWidth + labelPaddingX * 2, labelBoxHeight);
         ctx.fillStyle = "#ffffff";
         ctx.textBaseline = "middle";
-        ctx.fillText(label, paddingX, height - boxHeight / 2 + 1);
+        ctx.fillText(label, labelPaddingX, canvas.height - labelBoxHeight / 2 + 1);
 
         return await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
     } catch (error) {
@@ -456,8 +550,8 @@ async function buildShareThumbnail(imageUrl) {
  *  lo que hace que Instagram ofrezca "Historia"/"Reel" en su propio selector (si solo recibe
  *  texto/enlace, Instagram únicamente deja reenviarlo como mensaje directo, ya que un enlace
  *  no es contenido visual válido para una historia). */
-async function fetchShareableImageFile(imageUrl, filename) {
-    const blob = await buildShareThumbnail(imageUrl);
+async function fetchShareableImageFile(item, lang, filename) {
+    const blob = await buildShareThumbnail(item, lang);
     if (!blob) return null;
     return new File([blob], `${filename}.jpg`, { type: "image/jpeg" });
 }
@@ -470,10 +564,10 @@ async function fetchShareableImageFile(imageUrl, filename) {
  * real para ofrecerlo. Si el navegador no soporta esa API (algunos de escritorio), en vez de
  * ocultar el botón copiamos el enlace al portapapeles — siempre hace algo útil.
  */
-async function shareOrCopyLink(button, shareTitle, shareUrl, imageUrl) {
+async function shareOrCopyLink(button, shareTitle, shareUrl, item, lang) {
     if (typeof navigator.share === "function") {
-        if (imageUrl && typeof navigator.canShare === "function") {
-            const file = await fetchShareableImageFile(imageUrl, "psa-valencia-open");
+        if (item?.imageSrc && typeof navigator.canShare === "function") {
+            const file = await fetchShareableImageFile(item, lang, "psa-valencia-open");
             if (file && navigator.canShare({ files: [file] })) {
                 navigator.share({ files: [file], title: shareTitle, text: shareTitle, url: shareUrl }).catch(() => {});
                 return;
@@ -497,7 +591,7 @@ async function shareOrCopyLink(button, shareTitle, shareUrl, imageUrl) {
     window.open(shareUrl, "_blank", "noopener");
 }
 
-function renderNewsShareBar(item, title, article, isPreview) {
+function renderNewsShareBar(item, title, article, isPreview, lang) {
     const bar = document.getElementById("newsShareBar");
     const button = document.getElementById("newsShareNative");
     if (!bar || !button) return;
@@ -513,7 +607,7 @@ function renderNewsShareBar(item, title, article, isPreview) {
         : window.location.href.split("&preview=")[0];
     const shareText = title || deriveTitleFromArticleHtml(article, 100) || "PSA Valencia Open";
 
-    button.onclick = () => shareOrCopyLink(button, shareText, shareUrl, item?.imageSrc || "");
+    button.onclick = () => shareOrCopyLink(button, shareText, shareUrl, item, lang);
     bar.style.display = "";
 }
 
