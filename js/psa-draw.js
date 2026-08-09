@@ -337,7 +337,93 @@
         renderStageColumn("sfMatches", groups.semi, playerById, curatedMap);
         updateColumnCount("sfCount", groups.semi.length);
         renderStageColumn("finalMatches", groups.final, playerById, curatedMap);
+
+        scheduleBracketConnectorsRedraw();
     }
+
+    /**
+     * Líneas conectoras entre rondas, dibujadas con SVG midiendo la posición REAL de cada
+     * tarjeta ya renderizada — no con desplazamientos CSS fijos por ronda. Esos desplazamientos
+     * fijos se desalineaban en cuartos/semifinales/final porque .psa-matches-list usa
+     * justify-content:space-around, que reparte el espacio de forma distinta según cuántas
+     * tarjetas tenga cada columna (16 en Round 1 frente a 1 sola en la Final); un mismo valor
+     * en píxeles no puede cuadrar con todas las rondas a la vez. Midiendo con
+     * getBoundingClientRect() en vez de calcularlo a ciegas, siempre queda alineado sea cual
+     * sea el reparto real que haga el navegador.
+     */
+    function drawBracketConnectors() {
+        const tree = document.querySelector(".psa-bracket-tree");
+        if (!tree) return;
+
+        let svg = tree.querySelector(":scope > svg.psa-connector-svg");
+        if (!svg) {
+            svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "psa-connector-svg");
+            tree.insertBefore(svg, tree.firstChild);
+        }
+
+        const treeRect = tree.getBoundingClientRect();
+        if (!treeRect.width || !treeRect.height) return;
+
+        svg.setAttribute("width", treeRect.width);
+        svg.setAttribute("height", treeRect.height);
+        svg.setAttribute("viewBox", `0 0 ${treeRect.width} ${treeRect.height}`);
+        svg.innerHTML = "";
+
+        const roundIds = ["r1Matches", "r2Matches", "qfMatches", "sfMatches", "finalMatches"];
+        const columns = roundIds.map((id) => document.getElementById(id)).filter(Boolean);
+
+        for (let c = 0; c < columns.length - 1; c++) {
+            const sourceCards = Array.from(columns[c].querySelectorAll(".psa-match-item"));
+            const targetCards = Array.from(columns[c + 1].querySelectorAll(".psa-match-item"));
+            if (!sourceCards.length || !targetCards.length) continue;
+
+            targetCards.forEach((targetCard, i) => {
+                const a = sourceCards[i * 2];
+                const b = sourceCards[i * 2 + 1];
+                if (!a || !b) return;
+
+                const aRect = a.getBoundingClientRect();
+                const bRect = b.getBoundingClientRect();
+                const targetRect = targetCard.getBoundingClientRect();
+
+                const ay = aRect.top + aRect.height / 2 - treeRect.top;
+                const by = bRect.top + bRect.height / 2 - treeRect.top;
+                const ty = targetRect.top + targetRect.height / 2 - treeRect.top;
+                const startX = aRect.right - treeRect.left;
+                const endX = targetRect.left - treeRect.left;
+                const midX = startX + (endX - startX) / 2;
+
+                const bracket = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                bracket.setAttribute("class", "psa-connector-line");
+                bracket.setAttribute("d", `M ${startX} ${ay} H ${midX} V ${by} H ${startX}`);
+                svg.appendChild(bracket);
+
+                const connector = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                connector.setAttribute("class", "psa-connector-line");
+                connector.setAttribute("d", `M ${midX} ${(ay + by) / 2} L ${endX} ${ty}`);
+                svg.appendChild(connector);
+            });
+        }
+    }
+
+    let connectorRedrawFrame = null;
+    function scheduleBracketConnectorsRedraw() {
+        if (connectorRedrawFrame) cancelAnimationFrame(connectorRedrawFrame);
+        connectorRedrawFrame = requestAnimationFrame(() => {
+            connectorRedrawFrame = null;
+            drawBracketConnectors();
+        });
+    }
+
+    let connectorResizeTimer = null;
+    window.addEventListener("resize", () => {
+        clearTimeout(connectorResizeTimer);
+        connectorResizeTimer = setTimeout(scheduleBracketConnectorsRedraw, 150);
+    });
+    // Las fotos de jugador pueden llegar tarde y desplazar un poco la altura de la tarjeta;
+    // redibuja una vez más cuando todo (imágenes incluidas) ha terminado de cargar.
+    window.addEventListener("load", scheduleBracketConnectorsRedraw);
 
     function formatH2HDate(isoDate) {
         if (!isoDate) return "";

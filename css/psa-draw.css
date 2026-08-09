@@ -199,80 +199,39 @@ body {
     position: relative;
 }
 
-/* Bracket Connector Lines between Round Columns (strictly inside the 32px whitespace gap) */
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(odd)::after {
-    content: '';
+/* Las líneas conectoras entre rondas ya NO se dibujan con offsets CSS fijos (se
+   desalineaban en cuartos/semifinales/final porque justify-content:space-around reparte el
+   espacio de forma distinta según cuántas tarjetas tenga cada columna, así que un desplazamiento
+   en píxeles fijo por ronda no podía cuadrar con todas a la vez). Ahora psa-draw.js las dibuja
+   con un SVG midiendo la posición real de cada tarjeta ya renderizada — ver drawBracketConnectors()
+   y .psa-connector-svg más abajo. */
+
+.psa-bracket-tree {
+    position: relative;
+}
+
+.psa-connector-svg {
     position: absolute;
-    right: -16px;
-    top: 50%;
-    width: 16px;
-    border-right: 2px solid #FFFFFF;
-    border-top: 2px solid #FFFFFF;
-    border-top-right-radius: 6px;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
-    z-index: 3;
+    z-index: 1;
+    overflow: visible;
 }
 
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::after {
-    content: '';
-    position: absolute;
-    right: -16px;
-    bottom: 50%;
-    width: 16px;
-    border-right: 2px solid #FFFFFF;
-    border-bottom: 2px solid #FFFFFF;
-    border-bottom-right-radius: 6px;
-    pointer-events: none;
-    z-index: 3;
+.psa-connector-line {
+    fill: none;
+    stroke: #FFFFFF;
+    stroke-width: 2;
+    stroke-linecap: round;
 }
 
-.psa-round-column:not(:last-child) .psa-match-item:nth-child(even)::before {
-    content: '';
-    position: absolute;
-    right: -32px;
-    width: 16px;
-    height: 2px;
-    background-color: #FFFFFF;
-    pointer-events: none;
-    z-index: 3;
-}
-
-/* Height tuning per round column */
-
-/* Round 1 -> Round 2 */
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 12px);
-}
-.psa-round-column:nth-child(1) .psa-match-item:nth-child(even)::before {
-    top: -12px;
-}
-
-/* Round 2 -> Cuartos */
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 36px);
-}
-.psa-round-column:nth-child(2) .psa-match-item:nth-child(even)::before {
-    top: -36px;
-}
-
-/* Cuartos -> Semifinales */
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 84px);
-}
-.psa-round-column:nth-child(3) .psa-match-item:nth-child(even)::before {
-    top: -84px;
-}
-
-/* Semifinales -> Gran Final */
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(odd)::after,
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::after {
-    height: calc(50% + 180px);
-}
-.psa-round-column:nth-child(4) .psa-match-item:nth-child(even)::before {
-    top: -180px;
+.psa-round-column,
+.psa-matches-list,
+.psa-match-item {
+    position: relative;
+    z-index: 2;
 }
 
 .psa-match-item:hover {
