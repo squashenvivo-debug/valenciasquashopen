@@ -14,11 +14,11 @@
 <link rel="stylesheet" href="css/live.css?v=20260724-4">
 <link rel="stylesheet" href="css/players.css">
 <link rel="stylesheet" href="css/player.css?v=20260808-v2">
-<link rel="stylesheet" href="css/news.css?v=20260808-v15">
+<link rel="stylesheet" href="css/news.css?v=20260808-v16">
 <link rel="stylesheet" href="css/gallery.css?v=20260808-v2">
 <link rel="stylesheet" href="css/venue.css">
 <link rel="stylesheet" href="css/draw.css?v=20260726-2">
-<link rel="stylesheet" href="css/psa-draw.css?v=20260809-v1">
+<link rel="stylesheet" href="css/psa-draw.css?v=20260809-v2">
 <link rel="stylesheet" href="css/tournament-center.css">
 <link rel="stylesheet" href="css/sponsors.css?v=20260725-2">
 <link rel="stylesheet" href="css/discover.css">
@@ -365,13 +365,13 @@ DRAW
         </div>
 
         <div style="margin-bottom: 24px; text-align: center;">
-            <a href="draw.html" class="hero-btn primary" style="display: inline-block; padding: 12px 24px; border-radius: 10px; background: #00E676; color: #05101A; font-weight: 800; text-decoration: none;">
+            <button type="button" onclick="openDrawFullModal()" class="hero-btn primary" style="display: inline-block; padding: 12px 24px; border-radius: 10px; background: #00E676; color: #05101A; font-weight: 800; border: none; cursor: pointer;">
                 ⚡ <span data-i18n="psaDraw.viewFullDraw">Ver Cuadro Completo PSA</span>
-            </a>
+            </button>
         </div>
 
         <!-- Official PSA Interactive Bracket -->
-        <div class="psa-bracket-viewport" style="max-height: 700px; overflow-y: auto;">
+        <div class="psa-bracket-viewport">
             <div class="psa-bracket-tree">
 
                 <div class="psa-round-column">
@@ -759,6 +759,46 @@ FOOTER
     </div>
 </div>
 
+<!-- Cuadro Completo Modal: reutiliza el mismo cuadro ya renderizado (se mueve aquí dentro al
+     abrir y vuelve a su sitio al cerrar), así no hace falta ni un segundo fetch ni duplicar ids. -->
+<div class="psa-modal-overlay" id="drawFullModal" onclick="if(event.target === this) closeDrawFullModal()">
+    <div class="psa-modal-card draw-full-modal-card">
+        <button class="psa-modal-close" onclick="closeDrawFullModal()">&times;</button>
+        <div id="drawFullModalMount"></div>
+    </div>
+</div>
+
+<!-- Noticia Modal: "Leer más" abre esta ventana en vez de navegar a news.html, así se cierra
+     y el usuario sigue exactamente donde estaba en la portada. -->
+<div class="psa-modal-overlay" id="newsDetailModal" onclick="if(event.target === this) closeNewsModal()">
+    <div class="psa-modal-card news-modal-card">
+        <button class="psa-modal-close" onclick="closeNewsModal()">&times;</button>
+
+        <p id="newsModalEmpty" class="gallery-empty" style="display:none;" data-i18n="psaNews.notFound">Noticia no encontrada.</p>
+
+        <article id="newsModalArticle" class="news-card" style="display:none;">
+            <div id="newsModalGallery" class="news-detail-gallery">
+                <img id="newsModalImage" alt="Noticia">
+            </div>
+            <div class="news-content">
+                <span id="newsModalDate" class="news-date"></span>
+                <span id="newsModalCategory" class="news-date"></span>
+                <span id="newsModalPlayer" class="news-date"></span>
+                <h2 id="newsModalHeading"></h2>
+                <div id="newsModalBody" class="news-content-body"></div>
+                <p id="newsModalTags" class="admin-muted"></p>
+
+                <div id="newsModalShareBar" class="news-share-bar" style="display:none;">
+                    <button type="button" id="newsModalShareBtn" class="news-share-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                        <span data-i18n="psaNews.shareLabel">Compartir</span>
+                    </button>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="supabase.js"></script>
@@ -770,10 +810,12 @@ FOOTER
 <script src="js/countdown.js?v=20260805-7"></script>
 <script src="js/hero.js?v=20260805-7"></script>
 <script src="js/news.js?v=20260807-v25"></script>
-<script src="js/app.js?v=20260807-v18"></script>
-<script src="js/psa-draw.js?v=20260809-v1"></script>
+<script src="js/app.js?v=20260807-v19"></script>
+<script src="js/psa-draw.js?v=20260809-v2"></script>
 <script src="js/player.js?v=20260808-v2"></script>
 <script src="js/player-modal.js?v=20260808-v2"></script>
+<script src="js/draw-modal.js?v=20260809-v1"></script>
+<script src="js/news-modal.js?v=20260809-v1"></script>
 
 </body>
 </html>

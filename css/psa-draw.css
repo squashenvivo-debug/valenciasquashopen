@@ -414,6 +414,20 @@ body {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
+/* Necesita más especificidad que .psa-modal-card a secas para ganarle pase lo que pase el
+   orden de carga de las hojas de estilo (mismo motivo que .player-modal-card). */
+.psa-modal-card.draw-full-modal-card {
+    max-width: 96vw;
+    width: 96vw;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 20px 16px 32px;
+}
+
+.draw-full-modal-card .psa-bracket-viewport {
+    overflow-x: auto;
+}
+
 .psa-modal-close {
     position: absolute;
     top: 16px;

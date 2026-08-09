@@ -503,4 +503,9 @@
 
     document.addEventListener("DOMContentLoaded", renderAllColumns);
     document.addEventListener("app-language-changed", renderAllColumns);
+
+    // Para cuando el cuadro se mueve de sitio en el DOM (p.ej. al modal de "Cuadro completo"
+    // en index.html) — las líneas conectoras se miden por posición real en pantalla, así que
+    // hay que recalcularlas después de cualquier cambio de tamaño/posición del propio cuadro.
+    window.redrawPsaBracketConnectors = scheduleBracketConnectorsRedraw;
 })();

@@ -547,7 +547,7 @@
             const player = String(item.player || item.meta?.player || "").trim();
 
             return `
-            <a class="news-card" href="${newsUrl}">
+            <a class="news-card" href="${newsUrl}" data-news-id="${item.id || ""}" data-news-slug="${item?.seo?.slug || ""}">
                 <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${displayTitle}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
                 <div class="news-content">
                     <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
@@ -561,6 +561,20 @@
                 </div>
             </a>`;
         }).join("");
+
+        // Abre la noticia en una ventana modal (igual que el jugador/el cuadro) en vez de
+        // navegar a news.html, así no se pierde el sitio de la portada. Ctrl/Cmd/clic central
+        // siguen abriendo en pestaña nueva con normalidad.
+        if (!grid.dataset.newsModalBound) {
+            grid.dataset.newsModalBound = "1";
+            grid.addEventListener("click", (event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) return;
+                const card = event.target.closest(".news-card");
+                if (!card || typeof window.openNewsModal !== "function") return;
+                event.preventDefault();
+                window.openNewsModal(card.dataset.newsId || "", card.dataset.newsSlug || "");
+            });
+        }
     }
 
     async function loadNews() {
