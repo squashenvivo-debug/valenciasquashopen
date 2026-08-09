@@ -2394,6 +2394,13 @@ function getNewsPublicUrl(item) {
     return `news.html?newsId=${encodeURIComponent(item?.id || "")}`;
 }
 
+/** Enlace de vista previa real: muestra la noticia con el diseño real de la web aunque sea
+ *  borrador o esté programada para el futuro (news.js exige que el token coincida con el id
+ *  real de la noticia, así que nadie puede adivinarlo desde fuera). */
+function getNewsPreviewUrl(item) {
+    return `${getNewsPublicUrl(item)}&preview=${encodeURIComponent(item?.id || "")}`;
+}
+
 function readGalleryCollection() {
     try {
         const raw = localStorage.getItem(GALLERY_COLLECTION_KEY);
@@ -3680,6 +3687,7 @@ function renderNewsAdminList() {
             <textarea id="newsArticle_${item.id}_es" rows="6">${escapeHtml(item.article?.es || "")}</textarea>
 
             <p class="admin-muted">URL pública: <a href="${escapeHtml(getNewsPublicUrl(item))}" target="_blank" rel="noopener noreferrer">${escapeHtml(getNewsPublicUrl(item))}</a></p>
+            ${item.status !== "published" ? `<p class="admin-muted">👁️ <a href="${escapeHtml(getNewsPreviewUrl(item))}" target="_blank" rel="noopener noreferrer"><strong>Vista previa</strong> (comprueba cómo se verá antes de publicar)</a></p>` : ""}
             <div class="gallery-photo-actions">
                 <button type="button" class="btn-gallery-save" data-action="save-news" data-news-id="${item.id}">Guardar noticia</button>
             </div>
