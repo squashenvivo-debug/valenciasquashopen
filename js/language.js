@@ -61,6 +61,11 @@ quick: {
     players: {
         title: "JUGADORES",
         text: "Conoce a todos los participantes"
+    },
+
+    share: {
+        button: "📤 Compartir el torneo",
+        title: "PSA Valencia Open - En memoria de Chimo Marmaneu"
     }
 
 },
@@ -122,6 +127,11 @@ quick: {
     players: {
         title: "JUGADORS",
         text: "Coneix tots els participants"
+    },
+
+    share: {
+        button: "📤 Compartir el torneig",
+        title: "PSA Valencia Open - En memòria de Chimo Marmaneu"
     }
 
 },
@@ -182,6 +192,11 @@ quick: {
     players: {
         title: "PLAYERS",
         text: "Meet all participants"
+    },
+
+    share: {
+        button: "📤 Share the tournament",
+        title: "PSA Valencia Open - In memory of Chimo Marmaneu"
     }
 
 },
@@ -242,6 +257,11 @@ quick: {
     players: {
         title: "JOUEURS",
         text: "Découvrez tous les participants"
+    },
+
+    share: {
+        button: "📤 Partager le tournoi",
+        title: "PSA Valencia Open - En mémoire de Chimo Marmaneu"
     }
 
 },

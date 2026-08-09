@@ -76,6 +76,39 @@
     margin: 0;
 }
 
+.hero-share-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.hero-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    color: #05101A;
+    background: #C78C32;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.hero-share-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.hero-share-btn:disabled {
+    opacity: 0.7;
+    cursor: default;
+    transform: none;
+}
+
 /* Tablet & Mobile responsive - Equal dimensions across all 5 */
 @media (max-width: 992px) {
     .quick-grid {
