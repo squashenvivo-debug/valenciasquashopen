@@ -406,20 +406,60 @@ async function renderNewsDetail() {
     renderNewsShareBar(item, title, article, isPreview);
 }
 
-/** Trae la foto de portada de la noticia como File para compartirla de verdad, no solo el
- *  enlace — es lo que hace que Instagram ofrezca "Historia"/"Reel" en su propio selector (si
- *  solo recibe texto/enlace, Instagram únicamente deja reenviarlo como mensaje directo, ya
- *  que un enlace no es contenido visual válido para una historia). */
-async function fetchShareableImageFile(imageUrl, filename) {
+function loadImageForCanvas(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("No se pudo cargar la imagen"));
+        img.src = src;
+    });
+}
+
+/** Genera la miniatura tal cual se ve en la tarjeta de la portada (mismo recorte 5:3 que
+ *  css/news.css usa para .news-card img) y le añade la marca "psavalenciaopen.com" abajo a
+ *  la izquierda — esta es la imagen que se comparte, no la foto original sin marcar. */
+async function buildShareThumbnail(imageUrl) {
     try {
-        const response = await fetch(imageUrl, { mode: "cors" });
-        if (!response.ok) return null;
-        const blob = await response.blob();
-        const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
-        return new File([blob], `${filename}.${ext}`, { type: blob.type });
+        const img = await loadImageForCanvas(imageUrl);
+        const width = 1200;
+        const height = 720; // misma proporción 5:3 que .news-card img (100% × 240px)
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+
+        const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight);
+        const drawWidth = img.naturalWidth * scale;
+        const drawHeight = img.naturalHeight * scale;
+        ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+
+        const label = "psavalenciaopen.com";
+        const paddingX = 18;
+        const boxHeight = 46;
+        ctx.font = "600 26px Arial, Helvetica, sans-serif";
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillStyle = "rgba(13, 35, 64, 0.78)";
+        ctx.fillRect(0, height - boxHeight, textWidth + paddingX * 2, boxHeight);
+        ctx.fillStyle = "#ffffff";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, paddingX, height - boxHeight / 2 + 1);
+
+        return await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
     } catch (error) {
         return null;
     }
+}
+
+/** Trae la miniatura ya marcada como File para compartirla de verdad, no solo el enlace — es
+ *  lo que hace que Instagram ofrezca "Historia"/"Reel" en su propio selector (si solo recibe
+ *  texto/enlace, Instagram únicamente deja reenviarlo como mensaje directo, ya que un enlace
+ *  no es contenido visual válido para una historia). */
+async function fetchShareableImageFile(imageUrl, filename) {
+    const blob = await buildShareThumbnail(imageUrl);
+    if (!blob) return null;
+    return new File([blob], `${filename}.jpg`, { type: "image/jpeg" });
 }
 
 /**
