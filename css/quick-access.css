@@ -85,12 +85,11 @@
 .hero-share-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 13px 28px;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
     color: #05101A;
     background: #C78C32;
     border: none;

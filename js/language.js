@@ -64,7 +64,6 @@ quick: {
     },
 
     share: {
-        button: "📤 Compartir el torneo",
         title: "PSA Valencia Open - En memoria de Chimo Marmaneu"
     }
 
@@ -130,7 +129,6 @@ quick: {
     },
 
     share: {
-        button: "📤 Compartir el torneig",
         title: "PSA Valencia Open - En memòria de Chimo Marmaneu"
     }
 
@@ -195,7 +193,6 @@ quick: {
     },
 
     share: {
-        button: "📤 Share the tournament",
         title: "PSA Valencia Open - In memory of Chimo Marmaneu"
     }
 
@@ -260,7 +257,6 @@ quick: {
     },
 
     share: {
-        button: "📤 Partager le tournoi",
         title: "PSA Valencia Open - En mémoire de Chimo Marmaneu"
     }
 
