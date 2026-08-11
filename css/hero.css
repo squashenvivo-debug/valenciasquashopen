@@ -165,6 +165,31 @@
 
 }
 
+.tournament-live-badge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 114px;
+}
+
+.tournament-live-badge-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 10px;
+    background: #00E676;
+    color: #05101A;
+    font-weight: 800;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: filter 0.2s ease;
+}
+
+.tournament-live-badge-btn:hover {
+    filter: brightness(1.08);
+}
+
 .count-box{
 
     width:103px;

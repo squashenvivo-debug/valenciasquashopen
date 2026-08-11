@@ -28,7 +28,8 @@ const translations = {
     days: "DÍAS",
     hours: "HORAS",
     minutes: "MIN",
-    seconds: "SEG"
+    seconds: "SEG",
+    started: "¡EL TORNEO YA HA COMENZADO!"
 },
 quick: {
 
@@ -93,7 +94,8 @@ quick: {
     days: "DIES",
     hours: "HORES",
     minutes: "MIN",
-    seconds: "SEG"
+    seconds: "SEG",
+    started: "EL TORNEIG JA HA COMENÇAT!"
 },
 quick: {
 
@@ -157,7 +159,8 @@ hero: {
     days: "DAYS",
     hours: "HOURS",
     minutes: "MIN",
-    seconds: "SEC"
+    seconds: "SEC",
+    started: "THE TOURNAMENT HAS STARTED!"
 },
 quick: {
 
@@ -221,7 +224,8 @@ hero: {
     days: "JOURS",
     hours: "HEURES",
     minutes: "MIN",
-    seconds: "SEC"
+    seconds: "SEC",
+    started: "LE TOURNOI A COMMENCÉ !"
 },
 quick: {
 

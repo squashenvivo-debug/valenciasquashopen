@@ -214,7 +214,7 @@
     function initCountdown() {
 
         const heroSettings = readHeroSettings();
-        const fallback = "2026-08-11T10:00:00";
+        const fallback = "2026-08-11T12:00:00";
         const targetDateRaw = String(heroSettings?.countdownDate || fallback).trim();
 
         let targetDate = new Date(targetDateRaw).getTime();
@@ -222,24 +222,19 @@
             targetDate = new Date(fallback).getTime();
         }
 
-        const now = Date.now();
-        if (targetDate <= now) {
-            const base = new Date(fallback);
-            if (!Number.isNaN(base.getTime())) {
-                while (base.getTime() <= now) {
-                    base.setFullYear(base.getFullYear() + 1);
-                }
-                targetDate = base.getTime();
-            }
-        }
-
         const days = document.getElementById("days");
         const hours = document.getElementById("hours");
         const minutes = document.getElementById("minutes");
         const seconds = document.getElementById("seconds");
+        const countdownBox = document.querySelector(".countdown");
+        const liveBadge = document.getElementById("tournamentLiveBadge");
 
         if (!days) return;
 
+        // Antes de esto, al pasar la fecha de inicio el contador se quedaba en 00:00:00:00 y,
+        // en la siguiente vuelta, saltaba en silencio a contar hasta el año siguiente — nada
+        // avisaba de que el torneo ya había empezado. Ahora, al llegar a cero, se para de verdad
+        // y se cambia el bloque de números por un aviso "el torneo ya ha comenzado".
         function updateCountdown() {
 
             const now = new Date().getTime();
@@ -247,12 +242,17 @@
             const distance = targetDate - now;
 
             if (distance <= 0) {
-                days.textContent = "00";
-                hours.textContent = "00";
-                minutes.textContent = "00";
-                seconds.textContent = "00";
+                if (countdownTimerId) {
+                    clearInterval(countdownTimerId);
+                    countdownTimerId = null;
+                }
+                if (countdownBox) countdownBox.style.display = "none";
+                if (liveBadge) liveBadge.style.display = "";
                 return;
             }
+
+            if (countdownBox) countdownBox.style.display = "";
+            if (liveBadge) liveBadge.style.display = "none";
 
             const d = Math.floor(distance / (1000 * 60 * 60 * 24));
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
