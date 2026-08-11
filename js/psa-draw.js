@@ -158,10 +158,23 @@
         const p1IsWinner = !!winnerId && winnerId === p1Id;
         const p2IsWinner = !!winnerId && winnerId === p2Id;
 
+        // Parciales reales de cada juego (p.ej. "7-11"), no solo el resultado final en games
+        // ganados — vienen tal cual de la API de PSA (match.games[].scores), un juego por
+        // pastilla en el orden que se jugaron.
+        const partialsHtml = (Array.isArray(match.games) && match.games.length > 0)
+            ? `<div class="psa-match-partials">${match.games.map((game) => {
+                const s1 = game?.scores?.[0];
+                const s2 = game?.scores?.[1];
+                if (s1 === undefined || s1 === null || s2 === undefined || s2 === null) return "";
+                return `<span class="psa-partial-pill">${s1}-${s2}</span>`;
+            }).join("")}</div>`
+            : "";
+
         return `
             <div class="psa-match-item ${isLive ? "is-live" : ""}">
                 ${renderPlayerRow(match.player1, p1IsWinner)}
                 ${renderPlayerRow(match.player2, p2IsWinner)}
+                ${partialsHtml}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
                     ${showH2H
@@ -237,6 +250,7 @@
             dateTime: formatMatchDateTime(match),
             status: match.status,
             winnerId: match.winner_id ?? null,
+            games: match.games ?? [],
             player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
             player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");
@@ -331,6 +345,7 @@
                     dateTime: formatMatchDateTime(match),
                     status: match.status,
                     winnerId: match.winner_id ?? null,
+                    games: match.games ?? [],
                     player1: toDisplayPlayer(players[0], playerById, curatedMap),
                     player2: toDisplayPlayer(players[1], playerById, curatedMap)
                 });
@@ -350,6 +365,7 @@
             dateTime: formatMatchDateTime(match),
             status: match.status,
             winnerId: match.winner_id ?? null,
+            games: match.games ?? [],
             player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
             player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");

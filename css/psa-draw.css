@@ -361,6 +361,25 @@ body {
     color: var(--psa-green);
 }
 
+.psa-match-partials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.psa-partial-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--psa-text-muted);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
 /* Match Card Footer Meta */
 .psa-match-footer {
     background: rgba(0, 0, 0, 0.25);
