@@ -546,9 +546,15 @@
             const category = String(item.category || "").trim();
             const player = String(item.player || item.meta?.player || "").trim();
 
+            // Sin imageSrc no hay nada que enseñar (todavía no se ha subido foto para esta
+            // noticia): mejor un bloque neutro del mismo tamaño que un <img src=""> roto.
+            const imageHtml = imageSrc
+                ? `<img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${displayTitle}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">`
+                : `<div class="news-card-noimage" aria-hidden="true">🎾</div>`;
+
             return `
             <a class="news-card" href="${newsUrl}" data-news-id="${item.id || ""}" data-news-slug="${item?.seo?.slug || ""}">
-                <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${displayTitle}" loading="lazy" decoding="async" fetchpriority="high" width="400" height="240">
+                ${imageHtml}
                 <div class="news-content">
                     <span class="news-date">${formatNewsDate(displayDate, lang)}</span>
                     ${category ? `<span class="news-date">${category}</span>` : ""}

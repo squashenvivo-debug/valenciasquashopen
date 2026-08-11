@@ -3632,7 +3632,9 @@ function renderNewsAdminList() {
         <article class="gallery-admin-card" data-news-id="${item.id}">
             <h4 class="gallery-admin-card-title">${escapeHtml(displayTitle || "(sin título ni artículo)")}${!hasOwnTitle && displayTitle ? " <em>(sacado del artículo)</em>" : ""}</h4>
             <p class="admin-muted">Estado: <strong>${escapeHtml(getNewsStatusLabel(item.status))}</strong>${item.publishAt ? ` · Publicación: ${escapeHtml(formatAdminDateTime(item.publishAt))}` : ""}</p>
-            <img class="gallery-thumb" src="${item.imageSrc}" alt="${escapeHtml(displayTitle || "Noticia")}">
+            ${item.imageSrc
+                ? `<img class="gallery-thumb" src="${escapeHtml(item.imageSrc)}" alt="${escapeHtml(displayTitle || "Noticia")}">`
+                : `<p class="admin-muted" style="color:#ff8a65;">⚠️ Sin imagen — esta noticia se ve con el hueco de foto roto en la web.</p>`}
             <label class="field-label" for="newsReplaceImage_${item.id}">Reemplazar imagen</label>
             <input id="newsReplaceImage_${item.id}" class="news-replace-image" type="file" accept="image/*">
             <label class="field-label" for="newsTitle_${item.id}_es">Título ES (opcional)</label>

@@ -91,6 +91,17 @@ NEWS
 
 }
 
+.news-card-noimage {
+    width: 100%;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0d2340, #16324a);
+    font-size: 2.4rem;
+    opacity: 0.5;
+}
+
 .news-content{
 
     padding:25px;
@@ -142,7 +153,8 @@ NEWS
         border-radius: 14px;
     }
 
-    .news-card img {
+    .news-card img,
+    .news-card-noimage {
         height: 130px;
     }
 
@@ -189,7 +201,8 @@ NEWS
         gap: 10px;
     }
 
-    .news-card img {
+    .news-card img,
+    .news-card-noimage {
         height: 110px;
     }
 
