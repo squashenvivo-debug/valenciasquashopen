@@ -10,25 +10,7 @@
     let originalParent = null;
     let originalNextSibling = null;
 
-    window.openDrawFullModal = function () {
-        const viewport = document.querySelector("#draw .psa-bracket-viewport");
-        const mount = document.getElementById("drawFullModalMount");
-        const modal = document.getElementById("drawFullModal");
-        if (!viewport || !mount || !modal) return;
-
-        originalParent = viewport.parentElement;
-        originalNextSibling = viewport.nextSibling;
-        mount.appendChild(viewport);
-
-        modal.classList.add("active");
-        document.body.style.overflow = "hidden";
-
-        // El cuadro cambia de tamaño al entrar en el modal — las líneas conectoras se miden
-        // por posición real en pantalla, así que hay que recalcularlas aquí.
-        window.redrawPsaBracketConnectors?.();
-    };
-
-    window.closeDrawFullModal = function () {
+    function hideDrawFullModal() {
         const viewport = document.getElementById("drawFullModalMount")?.querySelector(".psa-bracket-viewport");
         const modal = document.getElementById("drawFullModal");
 
@@ -44,5 +26,31 @@
         document.body.style.overflow = "";
 
         window.redrawPsaBracketConnectors?.();
+    }
+
+    window.openDrawFullModal = function () {
+        const viewport = document.querySelector("#draw .psa-bracket-viewport");
+        const mount = document.getElementById("drawFullModalMount");
+        const modal = document.getElementById("drawFullModal");
+        if (!viewport || !mount || !modal) return;
+
+        originalParent = viewport.parentElement;
+        originalNextSibling = viewport.nextSibling;
+        mount.appendChild(viewport);
+
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+        window.PSAModalHistory?.pushModal(hideDrawFullModal);
+
+        // El cuadro cambia de tamaño al entrar en el modal — las líneas conectoras se miden
+        // por posición real en pantalla, así que hay que recalcularlas aquí.
+        window.redrawPsaBracketConnectors?.();
+    };
+
+    // El botón atrás del móvil (o la X) cierran el modal en vez de salir de la web — ver
+    // js/modal-history.js. Si por lo que sea ese script no está cargado, cae al cierre directo.
+    window.closeDrawFullModal = function () {
+        if (window.PSAModalHistory) window.PSAModalHistory.closeModal(hideDrawFullModal);
+        else hideDrawFullModal();
     };
 })();

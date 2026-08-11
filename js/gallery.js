@@ -164,6 +164,7 @@ function openLightbox(src, caption, photoMeta = {}) {
     lightbox.classList.add("is-open");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    window.PSAModalHistory?.pushModal(hideLightbox);
 
     currentLightboxPhoto = { imageSrc: src, caption: caption || "", ...photoMeta };
 }
@@ -312,7 +313,7 @@ function shareCurrentPhoto() {
     }, photo.imageSrc);
 }
 
-function closeLightbox() {
+function hideLightbox() {
     const lightbox = document.getElementById("galleryLightbox");
     const image = document.getElementById("galleryLightboxImage");
     if (!lightbox || !image) return;
@@ -321,6 +322,13 @@ function closeLightbox() {
     lightbox.setAttribute("aria-hidden", "true");
     image.src = "";
     document.body.style.overflow = "";
+}
+
+// El botón atrás del móvil (o la X) cierran el visor de foto en vez de salir de la web — ver
+// js/modal-history.js. Si por lo que sea ese script no está cargado, cae al cierre directo.
+function closeLightbox() {
+    if (window.PSAModalHistory) window.PSAModalHistory.closeModal(hideLightbox);
+    else hideLightbox();
 }
 
 function bindLightboxEvents() {

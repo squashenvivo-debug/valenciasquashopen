@@ -546,11 +546,19 @@
         if (compareSection) compareSection.style.display = compareHtml ? "" : "none";
 
         modal.classList.add("active");
+        window.PSAModalHistory?.pushModal(hideH2HModal);
     };
 
-    window.closeH2HModal = function () {
+    function hideH2HModal() {
         const modal = document.getElementById("h2hModal");
         if (modal) modal.classList.remove("active");
+    }
+
+    // El botón atrás del móvil (o la X) cierran el modal en vez de salir de la web — ver
+    // js/modal-history.js. Si por lo que sea ese script no está cargado, cae al cierre directo.
+    window.closeH2HModal = function () {
+        if (window.PSAModalHistory) window.PSAModalHistory.closeModal(hideH2HModal);
+        else hideH2HModal();
     };
 
     document.addEventListener("DOMContentLoaded", renderAllColumns);

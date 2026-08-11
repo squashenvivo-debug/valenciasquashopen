@@ -20,6 +20,7 @@
 
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
+        window.PSAModalHistory?.pushModal(hideNewsModal);
         emptyEl.style.display = "none";
         articleEl.style.display = "none";
 
@@ -91,9 +92,16 @@
 
     window.openNewsModal = openNewsModal;
 
-    window.closeNewsModal = function () {
+    function hideNewsModal() {
         const modal = document.getElementById("newsDetailModal");
         if (modal) modal.classList.remove("active");
         document.body.style.overflow = "";
+    }
+
+    // El botón atrás del móvil (o la X) cierran el modal en vez de salir de la web — ver
+    // js/modal-history.js. Si por lo que sea ese script no está cargado, cae al cierre directo.
+    window.closeNewsModal = function () {
+        if (window.PSAModalHistory) window.PSAModalHistory.closeModal(hideNewsModal);
+        else hideNewsModal();
     };
 })();

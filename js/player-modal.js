@@ -76,10 +76,17 @@
         row.style.display = "";
     }
 
-    window.closePlayerModal = function () {
+    function hidePlayerModal() {
         const modal = document.getElementById("playerDetailModal");
         if (modal) modal.classList.remove("active");
         document.body.style.overflow = "";
+    }
+
+    // El botón atrás del móvil (o la X) cierran el modal en vez de salir de la web — ver
+    // js/modal-history.js. Si por lo que sea ese script no está cargado, cae al cierre directo.
+    window.closePlayerModal = function () {
+        if (window.PSAModalHistory) window.PSAModalHistory.closeModal(hidePlayerModal);
+        else hidePlayerModal();
     };
 
     window.openPlayerModal = async function (id, name) {
@@ -87,6 +94,7 @@
         const modal = document.getElementById("playerDetailModal");
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
+        window.PSAModalHistory?.pushModal(hidePlayerModal);
 
         const loadingEl = document.getElementById("playerModalLoading");
         const notFoundEl = document.getElementById("playerModalNotFound");
