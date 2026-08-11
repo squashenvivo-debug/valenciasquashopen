@@ -106,7 +106,7 @@
      *  comparar dos vueltas de sondeo detecta si ha pasado algo real, no cambios de forma. */
     function buildMatchesSignature(matches) {
         return JSON.stringify(matches.map((m) => [
-            m.id, m.status, m.player1?.score, m.player2?.score, m.scores?.join(",")
+            m.id, m.status, m.player1?.score, m.player2?.score, m.scores?.join(","), m.durationMinutes
         ]));
     }
 
@@ -193,6 +193,7 @@
                             court: courtName,
                             dateTime: dateTimeStr,
                             status: m.status || "scheduled",
+                            durationMinutes: m.duration_minutes ?? null,
                             player1: { name: p1Name, country: p1Country, seed: "", score: (m.status === "scheduled" ? null : (playersList[0]?.games_won ?? null)) },
                             player2: { name: p2Name, country: p2Country, seed: "", score: (m.status === "scheduled" ? null : (playersList[1]?.games_won ?? null)) },
                             scores: gameScores
@@ -477,6 +478,13 @@
                 ? `<span class="ls-match-court">· ${match.court}</span>`
                 : "";
 
+            // Duración real del partido — PSA solo la da una vez terminado (no hay reloj en
+            // vivo en la API), así que en partidos programados o en juego simplemente no
+            // aparece, en vez de mostrar un tiempo inventado o clavado en 0.
+            const durationHtml = (match.durationMinutes !== null && match.durationMinutes !== undefined)
+                ? `<span class="ls-match-duration">⏱ ${match.durationMinutes} min</span>`
+                : "";
+
             return `
                 <div class="ls-match-card-wrapper">
                     <div class="ls-match-header-pill">
@@ -512,7 +520,10 @@
                                 <span class="ls-sets-label">${tls("partials", "PARCIALES:")}</span>
                                 ${scoresMarkup}
                             </div>
-                            <span class="ls-status-badge ${statusClass}">${statusLabel}</span>
+                            <div class="ls-status-group">
+                                <span class="ls-status-badge ${statusClass}">${statusLabel}</span>
+                                ${durationHtml}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -508,6 +508,18 @@ body {
     letter-spacing: 0.06em;
 }
 
+.ls-status-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ls-match-duration {
+    font-size: 0.8rem;
+    color: var(--ls-muted);
+    white-space: nowrap;
+}
+
 .ls-status-in_progress {
     background: rgba(0, 230, 118, 0.2);
     color: var(--ls-green);
