@@ -1653,9 +1653,11 @@
             title: normalizeLocalizedText(item?.title),
             photos: photos.map((photo) => ({
                 id: photo?.id || `photo_${Math.random().toString(36).slice(2, 8)}`,
+                type: photo?.type === "video" ? "video" : "photo",
+                videoUrl: photo?.type === "video" ? String(photo?.videoUrl || "").trim() : "",
                 src: photo?.src || "",
                 caption: normalizeLocalizedText(photo?.caption)
-            })).filter((photo) => !!photo.src),
+            })).filter((photo) => (photo.type === "video" ? !!photo.videoUrl : !!photo.src)),
             createdAt: item?.createdAt || new Date().toISOString()
         };
     }
@@ -1704,16 +1706,22 @@
             const photos = Array.isArray(gallery.photos) ? gallery.photos : [];
             if (photos.length === 0) return;
 
-            const cover = photos[0];
+            // Preferimos una foto real como portada; si la galería solo tiene vídeos
+            // enlazados (sin imagen propia), usamos un icono de "play" en vez de un <img>
+            // con src vacío, que se vería como imagen rota.
+            const cover = photos.find((photo) => photo.type !== "video" && photo.src) || photos[0];
             const card = document.createElement("a");
             card.className = "gallery-home-card";
             card.href = `gallery.html?galleryId=${encodeURIComponent(gallery.id)}`;
 
             const title = getLocalizedText(gallery.title, lang) || "Galería";
+            const thumbHtml = cover.type === "video" || !cover.src
+                ? `<div class="gallery-home-thumb-video" aria-hidden="true">▶</div>`
+                : `<img src="${resolveOptimizedAssetUrl(cover.processedSrc || cover.src)}" alt="${title}" loading="lazy" decoding="async">`;
 
             card.innerHTML = `
             <div class="gallery-home-thumb">
-                <img src="${resolveOptimizedAssetUrl(cover.processedSrc || cover.src)}" alt="${title}" loading="lazy" decoding="async">
+                ${thumbHtml}
             </div>
             <div class="gallery-home-info">
                 <div class="gallery-home-title">${title}</div>

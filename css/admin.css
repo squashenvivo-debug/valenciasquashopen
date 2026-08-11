@@ -830,6 +830,15 @@ border-radius:8px;
 border:1px solid #2D4861;
 }
 
+.gallery-video-thumb{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#0d2340;
+    color:#C78C32;
+    font-size:2rem;
+}
+
 .btn-gallery-danger,
 .btn-gallery-save,
 .btn-gallery-add{

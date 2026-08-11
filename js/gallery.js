@@ -140,6 +140,8 @@ function normalizeGalleryItem(item) {
         meta,
         photos: photos.map((photo) => ({
             id: photo?.id || "",
+            type: photo?.type === "video" ? "video" : "photo",
+            videoUrl: photo?.type === "video" ? String(photo?.videoUrl || "").trim() : "",
             src: photo?.src || "",
             storagePath: photo?.storagePath || "",
             processedSrc: photo?.processedSrc || "",
@@ -147,7 +149,7 @@ function normalizeGalleryItem(item) {
             ai: photo?.ai || null,
             caption: normalizeLocalizedText(photo?.caption),
             meta: normalizeGalleryPhotoMeta(photo?.meta || photo, meta)
-        })).filter((photo) => !!photo.src)
+        })).filter((photo) => (photo.type === "video" ? !!photo.videoUrl : !!photo.src))
     };
 }
 
@@ -407,7 +409,8 @@ function flattenGalleryPhotos(galleries, lang) {
                 caption: getLocalizedText(photo.caption, lang),
                 meta
             });
-            const imageSrc = resolveOptimizedAssetUrl(photo.processedSrc || photo.src);
+            const isVideo = photo.type === "video";
+            const imageSrc = isVideo ? "" : resolveOptimizedAssetUrl(photo.processedSrc || photo.src);
             const searchBlob = [
                 galleryTitle,
                 caption,
@@ -421,6 +424,8 @@ function flattenGalleryPhotos(galleries, lang) {
                 id: photo.id || `${gallery.id}_${index}`,
                 galleryId: gallery.id,
                 galleryTitle,
+                type: isVideo ? "video" : "photo",
+                videoUrl: isVideo ? photo.videoUrl : "",
                 imageSrc,
                 caption,
                 meta,
@@ -549,6 +554,18 @@ function renderGalleryArchive() {
     filteredEntries.forEach((photo) => {
         const card = document.createElement("figure");
         card.className = "gallery-detail-card";
+
+        if (photo.type === "video") {
+            card.innerHTML = `
+                <a class="gallery-detail-image gallery-video-card" href="${escapeHtml(photo.videoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Ver vídeo">
+                    <span class="gallery-video-play" aria-hidden="true">▶</span>
+                </a>
+                ${photo.caption ? `<figcaption class="gallery-detail-caption">${escapeHtml(photo.caption)}</figcaption>` : ""}
+            `;
+            grid.appendChild(card);
+            return;
+        }
+
         card.innerHTML = `
             <img class="gallery-detail-image" src="${photo.imageSrc}" alt="${escapeHtml(photo.caption || "Foto")}">
             ${photo.caption ? `<figcaption class="gallery-detail-caption">${escapeHtml(photo.caption)}</figcaption>` : ""}

@@ -2242,6 +2242,8 @@ function normalizeGallery(gallery) {
         meta,
         photos: photos.map((photo) => ({
             id: photo?.id || createId("photo"),
+            type: photo?.type === "video" ? "video" : "photo",
+            videoUrl: photo?.type === "video" ? String(photo?.videoUrl || "").trim() : "",
             src: photo?.src || "",
             storagePath: photo?.storagePath || "",
             sourceSrc: photo?.sourceSrc || "",
@@ -2251,7 +2253,7 @@ function normalizeGallery(gallery) {
             ai: photo?.ai || null,
             caption: normalizeLocalizedText(photo?.caption),
             meta: normalizeGalleryPhotoMeta(photo?.meta || photo, meta)
-        })).filter((photo) => !!photo.src),
+        })).filter((photo) => (photo.type === "video" ? !!photo.videoUrl : !!photo.src)),
         createdAt: gallery?.createdAt || new Date().toISOString()
     };
 }
@@ -3028,7 +3030,24 @@ function renderGalleryAdminList() {
     host.innerHTML = galleriesToRender.map((gallery) => {
         const meta = normalizeGalleryMeta(gallery.meta);
         const photos = Array.isArray(gallery.photos) ? gallery.photos : [];
-        const photosMarkup = photos.map((photo, photoIndex) => `
+        const photosMarkup = photos.map((photo, photoIndex) => {
+            if (photo.type === "video") {
+                return `
+                    <div class="gallery-photo-item" data-photo-item="${photo.id}">
+                        <div class="gallery-thumb gallery-video-thumb" aria-hidden="true">▶</div>
+                        <p class="gallery-ai-state">Vídeo / Reel enlazado</p>
+                        <label class="field-label" for="videoUrl_${photo.id}">Enlace</label>
+                        <input id="videoUrl_${photo.id}" type="url" value="${escapeHtml(photo.videoUrl || "")}" placeholder="https://www.instagram.com/reel/...">
+                        <label class="field-label" for="caption_${photo.id}_es">Pie ES</label>
+                        <input id="caption_${photo.id}_es" type="text" value="${escapeHtml(photo.caption?.es || "")}" placeholder="Texto ES (se traduce automático)">
+                        <div class="gallery-photo-actions">
+                            <button type="button" class="btn-gallery-save" data-action="save-video" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Guardar vídeo</button>
+                            <button type="button" class="btn-gallery-danger" data-action="delete-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Borrar vídeo</button>
+                        </div>
+                    </div>
+                `;
+            }
+            return `
             <div class="gallery-photo-item" data-photo-item="${photo.id}">
                 <img class="gallery-thumb" src="${photo.processedSrc || photo.src}" alt="${escapeHtml(photo.caption?.es || "Foto")}">
                 <p class="gallery-ai-state">${photo.processedSrc ? "IA procesada y validada" : "Original sin procesar"}</p>
@@ -3048,7 +3067,8 @@ function renderGalleryAdminList() {
                     <button type="button" class="btn-gallery-danger" data-action="delete-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Borrar foto</button>
                 </div>
             </div>
-        `).join("");
+        `;
+        }).join("");
 
         return `
             <article class="gallery-admin-card" data-gallery-id="${gallery.id}">
@@ -3079,6 +3099,11 @@ function renderGalleryAdminList() {
                     <button type="button" class="btn-gallery-add" data-action="append-photos" data-gallery-id="${gallery.id}">Añadir fotos</button>
                     <button type="button" class="btn-gallery-save" data-action="save-meta" data-gallery-id="${gallery.id}">Guardar metadatos</button>
                 </div>
+                <div class="gallery-admin-actions">
+                    <input type="url" id="appendVideoUrl_${gallery.id}" placeholder="Enlace del Reel/vídeo de Instagram">
+                    <input type="text" id="appendVideoCaption_${gallery.id}" placeholder="Pie (opcional)">
+                    <button type="button" class="btn-gallery-add" data-action="append-video" data-gallery-id="${gallery.id}">Añadir vídeo</button>
+                </div>
                 <div class="gallery-photo-grid">${photosMarkup || '<p class="admin-muted">Sin fotos.</p>'}</div>
             </article>
         `;
@@ -3107,6 +3132,82 @@ function renderGalleryAdminList() {
             }
             updateGalleryStatus("Título de galería actualizado.");
             renderGalleryDeleteSelect();
+            renderGalleryAdminList();
+        });
+    });
+
+    host.querySelectorAll("[data-action='append-video']").forEach((button) => {
+        button.addEventListener("click", async () => {
+            const galleryId = button.getAttribute("data-gallery-id");
+            const urlInput = document.getElementById(`appendVideoUrl_${galleryId}`);
+            const captionInput = document.getElementById(`appendVideoCaption_${galleryId}`);
+            const url = (urlInput?.value || "").trim();
+
+            if (!url) {
+                updateGalleryStatus("Pega el enlace del vídeo o Reel.");
+                return;
+            }
+            if (!/^https?:\/\//i.test(url)) {
+                updateGalleryStatus("El enlace debe empezar por http:// o https://");
+                return;
+            }
+
+            const galleriesInner = readGalleryCollection();
+            const gallery = getGalleryById(galleriesInner, galleryId);
+            if (!gallery) return;
+
+            const captionEs = (captionInput?.value || "").trim();
+            const newVideo = {
+                id: createId("photo"),
+                type: "video",
+                videoUrl: url,
+                src: "",
+                caption: captionEs ? await buildLocalizedFromSpanish(captionEs) : normalizeLocalizedText(""),
+                meta: normalizeGalleryPhotoMeta({}, normalizeGalleryMeta(gallery.meta))
+            };
+
+            if (!Array.isArray(gallery.photos)) gallery.photos = [];
+            gallery.photos.push(newVideo);
+
+            const saved = saveGalleryCollection(galleriesInner);
+            if (!saved) {
+                updateGalleryStatus("No se pudo guardar el vídeo.");
+                return;
+            }
+            updateGalleryStatus("Vídeo añadido a la galería.");
+            renderGalleryAdminList();
+        });
+    });
+
+    host.querySelectorAll("[data-action='save-video']").forEach((button) => {
+        button.addEventListener("click", async () => {
+            const galleryId = button.getAttribute("data-gallery-id");
+            const photoId = button.getAttribute("data-photo-id");
+            const galleriesInner = readGalleryCollection();
+            const gallery = getGalleryById(galleriesInner, galleryId);
+            const photo = gallery?.photos?.find((item) => item.id === photoId);
+            if (!photo) return;
+
+            const urlInput = document.getElementById(`videoUrl_${photoId}`);
+            const url = (urlInput?.value || "").trim();
+            if (!url || !/^https?:\/\//i.test(url)) {
+                updateGalleryStatus("El enlace debe empezar por http:// o https://");
+                return;
+            }
+            photo.videoUrl = url;
+
+            const captionInputEs = document.getElementById(`caption_${photoId}_es`);
+            const captionEs = (captionInputEs?.value || "").trim();
+            photo.caption = captionEs
+                ? await buildLocalizedFromSpanish(captionEs)
+                : normalizeLocalizedText("");
+
+            const saved = saveGalleryCollection(galleriesInner);
+            if (!saved) {
+                updateGalleryStatus("No se pudo guardar el vídeo.");
+                return;
+            }
+            updateGalleryStatus("Vídeo actualizado.");
             renderGalleryAdminList();
         });
     });

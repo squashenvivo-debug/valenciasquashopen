@@ -34,6 +34,17 @@ GALLERY
     object-fit:cover;
 }
 
+.gallery-home-thumb-video{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg, #0d2340, #16324a);
+    color:#C78C32;
+    font-size:2.2rem;
+}
+
 .gallery-home-info{
     padding:10px 12px 12px;
 }
@@ -158,6 +169,27 @@ GALLERY
     object-fit:cover;
     display:block;
     cursor:zoom-in;
+}
+
+.gallery-video-card{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg, #0d2340, #16324a);
+    cursor:pointer;
+    text-decoration:none;
+}
+
+.gallery-video-play{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:rgba(199,140,50,.9);
+    color:#0d2340;
+    font-size:1.6rem;
 }
 
 .gallery-detail-caption{
