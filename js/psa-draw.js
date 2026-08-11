@@ -82,8 +82,9 @@
         const curatedPhoto = curatedMap.get(normalizeName(name));
         const mugshot = curatedPhoto || full?.profile_photo_url || "";
         const id = matchPlayer.id ?? full?.id ?? null;
+        const gamesWon = matchPlayer.games_won ?? null;
 
-        return { id, name, country, ranking, seed, mugshot };
+        return { id, name, country, ranking, seed, mugshot, gamesWon };
     }
 
     function formatMatchDateTime(match) {
@@ -94,7 +95,7 @@
         return match.time ? `${datePart} • ${match.time}` : datePart;
     }
 
-    function renderPlayerRow(player) {
+    function renderPlayerRow(player, isWinner) {
         const isPlaceholder = !player || !player.mugshot || player.name === "BYE" || player.name === "TBD" ||
             /^(Ganador|Guanyador|Winner|Vainqueur|Semifinalist|Semifinalista)/i.test(player.name || "");
 
@@ -121,13 +122,21 @@
                     <span class="psa-mugshot-fallback" style="display:none;">${RED_SILHOUETTE_SVG}</span>
                </span>`;
 
+        // Resultado real de PSA (games ganados, p.ej. "3"): solo aparece si el partido ya tiene
+        // marcador (partidos por jugar no llevan esta celda). El ganador se resalta en verde,
+        // igual que ya preveía el CSS de .psa-score-cell/.winner-score sin usarse hasta ahora.
+        const scoreHtml = (player.gamesWon !== null && player.gamesWon !== undefined)
+            ? `<div class="psa-scores-grid"><span class="psa-score-cell ${isWinner ? "winner-score" : ""}">${player.gamesWon}</span></div>`
+            : "";
+
         return `
-            <div class="psa-player-row ${isPlaceholder ? "is-placeholder-row" : ""}">
+            <div class="psa-player-row ${isPlaceholder ? "is-placeholder-row" : ""} ${isWinner ? "is-winner" : ""}">
                 ${avatarHtml}
                 ${flagHtml}
                 <span class="psa-player-name-box ${isPlaceholder ? "psa-placeholder-name" : ""}">
                     ${player.name} ${seedHtml}
                 </span>
+                ${scoreHtml}
             </div>
         `;
     }
@@ -145,10 +154,14 @@
         const p1Id = match.player1?.id !== undefined && match.player1?.id !== null ? String(match.player1.id) : "";
         const p2Id = match.player2?.id !== undefined && match.player2?.id !== null ? String(match.player2.id) : "";
 
+        const winnerId = match.winnerId !== undefined && match.winnerId !== null ? String(match.winnerId) : "";
+        const p1IsWinner = !!winnerId && winnerId === p1Id;
+        const p2IsWinner = !!winnerId && winnerId === p2Id;
+
         return `
             <div class="psa-match-item ${isLive ? "is-live" : ""}">
-                ${renderPlayerRow(match.player1)}
-                ${renderPlayerRow(match.player2)}
+                ${renderPlayerRow(match.player1, p1IsWinner)}
+                ${renderPlayerRow(match.player2, p2IsWinner)}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
                     ${showH2H
@@ -223,6 +236,7 @@
             id: match.id,
             dateTime: formatMatchDateTime(match),
             status: match.status,
+            winnerId: match.winner_id ?? null,
             player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
             player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");
@@ -316,6 +330,7 @@
                     id: match.id,
                     dateTime: formatMatchDateTime(match),
                     status: match.status,
+                    winnerId: match.winner_id ?? null,
                     player1: toDisplayPlayer(players[0], playerById, curatedMap),
                     player2: toDisplayPlayer(players[1], playerById, curatedMap)
                 });
@@ -334,6 +349,7 @@
             id: match.id,
             dateTime: formatMatchDateTime(match),
             status: match.status,
+            winnerId: match.winner_id ?? null,
             player1: toDisplayPlayer(match.players?.[0], playerById, curatedMap) || { name: "TBD" },
             player2: toDisplayPlayer(match.players?.[1], playerById, curatedMap) || { name: "TBD" }
         })).join("");
