@@ -100,6 +100,15 @@
 
     let matchesData = [...MOCK_MATCHES];
     let currentFilter = "all";
+    let lastMatchesSignature = "";
+
+    /** Solo los campos que de verdad cambian un resultado (estado, marcador, parciales) — así
+     *  comparar dos vueltas de sondeo detecta si ha pasado algo real, no cambios de forma. */
+    function buildMatchesSignature(matches) {
+        return JSON.stringify(matches.map((m) => [
+            m.id, m.status, m.player1?.score, m.player2?.score, m.scores?.join(",")
+        ]));
+    }
 
     async function fetchRealPsaMatches() {
         const apiKey = getApiKey();
@@ -193,8 +202,16 @@
             });
 
             if (realMatches.length > 0) {
+                const signature = buildMatchesSignature(realMatches);
                 matchesData = realMatches;
-                renderMatches(currentFilter);
+                // Repintar SOLO si algún resultado/estado/marcador ha cambiado de verdad desde
+                // el último sondeo — así, aunque comprobemos cada 5s, la pantalla no "parpadea"
+                // ni pierde el scroll salvo que de verdad haya novedades, dando sensación de
+                // tiempo real en vez de una recarga periódica.
+                if (signature !== lastMatchesSignature) {
+                    lastMatchesSignature = signature;
+                    renderMatches(currentFilter);
+                }
             }
         } catch (err) {
             console.warn("Error cargando partidos en tiempo real de PSA API:", err);
