@@ -314,7 +314,7 @@ const pageTranslations = {
             discover: { label: "VALENCIA", title: "EXPERIENCE VALENCIA", intro: "Mucho más que squash. Descubre una de las ciudades más atractivas del Mediterráneo durante tu estancia." },
             sponsors: { label: "SPONSORS", title: "PATROCINADORES", intro: "Gracias a nuestros patrocinadores por hacer posible el PSA Valencia Open 2026." }
         },
-        event: { label: "MEMORIAL", title: "CHIMO MARMANEAU", location: "Alboraya · Valencia" },
+        event: { label: "MEMORIAL", title: "CHIMO MARMANEU", location: "Alboraya · Valencia" },
         tournament: { kicker: "PSA WORLD TOUR COPPER", title: "Torneo", intro: "Descubre todo sobre el PSA Valencia Open 2026 – Memorial Chimo Marmaneu." },
         live: { title: "EN DIRECTO", videoTitle: "Streaming PSA Valencia Open", videoIntro: "Aquí aparecerá el reproductor de YouTube.", court1: "PISTA 1", court2: "PISTA 2", upcoming: "Próximamente", pending: "Partido pendiente", openScoreboard: "⚡ Abrir Marcador en Vivo" },
         sections: { players: "JUGADORES", schedule: "HORARIOS", draw: "CUADROS", news: "NOTICIAS", gallery: "GALERÍA" },
@@ -365,7 +365,7 @@ const pageTranslations = {
             discover: { label: "VALÈNCIA", title: "EXPERIENCE VALÈNCIA", intro: "Molt més que esquaix. Descobreix una de les ciutats més atractives de la Mediterrània durant la teua estada." },
             sponsors: { label: "SPONSORS", title: "PATROCINADORS", intro: "Gràcies als nostres patrocinadors per fer possible el PSA Valencia Open 2026." }
         },
-        event: { label: "MEMORIAL", title: "CHIMO MARMANEAU", location: "Alboraia · València" },
+        event: { label: "MEMORIAL", title: "CHIMO MARMANEU", location: "Alboraia · València" },
         tournament: { kicker: "PSA WORLD TOUR COPPER", title: "Torneig", intro: "Descobreix tot sobre el PSA Valencia Open 2026 – Memorial Chimo Marmaneu." },
         live: { title: "EN DIRECTE", videoTitle: "Retransmissió PSA Valencia Open", videoIntro: "Ací apareixerà el reproductor de YouTube.", court1: "PISTA 1", court2: "PISTA 2", upcoming: "Pròximament", pending: "Partit pendent", openScoreboard: "⚡ Obrir Marcador en Viu" },
         sections: { players: "JUGADORS", schedule: "HORARIS", draw: "QUADRES", news: "NOTÍCIES", gallery: "GALERIA" },
@@ -416,7 +416,7 @@ const pageTranslations = {
             discover: { label: "VALENCIA", title: "EXPERIENCE VALENCIA", intro: "Much more than squash. Discover one of the Mediterranean's most attractive cities during your stay." },
             sponsors: { label: "SPONSORS", title: "SPONSORS", intro: "Thank you to our sponsors for making the PSA Valencia Open 2026 possible." }
         },
-        event: { label: "MEMORIAL", title: "CHIMO MARMANEAU", location: "Alboraya · Valencia" },
+        event: { label: "MEMORIAL", title: "CHIMO MARMANEU", location: "Alboraya · Valencia" },
         tournament: { kicker: "PSA WORLD TOUR COPPER", title: "Tournament", intro: "Discover everything about the PSA Valencia Open 2026 – Memorial Chimo Marmaneu." },
         live: { title: "LIVE", videoTitle: "PSA Valencia Open streaming", videoIntro: "The YouTube player will appear here.", court1: "COURT 1", court2: "COURT 2", upcoming: "Coming soon", pending: "Match pending", openScoreboard: "⚡ Open Live Scoreboard" },
         sections: { players: "PLAYERS", schedule: "SCHEDULE", draw: "DRAWS", news: "NEWS", gallery: "GALLERY" },
@@ -467,7 +467,7 @@ const pageTranslations = {
             discover: { label: "VALENCE", title: "EXPERIENCE VALENCIA", intro: "Bien plus que le squash. Découvrez l'une des villes les plus attrayantes de la Méditerranée pendant votre séjour." },
             sponsors: { label: "SPONSORS", title: "PARTENAIRES", intro: "Merci à nos partenaires de rendre possible le PSA Valencia Open 2026." }
         },
-        event: { label: "MÉMORIAL", title: "CHIMO MARMANEAU", location: "Alboraia · Valence" },
+        event: { label: "MÉMORIAL", title: "CHIMO MARMANEU", location: "Alboraia · Valence" },
         tournament: { kicker: "PSA WORLD TOUR COPPER", title: "Tournoi", intro: "Découvrez tout sur le PSA Valencia Open 2026 – Memorial Chimo Marmaneu." },
         live: { title: "EN DIRECT", videoTitle: "Diffusion PSA Valencia Open", videoIntro: "Le lecteur YouTube apparaîtra ici.", court1: "COURT 1", court2: "COURT 2", upcoming: "Prochainement", pending: "Match en attente", openScoreboard: "⚡ Ouvrir le Tableau en Direct" },
         sections: { players: "JOUEURS", schedule: "PROGRAMME", draw: "TABLEAUX", news: "ACTUALITÉS", gallery: "GALERIE" },
