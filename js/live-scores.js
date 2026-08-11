@@ -99,6 +99,7 @@
     ];
 
     let matchesData = [...MOCK_MATCHES];
+    let currentFilter = "all";
 
     async function fetchRealPsaMatches() {
         const apiKey = getApiKey();
@@ -193,7 +194,7 @@
 
             if (realMatches.length > 0) {
                 matchesData = realMatches;
-                renderMatches("all");
+                renderMatches(currentFilter);
             }
         } catch (err) {
             console.warn("Error cargando partidos en tiempo real de PSA API:", err);
@@ -538,7 +539,8 @@
             btn.addEventListener("click", () => {
                 document.querySelectorAll(".ls-tab-btn").forEach((b) => b.classList.remove("active"));
                 btn.classList.add("active");
-                renderMatches(btn.getAttribute("data-filter"));
+                currentFilter = btn.getAttribute("data-filter");
+                renderMatches(currentFilter);
             });
         });
 
@@ -547,6 +549,11 @@
 
         renderMatches("all");
         fetchRealPsaMatches();
+
+        // Refresco automático mientras la pestaña de Live Score está abierta, para no tener
+        // que recargar a mano — respeta la pestaña (Todos/En juego/Programados/Finalizados)
+        // que el usuario tenga seleccionada en cada momento (ver currentFilter).
+        setInterval(fetchRealPsaMatches, 5000);
     });
 })();
 
