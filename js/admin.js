@@ -1697,6 +1697,19 @@ async function saveLiveSettings() {
     if (titleInput) titleInput.value = title;
 
     const history = readLiveHistory();
+
+    // Repara títulos genéricos de entradas anteriores (p.ej. si en su día falló la consulta
+    // a YouTube, o si venían del histórico "de repuesto" con título fijo "Directo") — así el
+    // archivo de "Directos anteriores" siempre enseña el título real del vídeo, no un
+    // genérico. Solo vuelve a consultar YouTube para las que de verdad lo necesitan.
+    for (const entry of history) {
+        const isGeneric = !entry.title || entry.title === "Directo" || /^Directo [\w-]+$/.test(entry.title);
+        if (isGeneric && entry.url) {
+            const fixedTitle = await fetchYouTubeTitle(entry.url);
+            if (fixedTitle) entry.title = fixedTitle;
+        }
+    }
+
     const last = history[history.length - 1] || null;
     if (!last || value !== last.url) {
         history.push({

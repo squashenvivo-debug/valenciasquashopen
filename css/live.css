@@ -261,7 +261,19 @@ LIVE
 
 @media(max-width:680px){
     .live-archive-grid{
-        grid-template-columns:1fr;
+        grid-template-columns:repeat(4, minmax(0, 1fr));
+        gap:6px;
+    }
+
+    .live-archive-card{
+        border-radius:8px;
+    }
+
+    .live-archive-meta{
+        padding:4px 5px;
+        font-size:.6rem;
+        min-height:0;
+        -webkit-line-clamp:1;
     }
 
     #live .container{
