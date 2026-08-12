@@ -104,11 +104,27 @@
         });
     });
 
+    function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    // En conexiones móviles lentas, el script de Supabase (CDN externo, antes de este script)
+    // a veces todavía no ha terminado de cargar cuando llegamos aquí — antes, en ese caso, nos
+    // rendíamos a la primera y la página se quedaba con los datos locales de la última visita
+    // (p.ej. el directo de ayer) en vez de los reales. Reintentamos unas cuantas veces antes de
+    // darnos por vencidos.
     async function syncPublicStateFromCloud() {
         if (isLocalHostRuntime()) return;
 
         const cloud = window.PSACloudStore;
-        if (!cloud?.isReady?.()) return;
+        if (!cloud) return;
+
+        let ready = cloud.isReady?.();
+        for (let attempt = 0; !ready && attempt < 6; attempt++) {
+            await wait(400);
+            ready = cloud.isReady?.();
+        }
+        if (!ready) return;
 
         try {
             await cloud.syncLocalStorageFromCloud(CLOUD_PUBLIC_KEYS);
