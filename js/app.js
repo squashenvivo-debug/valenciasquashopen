@@ -1291,9 +1291,16 @@
         const currentItem = validHistory.length ? validHistory[validHistory.length - 1] : null;
 
         const isOldDefaultStream = Boolean(currentItem?.url?.includes("8Th2hgkl1v8"));
+        const titleEl = document.getElementById("liveVideoTitle");
         if (currentItem?.url && extractYouTubeVideoId(currentItem.url) && !isOldDefaultStream) {
             renderLivePlayer(videoContainer, currentItem.url);
+            if (titleEl) {
+                const title = String(currentItem.title || "").trim();
+                titleEl.textContent = title;
+                titleEl.style.display = title ? "" : "none";
+            }
         } else {
+            if (titleEl) titleEl.style.display = "none";
             videoContainer.innerHTML = `
             <div class="video-placeholder">
                 📺

@@ -52,6 +52,18 @@ LIVE
 
 }
 
+.live-video-title{
+
+    margin-top:12px;
+
+    color:#E8EEF4;
+
+    font-weight:700;
+
+    font-size:0.95rem;
+
+}
+
 .video-placeholder{
 
     width:100%;
