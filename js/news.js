@@ -611,8 +611,8 @@ function renderNewsShareBar(item, title, article, isPreview, lang) {
 
     const slug = item?.seo?.slug || "";
     const shareUrl = slug
-        ? `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}`
-        : window.location.href.split("&preview=")[0];
+        ? `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}&lang=${encodeURIComponent(lang)}`
+        : `${window.location.href.split("&preview=")[0]}${window.location.search ? "&" : "?"}lang=${encodeURIComponent(lang)}`;
     const shareText = title || deriveTitleFromArticleHtml(article, 100) || "PSA Valencia Open";
 
     button.onclick = () => shareOrCopyLink(button, shareText, shareUrl, item, lang);
