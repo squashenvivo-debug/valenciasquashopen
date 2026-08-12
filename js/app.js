@@ -1346,7 +1346,8 @@
             const safeUrl = escapeHtml(item.url);
             return `
             <a class="live-archive-card" href="${safeUrl}" target="_blank" rel="noopener noreferrer" aria-label="${title}">
-                <img class="live-archive-thumb" src="${thumb}" alt="${title}">
+                <img class="live-archive-thumb" src="${thumb}" alt="${title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='';">
+                <div class="live-archive-thumb-fallback" style="display:none;">📺</div>
                 <div class="live-archive-meta">${title}</div>
             </a>
         `;

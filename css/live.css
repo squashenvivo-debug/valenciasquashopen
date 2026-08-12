@@ -164,6 +164,16 @@ LIVE
     display:block;
 }
 
+.live-archive-thumb-fallback{
+    width:100%;
+    aspect-ratio:16/9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#10293E;
+    font-size:1.8rem;
+}
+
 .live-archive-meta{
     padding:8px 10px;
     font-size:.78rem;
