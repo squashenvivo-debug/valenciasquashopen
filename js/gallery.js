@@ -169,6 +169,40 @@ function openLightbox(src, caption, photoMeta = {}) {
     window.PSAModalHistory?.pushModal(hideLightbox);
 
     currentLightboxPhoto = { imageSrc: src, caption: caption || "", ...photoMeta };
+    updateLightboxNavState();
+}
+
+function getNavigableLightboxPhotos() {
+    return lastRenderedGalleryEntries.filter((entry) => entry.type !== "video");
+}
+
+function findCurrentLightboxIndex(navigablePhotos) {
+    if (!currentLightboxPhoto) return -1;
+    return navigablePhotos.findIndex((entry) =>
+        entry.id === currentLightboxPhoto.photoId &&
+        entry.galleryId === currentLightboxPhoto.galleryId
+    );
+}
+
+function updateLightboxNavState() {
+    const prevBtn = document.getElementById("galleryLightboxPrev");
+    const nextBtn = document.getElementById("galleryLightboxNext");
+    if (!prevBtn || !nextBtn) return;
+
+    const navigablePhotos = getNavigableLightboxPhotos();
+    const showNav = navigablePhotos.length > 1 && findCurrentLightboxIndex(navigablePhotos) !== -1;
+    prevBtn.style.display = showNav ? "" : "none";
+    nextBtn.style.display = showNav ? "" : "none";
+}
+
+function showLightboxPhotoAt(delta) {
+    const navigablePhotos = getNavigableLightboxPhotos();
+    const currentIndex = findCurrentLightboxIndex(navigablePhotos);
+    if (currentIndex === -1 || navigablePhotos.length <= 1) return;
+
+    const nextIndex = (currentIndex + delta + navigablePhotos.length) % navigablePhotos.length;
+    const photo = navigablePhotos[nextIndex];
+    openLightbox(photo.imageSrc, photo.caption || "", { galleryId: photo.galleryId, photoId: photo.id });
 }
 
 /** Descarga la foto de verdad (no solo abrirla) trayéndola como blob — un <a download> normal
@@ -346,10 +380,21 @@ function bindLightboxEvents() {
     });
 
     document.addEventListener("keydown", (event) => {
+        if (!lightbox.classList.contains("is-open")) return;
         if (event.key === "Escape") {
             closeLightbox();
+        } else if (event.key === "ArrowLeft") {
+            showLightboxPhotoAt(-1);
+        } else if (event.key === "ArrowRight") {
+            showLightboxPhotoAt(1);
         }
     });
+
+    const prevBtn = document.getElementById("galleryLightboxPrev");
+    if (prevBtn) prevBtn.addEventListener("click", () => showLightboxPhotoAt(-1));
+
+    const nextBtn = document.getElementById("galleryLightboxNext");
+    if (nextBtn) nextBtn.addEventListener("click", () => showLightboxPhotoAt(1));
 
     const downloadBtn = document.getElementById("galleryDownloadBtn");
     if (downloadBtn) downloadBtn.addEventListener("click", downloadCurrentPhoto);

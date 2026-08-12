@@ -261,6 +261,50 @@ GALLERY
     cursor:pointer;
 }
 
+.gallery-lightbox-nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    border:none;
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    font-size:2.2rem;
+    line-height:1;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.gallery-lightbox-nav:hover{
+    background:rgba(255,255,255,.18);
+}
+
+.gallery-lightbox-prev{
+    left:14px;
+}
+
+.gallery-lightbox-next{
+    right:14px;
+}
+
+@media(max-width:680px){
+    .gallery-lightbox-nav{
+        width:38px;
+        height:38px;
+        font-size:1.8rem;
+    }
+    .gallery-lightbox-prev{
+        left:6px;
+    }
+    .gallery-lightbox-next{
+        right:6px;
+    }
+}
+
 .gallery-lightbox-actions{
     display:flex;
     flex-wrap:wrap;
