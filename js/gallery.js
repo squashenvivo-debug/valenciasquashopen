@@ -78,7 +78,10 @@ function normalizeGalleryPhotoMeta(photo, galleryMeta = {}) {
 
 function getGalleryDisplayTitle(gallery, lang) {
     const explicitTitle = String(getLocalizedText(gallery?.title, lang) || "").trim();
-    if (explicitTitle) return explicitTitle;
+    if (explicitTitle) {
+        const dateLabel = formatGalleryDate(normalizeGalleryMeta(gallery?.meta || {}).date, lang);
+        return dateLabel ? `${explicitTitle} · ${dateLabel}` : explicitTitle;
+    }
 
     const meta = normalizeGalleryMeta(gallery?.meta || {});
     const metaParts = [

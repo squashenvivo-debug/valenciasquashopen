@@ -1675,6 +1675,7 @@
         return {
             id: item?.id || `gallery_${Math.random().toString(36).slice(2, 8)}`,
             title: normalizeLocalizedText(item?.title),
+            meta: item?.meta && typeof item.meta === "object" ? item.meta : {},
             photos: photos.map((photo) => ({
                 id: photo?.id || `photo_${Math.random().toString(36).slice(2, 8)}`,
                 type: photo?.type === "video" ? "video" : "photo",
@@ -1738,7 +1739,9 @@
             card.className = "gallery-home-card";
             card.href = `gallery.html?galleryId=${encodeURIComponent(gallery.id)}`;
 
-            const title = getLocalizedText(gallery.title, lang) || "Galería";
+            const baseTitle = getLocalizedText(gallery.title, lang) || "Galería";
+            const galleryDate = String(gallery.meta?.date || "").trim();
+            const title = galleryDate ? `${baseTitle} · ${formatNewsDate(galleryDate, lang)}` : baseTitle;
             const thumbHtml = cover.type === "video" || !cover.src
                 ? `<div class="gallery-home-thumb-video" aria-hidden="true">▶</div>`
                 : `<img src="${resolveOptimizedAssetUrl(cover.processedSrc || cover.src)}" alt="${title}" loading="lazy" decoding="async">`;
