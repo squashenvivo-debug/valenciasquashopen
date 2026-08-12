@@ -120,8 +120,8 @@
         if (!cloud) return;
 
         let ready = cloud.isReady?.();
-        for (let attempt = 0; !ready && attempt < 6; attempt++) {
-            await wait(400);
+        for (let attempt = 0; !ready && attempt < 12; attempt++) {
+            await wait(500);
             ready = cloud.isReady?.();
         }
         if (!ready) return;
