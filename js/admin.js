@@ -1332,6 +1332,47 @@ async function saveTournamentSettings() {
     );
 }
 
+/** Descarga tal cual (sin tocar nada) el JSON que devuelve ahora mismo la API de PSA para
+ *  este torneo — cuadro, partidos, resultados, jugadores — vía el mismo proxy que usa el
+ *  resto del sitio. Sirve para guardar una copia puntual, no es una copia de seguridad del
+ *  contenido de la web (para eso está "Descargar backup" en el Dashboard). */
+async function downloadPsaTournamentJson() {
+    const statusEl = document.getElementById("psaJsonDownloadStatus");
+    const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+    const tournamentId = (document.getElementById("tournamentPsaId")?.value || localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || "12711").trim();
+    const baseUrl = String(window.PSA_CONFIG?.supabaseUrl || window.PSA_CONFIG?.SUPABASE_URL || "https://texjzaanugmssmolzwgb.supabase.co").replace(/\/$/, "");
+    const url = `${baseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true&head_to_head=true`;
+
+    setMsg("Consultando la API de PSA...");
+    try {
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        const payload = await response.json();
+        if (!response.ok || payload?.success === false) {
+            throw new Error(payload?.error || `HTTP ${response.status}`);
+        }
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const fileName = `psa-api-torneo-${tournamentId}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
+
+        if (window.PSAOptimizations?.downloadBlob) {
+            window.PSAOptimizations.downloadBlob(fileName, blob);
+        } else {
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(objectUrl);
+        }
+        setMsg(`JSON descargado (torneo ${tournamentId}).`);
+    } catch (error) {
+        setMsg(`No se pudo descargar el JSON: ${error?.message || "error desconocido"}`);
+    }
+}
+
 async function fetchPsaTournamentsList() {
     const select = document.getElementById("psaTournamentSelect");
     if (!select) return;
@@ -1412,6 +1453,11 @@ function bindTournamentSettings() {
     const saveButton = document.getElementById("saveTournamentSettings");
     if (saveButton) {
         saveButton.addEventListener("click", saveTournamentSettings);
+    }
+
+    const downloadJsonButton = document.getElementById("downloadPsaJsonBtn");
+    if (downloadJsonButton) {
+        downloadJsonButton.addEventListener("click", downloadPsaTournamentJson);
     }
 
     bindPsaTournamentSelector();
