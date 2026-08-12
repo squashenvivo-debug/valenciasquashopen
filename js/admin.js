@@ -195,6 +195,9 @@ function ensureProgrammingAdminPanel() {
             <label for="programmingDateTime" class="field-label">Fecha y hora visible</label>
             <input id="programmingDateTime" type="text" placeholder="Lunes 11 agosto · 20:00">
 
+            <label for="programmingEventDate" class="field-label">Fecha real (para que se borre sola al pasar el día)</label>
+            <input id="programmingEventDate" type="date">
+
             <label for="programmingTitle_es" class="field-label">Título ES</label>
             <input id="programmingTitle_es" type="text" placeholder="Presentación oficial del torneo">
 
@@ -5554,6 +5557,9 @@ function renderProgrammingAdminList(collection) {
             <label class="field-label" for="programming_date_${item.id}">Fecha y hora visible</label>
             <input id="programming_date_${item.id}" type="text" value="${escapeHtml(item.dateTime || "")}" placeholder="Lunes 11 agosto · 20:00">
 
+            <label class="field-label" for="programming_eventdate_${item.id}">Fecha real (para que se borre sola al pasar el día)</label>
+            <input id="programming_eventdate_${item.id}" type="date" value="${escapeHtml(item.eventDate || "")}">
+
             <label class="field-label" for="programming_title_es_${item.id}">Título ES</label>
             <input id="programming_title_es_${item.id}" type="text" value="${escapeHtml(item.title?.es || "")}">
 
@@ -5606,6 +5612,7 @@ async function translateProgrammingRowFromSpanish(collection, itemId) {
 function collectProgrammingFromEditor(currentCollection) {
     return currentCollection.map((item, index) => {
         const dateTime = (document.getElementById(`programming_date_${item.id}`)?.value || "").trim();
+        const eventDate = (document.getElementById(`programming_eventdate_${item.id}`)?.value || "").trim();
         const orderValue = Number(document.getElementById(`programming_order_${item.id}`)?.value || index + 1);
         const title = getProgrammingRowLocalized("title", item.id, item.title);
         const subtitle = getProgrammingRowLocalized("subtitle", item.id, item.subtitle);
@@ -5613,6 +5620,7 @@ function collectProgrammingFromEditor(currentCollection) {
         return normalizeProgrammingItem({
             ...item,
             dateTime,
+            eventDate,
             title,
             subtitle,
             order: Number.isFinite(orderValue) ? orderValue : index + 1
@@ -5672,6 +5680,7 @@ async function initProgrammingAdmin() {
     if (saveNewBtn && !saveNewBtn.dataset.bound) {
         saveNewBtn.addEventListener("click", async () => {
             const dateTime = (document.getElementById("programmingDateTime")?.value || "").trim();
+            const eventDate = (document.getElementById("programmingEventDate")?.value || "").trim();
             const titleEs = (document.getElementById("programmingTitle_es")?.value || "").trim();
             const subtitleEs = (document.getElementById("programmingSubtitle_es")?.value || "").trim();
 
@@ -5690,6 +5699,7 @@ async function initProgrammingAdmin() {
             collection.push(normalizeProgrammingItem({
                 id: createId("program"),
                 dateTime,
+                eventDate,
                 title: titleLoc,
                 subtitle: subtitleLoc,
                 order: collection.length + 1
@@ -5700,9 +5710,11 @@ async function initProgrammingAdmin() {
             bindProgrammingRowActions();
 
             const dateInput = document.getElementById("programmingDateTime");
+            const eventDateInput = document.getElementById("programmingEventDate");
             const titleInput = document.getElementById("programmingTitle_es");
             const subtitleInput = document.getElementById("programmingSubtitle_es");
             if (dateInput) dateInput.value = "";
+            if (eventDateInput) eventDateInput.value = "";
             if (titleInput) titleInput.value = "";
             if (subtitleInput) subtitleInput.value = "";
 
