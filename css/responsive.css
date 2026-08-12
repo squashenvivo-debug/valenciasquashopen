@@ -170,7 +170,7 @@
 
     .hero-logo {
         width: var(--hero-logo-mobile-width);
-        top: -107px;
+        top: -117px;
     }
 
     .hero-content {
@@ -228,7 +228,7 @@
     }
 
     .hero-event {
-        bottom: -65px;
+        bottom: -75px;
     }
 
     .event-label {
@@ -294,7 +294,7 @@
 
     .hero-logo {
         width: var(--hero-logo-mobile-width);
-        top: -112px;
+        top: -122px;
     }
 
     .hero-content {
@@ -352,7 +352,7 @@
     }
 
     .hero-event {
-        bottom: -75px;
+        bottom: -85px;
     }
 
     .event-label {
