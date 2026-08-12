@@ -5,6 +5,7 @@
    - r1: drawBracketState
    - intro: eventProgrammingCollection
    - youtube_url: liveStreamYoutubeUrl
+   - live_history: liveStreamYoutubeHistory
    - headline: heroSettings
 ========================================================== */
 
@@ -23,6 +24,7 @@ window.PSACloudStore = (() => {
         newsCollection: "qf",
         galleryCollections: "sf",
         liveStreamYoutubeUrl: "youtube_url",
+        liveStreamYoutubeHistory: "live_history",
         heroSettings: "headline"
     };
 
@@ -33,6 +35,7 @@ window.PSACloudStore = (() => {
         qf: "newsCollection",
         sf: "galleryCollections",
         youtube_url: "liveStreamYoutubeUrl",
+        live_history: "liveStreamYoutubeHistory",
         headline: "heroSettings"
     };
 

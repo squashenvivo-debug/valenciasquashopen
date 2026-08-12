@@ -1459,6 +1459,7 @@ function persistLiveHistory(history) {
         localStorage.removeItem(LIVE_STREAM_HISTORY_KEY);
         if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
             window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+            window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_HISTORY_KEY);
         }
         window.PSAOptimizations?.clearFetchCache?.();
         return;
@@ -1471,6 +1472,12 @@ function persistLiveHistory(history) {
 
     if (window.PSACloudStore?.saveLocalStorageKeyToCloud) {
         window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_URL_KEY);
+        // Antes solo se guardaba el enlace "actual" en la nube — el historial (qué directo es
+        // el activo y cuáles pasan al archivo "Directos anteriores") se quedaba solo en este
+        // navegador. Cualquier otra visita (otro dispositivo, caché limpia) nunca veía el
+        // segundo directo como activo ni el primero archivado: el primero, sencillamente,
+        // desaparecía. Ahora el historial también se sincroniza.
+        window.PSACloudStore.saveLocalStorageKeyToCloud(LIVE_STREAM_HISTORY_KEY);
     }
     window.PSAOptimizations?.clearFetchCache?.();
 }
