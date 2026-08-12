@@ -206,7 +206,8 @@
         font-size: var(--hero-button-mobile-font-size);
     }
 
-    .countdown {
+    .countdown,
+    .tournament-live-badge {
         gap: 10px;
         margin-top: 12px;
         transform: scale(.82);
@@ -329,7 +330,8 @@
         font-size: var(--hero-button-mobile-font-size);
     }
 
-    .countdown {
+    .countdown,
+    .tournament-live-badge {
         gap: 8px;
         margin-top: 5px;
         transform: scale(.75);
