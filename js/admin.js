@@ -2936,12 +2936,39 @@ async function uploadGalleryPhoto(photo, galleryId, progressPhotos = pendingGall
     return photo.uploadedUrl;
 }
 
+/** Copia una imagen ya subida a Supabase Storage a Cloudflare R2 (redimensionada y
+ *  comprimida ahí mismo, en el servidor) — R2 no cobra por egress, a diferencia de
+ *  Supabase Storage. Si falla por lo que sea, devuelve "" y quien llama sigue usando
+ *  la URL de Supabase de siempre; no bloquea nunca la subida. */
+async function mirrorToR2(sourceUrl, objectKey) {
+    if (!sourceUrl || !objectKey) return "";
+    try {
+        const base = String(window.PSA_CONFIG?.aiNewsApiBase || "").trim().replace(/\/+$/, "");
+        if (!base) return "";
+        const token = await window.AdminSupabase?.getAccessToken?.();
+        const response = await fetch(`${base}/api/mirror-to-r2`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ sourceUrl, objectKey })
+        });
+        const data = await response.json().catch(() => ({}));
+        return response.ok && data?.publicUrl ? data.publicUrl : "";
+    } catch (error) {
+        return "";
+    }
+}
+
 async function uploadGalleryQueue(galleryId, photos = pendingGalleryPhotos) {
     let nextIndex = 0;
     const workers = Array.from({ length: Math.min(GALLERY_UPLOAD_CONCURRENCY, photos.length) }, async () => {
         while (nextIndex < photos.length) {
             const photo = photos[nextIndex++];
             await uploadGalleryPhoto(photo, galleryId, photos);
+            const r2Url = await mirrorToR2(photo.uploadedUrl, photo.objectPath);
+            if (r2Url) photo.r2Url = r2Url;
             if (photos === pendingGalleryPhotos) renderPendingGalleryPhotos();
         }
     });
@@ -2968,6 +2995,9 @@ async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMes
     photo.processedSrc = data.processedUrl;
     photo.processedStoragePath = data.processedPath;
     photo.ai = { detection: data.detection || null, quality: data.quality || null, processedAt: new Date().toISOString() };
+
+    const r2Url = await mirrorToR2(data.processedUrl, data.processedPath);
+    if (r2Url) photo.processedSrc = r2Url;
 
     if (galleriesInner && !saveGalleryCollection(galleriesInner)) {
         throw new Error("No se pudo guardar el resultado IA.");
@@ -3313,7 +3343,7 @@ function renderGalleryAdminList() {
             }
             const newPhotos = uploadPhotos.map((photo) => ({
                 id: photo.id,
-                src: photo.uploadedUrl,
+                src: photo.r2Url || photo.uploadedUrl,
                 storagePath: photo.objectPath,
                 caption: photo.caption,
                 meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta)
