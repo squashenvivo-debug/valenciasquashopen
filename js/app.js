@@ -344,6 +344,9 @@
      *  con winner_id decidido en el que este jugador no es el ganador. Si la consulta
      *  falla (torneo en modo manual, proxy caído...) no se marca a nadie como eliminado. */
     async function fetchEliminatedPlayerNames() {
+        const mode = localStorage.getItem(TOURNAMENT_MODE_KEY) || "api";
+        if (mode === "manual") return new Set();
+
         try {
             const baseUrl = window.PSA_CONFIG?.supabaseUrl || "https://texjzaanugmssmolzwgb.supabase.co";
             const tournamentId = (localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
@@ -352,7 +355,9 @@
             const payload = await response.json().catch(() => ({}));
             if (!response.ok || payload?.success === false) return new Set();
 
-            const matches = Array.isArray(payload?.matches) ? payload.matches : [];
+            const division = (Array.isArray(payload?.divisions) ? payload.divisions : [])[0];
+            const brackets = Array.isArray(division?.brackets) ? division.brackets : [];
+            const matches = brackets.flatMap((bracket) => Array.isArray(bracket?.matches) ? bracket.matches : []);
             const eliminated = new Set();
             matches.forEach((match) => {
                 const winnerId = match?.winner_id;
