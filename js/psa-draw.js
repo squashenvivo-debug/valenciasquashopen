@@ -95,7 +95,7 @@
         return match.time ? `${datePart} • ${match.time}` : datePart;
     }
 
-    function renderPlayerRow(player, isWinner) {
+    function renderPlayerRow(player, isWinner, isEliminated) {
         const isPlaceholder = !player || !player.mugshot || player.name === "BYE" || player.name === "TBD" ||
             /^(Ganador|Guanyador|Winner|Vainqueur|Semifinalist|Semifinalista)/i.test(player.name || "");
 
@@ -130,7 +130,7 @@
             : "";
 
         return `
-            <div class="psa-player-row ${isPlaceholder ? "is-placeholder-row" : ""} ${isWinner ? "is-winner" : ""}">
+            <div class="psa-player-row ${isPlaceholder ? "is-placeholder-row" : ""} ${isWinner ? "is-winner" : ""} ${isEliminated ? "is-eliminated" : ""}">
                 ${avatarHtml}
                 ${flagHtml}
                 <span class="psa-player-name-box ${isPlaceholder ? "psa-placeholder-name" : ""}">
@@ -172,8 +172,8 @@
 
         return `
             <div class="psa-match-item ${isLive ? "is-live" : ""}">
-                ${renderPlayerRow(match.player1, p1IsWinner)}
-                ${renderPlayerRow(match.player2, p2IsWinner)}
+                ${renderPlayerRow(match.player1, p1IsWinner, !!winnerId && !p1IsWinner)}
+                ${renderPlayerRow(match.player2, p2IsWinner, !!winnerId && !p2IsWinner)}
                 ${partialsHtml}
                 <div class="psa-match-footer">
                     <span>${metaDate}</span>
