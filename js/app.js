@@ -330,6 +330,45 @@
        PLAYERS
     ========================================================== */
 
+    function normalizePlayerName(name) {
+        return String(name || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[̀-ͯ]/g, "")
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+    }
+
+    /** Nombres (normalizados) de jugadores que ya han perdido algún partido en el cuadro
+     *  en vivo de PSA — mismo criterio que ya usa el cuadro (js/psa-draw.js): un partido
+     *  con winner_id decidido en el que este jugador no es el ganador. Si la consulta
+     *  falla (torneo en modo manual, proxy caído...) no se marca a nadie como eliminado. */
+    async function fetchEliminatedPlayerNames() {
+        try {
+            const baseUrl = window.PSA_CONFIG?.supabaseUrl || "https://texjzaanugmssmolzwgb.supabase.co";
+            const tournamentId = (localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
+            const url = `${baseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&show_past=true`;
+            const response = await fetch(url, { headers: { Accept: "application/json" } });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload?.success === false) return new Set();
+
+            const matches = Array.isArray(payload?.matches) ? payload.matches : [];
+            const eliminated = new Set();
+            matches.forEach((match) => {
+                const winnerId = match?.winner_id;
+                if (winnerId === undefined || winnerId === null) return;
+                (Array.isArray(match?.players) ? match.players : []).forEach((player) => {
+                    if (player?.id !== undefined && String(player.id) !== String(winnerId) && player?.name) {
+                        eliminated.add(normalizePlayerName(player.name));
+                    }
+                });
+            });
+            return eliminated;
+        } catch (error) {
+            return new Set();
+        }
+    }
+
     async function loadPlayers() {
 
         const grid = document.querySelector(".players-grid");
@@ -355,6 +394,8 @@
 
             grid.innerHTML = "";
 
+            const eliminatedNames = await fetchEliminatedPlayerNames();
+
             players.forEach(player => {
 
                 const seedBadge = player.seed
@@ -367,10 +408,11 @@
 
                 const imageSrc = resolvePlayerImageSrc(player.image || player.imageSrc || "");
                 const playerLinkParam = player.id ? `id=${encodeURIComponent(player.id)}` : `name=${encodeURIComponent(player.name)}`;
+                const isEliminated = eliminatedNames.has(normalizePlayerName(player.name));
 
                 grid.innerHTML += `
 
-                <a class="player-card" href="player.html?${playerLinkParam}" data-player-id="${player.id || ""}" data-player-name="${player.name || ""}">
+                <a class="player-card${isEliminated ? " is-eliminated" : ""}" href="player.html?${playerLinkParam}" data-player-id="${player.id || ""}" data-player-name="${player.name || ""}">
 
                     <div class="player-photo">
                         <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${player.name}" loading="lazy" decoding="async"${positionStyle}>
