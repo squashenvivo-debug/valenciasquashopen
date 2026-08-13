@@ -97,10 +97,18 @@ window.PSACloudStore = (() => {
         const values = {};
 
         // 1. Mapeo por columnas de fila única (site_content id = 1)
+        // Solo pedimos las columnas que hacen falta para estas keys — no "*". La fila entera
+        // pesa >1MB (incluye fotos de jugadores en base64, el cuadro completo...) y cada
+        // página solo necesita una o dos columnas; pedirlas todas en cada carga es egress
+        // desperdiciado multiplicado por cada visita a cada página del sitio.
+        const neededColumns = Object.entries(COLUMN_MAP)
+            .filter(([key]) => keys.includes(key))
+            .map(([, col]) => col);
+
         try {
             const { data, error } = await client
                 .from(TABLE_NAME)
-                .select("*")
+                .select(neededColumns.length ? neededColumns.join(",") : "*")
                 .eq("id", 1);
 
             if (!error && Array.isArray(data) && data.length > 0) {
@@ -170,7 +178,7 @@ window.PSACloudStore = (() => {
                     updated_at: new Date().toISOString()
                 })
                 .eq("id", 1)
-                .select();
+                .select("id");
 
             if (!error && Array.isArray(data) && data.length > 0) {
                 return { ok: true };
