@@ -54,6 +54,8 @@ PLAYERS
 
 .player-photo{
 
+    position:relative;
+
     aspect-ratio:4/5;
 
     overflow:hidden;
@@ -73,6 +75,34 @@ PLAYERS
 .player-card.is-eliminated .player-name{
 
     opacity:0.55;
+
+}
+
+.player-eliminated-badge{
+
+    position:absolute;
+
+    top:12px;
+
+    left:12px;
+
+    background:rgba(183,28,28,0.92);
+
+    color:#fff;
+
+    font-size:0.7rem;
+
+    font-weight:800;
+
+    letter-spacing:0.06em;
+
+    padding:4px 10px;
+
+    border-radius:6px;
+
+    text-transform:uppercase;
+
+    box-shadow:0 2px 8px rgba(0,0,0,0.35);
 
 }
 

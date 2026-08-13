@@ -61,7 +61,8 @@ quick: {
 
     players: {
         title: "JUGADORES",
-        text: "Conoce a todos los participantes"
+        text: "Conoce a todos los participantes",
+        eliminated: "ELIMINADO"
     },
 
     share: {
@@ -127,7 +128,8 @@ quick: {
 
     players: {
         title: "JUGADORS",
-        text: "Coneix tots els participants"
+        text: "Coneix tots els participants",
+        eliminated: "ELIMINAT"
     },
 
     share: {
@@ -192,7 +194,8 @@ quick: {
 
     players: {
         title: "PLAYERS",
-        text: "Meet all participants"
+        text: "Meet all participants",
+        eliminated: "ELIMINATED"
     },
 
     share: {
@@ -257,7 +260,8 @@ quick: {
 
     players: {
         title: "JOUEURS",
-        text: "Découvrez tous les participants"
+        text: "Découvrez tous les participants",
+        eliminated: "ÉLIMINÉ"
     },
 
     share: {

@@ -414,6 +414,9 @@
                 const imageSrc = resolvePlayerImageSrc(player.image || player.imageSrc || "");
                 const playerLinkParam = player.id ? `id=${encodeURIComponent(player.id)}` : `name=${encodeURIComponent(player.name)}`;
                 const isEliminated = eliminatedNames.has(normalizePlayerName(player.name));
+                const eliminatedBadge = isEliminated
+                    ? `<span class="player-eliminated-badge">${typeof t === "function" ? t("players.eliminated") : "ELIMINADO"}</span>`
+                    : "";
 
                 grid.innerHTML += `
 
@@ -421,6 +424,7 @@
 
                     <div class="player-photo">
                         <img src="${resolveOptimizedAssetUrl(imageSrc)}" alt="${player.name}" loading="lazy" decoding="async"${positionStyle}>
+                        ${eliminatedBadge}
                     </div>
 
                     <div class="player-info">
