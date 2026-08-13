@@ -415,7 +415,7 @@
                 const playerLinkParam = player.id ? `id=${encodeURIComponent(player.id)}` : `name=${encodeURIComponent(player.name)}`;
                 const isEliminated = eliminatedNames.has(normalizePlayerName(player.name));
                 const eliminatedBadge = isEliminated
-                    ? `<span class="player-eliminated-badge">${typeof t === "function" ? t("players.eliminated") : "ELIMINADO"}</span>`
+                    ? `<span class="player-eliminated-badge">${typeof t === "function" ? t("quick.players.eliminated") : "ELIMINADO"}</span>`
                     : "";
 
                 grid.innerHTML += `
