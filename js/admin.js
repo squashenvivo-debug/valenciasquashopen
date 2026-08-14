@@ -1944,7 +1944,7 @@ function decodeHtmlEntities(value) {
 function deriveTitleFromArticleHtml(html, maxLen = 100) {
     const source = String(html || "");
     const headingMatch = source.match(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i);
-    const raw = headingMatch ? headingMatch[1] : source;
+    const raw = headingMatch ? headingMatch[1] : source.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ");
     const text = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (!text) return "";
     if (text.length <= maxLen) return text;
@@ -1956,7 +1956,9 @@ function deriveTitleFromArticleHtml(html, maxLen = 100) {
  *  casi siempre cortaba a mitad de una etiqueta y dejaba HTML roto guardado — quitamos las
  *  etiquetas PRIMERO y recortamos después, así nunca puede quedar HTML a medias. */
 function stripHtmlForSeoDescription(html, maxLen = 160) {
-    const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const text = String(html || "")
+        .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+        .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (!text) return "";
     if (text.length <= maxLen) return text;
     return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;

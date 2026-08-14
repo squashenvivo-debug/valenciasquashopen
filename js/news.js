@@ -17,7 +17,9 @@ function getCurrentLanguage() {
  *  recortar, para no dejar nunca HTML a medio cortar (a diferencia de un simple
  *  string.slice() sobre HTML en crudo, que corta donde caiga sin mirar las etiquetas). */
 function stripHtmlTagsForSummary(html, maxLen = 160) {
-    const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const text = String(html || "")
+        .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+        .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (!text) return "";
     if (text.length <= maxLen) return text;
     return `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
@@ -171,7 +173,7 @@ function deriveTitleFromArticleHtml(html, maxLen = 100) {
     // Si el artículo empieza con un encabezado (h1-h3), usamos justo ese texto — normalmente
     // es el titular que el admin ya escribió ahí. Si no, recurrimos al primer texto plano.
     const headingMatch = source.match(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i);
-    const raw = headingMatch ? headingMatch[1] : source;
+    const raw = headingMatch ? headingMatch[1] : source.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ");
     const text = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (!text) return "";
     if (text.length <= maxLen) return text;

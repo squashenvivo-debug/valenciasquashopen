@@ -1667,7 +1667,9 @@
 
     function stripHtmlTagsForSummaryLocal(html, maxLen) {
         if (typeof stripHtmlTagsForSummary === "function") return stripHtmlTagsForSummary(html, maxLen);
-        const text = String(html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        const text = String(html || "")
+            .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+            .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
         return text.length <= maxLen ? text : `${text.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
     }
 
