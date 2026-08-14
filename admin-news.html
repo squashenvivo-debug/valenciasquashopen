@@ -301,7 +301,9 @@
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<span style=&quot;font-size:1.25em;&quot;>', '</span>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Aumentar tamaño">A+ Tamaño</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<ul>\n  <li>', '</li>\n</ul>')" style="padding:4px 10px; background:#122b42; color:#fff; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Lista">• Lista</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<a href=&quot;https://&quot; target=&quot;_blank&quot;>', '</a>')" style="padding:4px 10px; background:#122b42; color:#64B5F6; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Enlace">🔗 Enlace</button>
-                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<img src=&quot;', '&quot; alt=&quot;Imagen&quot; style=&quot;width:100%; border-radius:8px; margin:15px 0;&quot;>')" style="padding:4px 10px; background:#122b42; color:#81C784; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Imagen HTML">🖼️ Imagen HTML</button>
+                <button type="button" class="wysiwyg-btn" onclick="document.getElementById('newNewsArticleImageUpload').click()" style="padding:4px 10px; background:#2e7d32; color:#fff; border:1px solid #4caf50; border-radius:4px; cursor:pointer;" title="Subir una foto desde tu ordenador o móvil e insertarla aquí">📷 Subir imagen</button>
+                <input id="newNewsArticleImageUpload" type="file" accept="image/*" style="display:none" onchange="insertUploadedImageIntoArticle('newNewsArticle_es', this.files[0], this)">
+                <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<img src=&quot;', '&quot; alt=&quot;Imagen&quot; style=&quot;width:100%; border-radius:8px; margin:15px 0;&quot;>')" style="padding:4px 10px; background:#122b42; color:#81C784; border:1px solid #234567; border-radius:4px; cursor:pointer;" title="Ya tengo la URL de la imagen">🖼️ Imagen (URL)</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<p>', '</p>')" style="padding:4px 10px; background:#1e3a5f; color:#81D4FA; border:1px solid #29b6f6; border-radius:4px; font-weight:bold; cursor:pointer;" title="Etiqueta HTML Párrafo">&lt;&gt; HTML</button>
                 <button type="button" class="wysiwyg-btn" onclick="insertFormatTag('newNewsArticle_es', '<div style=&quot;margin:20px 0;padding:16px 20px;background:rgba(199,140,50,0.12);border-left:4px solid #C78C32;border-radius:10px;color:#fff;&quot;><h3 style=&quot;margin-top:0;color:#F0D7A2;&quot;>🏆 Título destacado</h3><p style=&quot;margin-bottom:0;&quot;>', '</p></div>')" style="padding:4px 10px; background:#C78C32; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" title="Cuadro Destacado">🏆 Cuadro Destacado</button>
                 <button type="button" id="previewBtn_newNewsArticle_es" class="wysiwyg-btn" onclick="toggleHtmlPreview('newNewsArticle_es', 'previewBtn_newNewsArticle_es', 'previewBox_newNewsArticle_es')" style="padding:4px 12px; background:#2e7d32; color:#fff; border:1px solid #4caf50; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:auto;" title="Ver resultado de cómo quedará">👁️ Ver resultado (Vista previa)</button>
@@ -478,7 +480,7 @@
 window.ADMIN_DEFAULT_SECTION = "news-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260811-v11"></script>
+<script src="js/admin.js?v=20260811-v12"></script>
 
 </body>
 

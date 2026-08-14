@@ -2548,6 +2548,35 @@ function insertFormatTag(targetInputId, tagBefore, tagAfter = "") {
 }
 window.insertFormatTag = insertFormatTag;
 
+/** Sube una foto desde el ordenador/móvil del admin (mismo almacén y compresión que ya usa la
+ *  imagen de portada) e inserta el <img> resultante en el punto del texto donde estaba el
+ *  cursor — así no hace falta subir la foto a mano a otro sitio y pegar la URL. */
+async function insertUploadedImageIntoArticle(targetInputId, file, triggerInputEl) {
+    const el = document.getElementById(targetInputId);
+    if (!el || !file) return;
+
+    // Capturamos la posición del cursor ANTES de subir: la subida es asíncrona y el
+    // textarea puede perder el foco/selección mientras tanto (el propio selector de
+    // archivos ya se lo quita), así que leerla después no sería fiable.
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+
+    updateNewsStatus("Subiendo imagen...");
+    try {
+        const { imageSrc } = await uploadNewsImageFile(file, createId("news-inline"));
+        const tag = `<img src="${imageSrc}" alt="Imagen" style="width:100%; border-radius:8px; margin:15px 0;">`;
+        el.value = el.value.substring(0, start) + tag + el.value.substring(end);
+        el.focus();
+        el.selectionStart = el.selectionEnd = start + tag.length;
+        updateNewsStatus("Imagen insertada en el artículo.");
+    } catch (error) {
+        updateNewsStatus(`No se pudo subir la imagen: ${error?.message || "error desconocido"}`);
+    } finally {
+        if (triggerInputEl) triggerInputEl.value = "";
+    }
+}
+window.insertUploadedImageIntoArticle = insertUploadedImageIntoArticle;
+
 function formatNewsPreviewHtml(text) {
     if (!text) return "";
     let str = String(text || "").trim();
