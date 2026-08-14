@@ -132,18 +132,27 @@ NEWS
 
 }
 
-/* El cuerpo del artículo completo (news.html, #newsPageBody.news-content-body) trae su
-   propio HTML con su propio <style> — normalmente un contenedor tipo .news-wrapper con sus
-   colores ya definidos (fondo blanco, texto #0d2340, tarjetas de marcador, etc.). La regla
-   .news-content p de arriba es solo para el resumen gris claro de las tarjetas de la lista;
-   sin este reset, también pintaría de gris claro el texto de la noticia completa, aunque el
-   artículo defina su color explícitamente, porque el navegador aplica cualquier regla que
-   encuentre una coincidencia por encima de la herencia normal (que es lo que el HTML de la
-   noticia da por hecho). `color:inherit` con baja especificidad basta: cualquier selector del
-   propio artículo (una sola clase ya vale) tiene más especificidad y gana sin necesitar
-   !important, ni aquí ni en cada noticia nueva que se publique.  */
+/* El cuerpo del artículo completo (news.html, #newsPageBody.news-content-body, que vive
+   dentro de .news-content) trae su propio HTML con su propio <style> — normalmente un
+   contenedor tipo .news-wrapper con sus colores ya definidos (fondo blanco, texto #0d2340,
+   tarjetas de marcador, etc.). La regla .news-content p de arriba es solo para el resumen
+   gris claro de las tarjetas de la lista; sin este reset, también pintaría de gris claro el
+   texto de la noticia completa, aunque el artículo defina su color explícitamente, porque el
+   navegador aplica cualquier regla que encuentre una coincidencia por encima de la herencia
+   normal (que es lo que el HTML de la noticia da por hecho).
+   `.news-content p` tiene especificidad (1 clase + 1 etiqueta); un simple
+   `.news-content-body *` (1 clase) NO basta para ganarle — hace falta iguales o más clases,
+   por eso el selector de "p" repite `.news-content` explícitamente. El resto de etiquetas
+   (h1-h3, strong, a, li...) no tienen ninguna regla global que las toque, así que ahí sí basta
+   el reset de baja especificidad. Cualquier selector propio del artículo (una sola clase ya
+   vale) sigue ganando a todo esto sin necesitar !important, ni aquí ni en cada noticia nueva
+   que se publique. */
 .news-content-body,
 .news-content-body * {
+    color: inherit;
+}
+
+.news-content .news-content-body p {
     color: inherit;
 }
 
