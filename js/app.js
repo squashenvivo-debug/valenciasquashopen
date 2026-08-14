@@ -339,6 +339,25 @@
             .trim();
     }
 
+    /** PSA a veces recorta apellidos (p.ej. "Sergio Garcia Pollan" en la ficha del admin vs.
+     *  "Sergio Garcia" en el propio partido de PSA) — una igualdad exacta se rompe con eso.
+     *  Consideramos coincidencia si un nombre es el otro, o el otro seguido de más palabras
+     *  (coincidencia por prefijo respetando límites de palabra, no una subcadena cualquiera). */
+    function namesMatch(a, b) {
+        if (!a || !b) return false;
+        if (a === b) return true;
+        return a.startsWith(`${b} `) || b.startsWith(`${a} `);
+    }
+
+    function isPlayerNameEliminated(name, eliminatedNames) {
+        const normalized = normalizePlayerName(name);
+        if (!normalized) return false;
+        for (const eliminatedName of eliminatedNames) {
+            if (namesMatch(normalized, eliminatedName)) return true;
+        }
+        return false;
+    }
+
     /** Nombres (normalizados) de jugadores que ya han perdido algún partido en el cuadro
      *  en vivo de PSA — mismo criterio que ya usa el cuadro (js/psa-draw.js): un partido
      *  con winner_id decidido en el que este jugador no es el ganador. Si la consulta
@@ -413,7 +432,7 @@
 
                 const imageSrc = resolvePlayerImageSrc(player.image || player.imageSrc || "");
                 const playerLinkParam = player.id ? `id=${encodeURIComponent(player.id)}` : `name=${encodeURIComponent(player.name)}`;
-                const isEliminated = eliminatedNames.has(normalizePlayerName(player.name));
+                const isEliminated = isPlayerNameEliminated(player.name, eliminatedNames);
                 const eliminatedBadge = isEliminated
                     ? `<span class="player-eliminated-badge">${typeof t === "function" ? t("quick.players.eliminated") : "ELIMINADO"}</span>`
                     : "";
