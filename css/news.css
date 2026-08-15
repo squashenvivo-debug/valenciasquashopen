@@ -173,8 +173,8 @@ NEWS
     width: auto !important;
     height: auto !important;
     object-fit: contain !important;
-    display: block;
-    margin: 15px auto;
+    display: block !important;
+    margin: 15px auto !important;
 }
 
 @media (max-width: 992px) {
