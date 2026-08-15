@@ -87,9 +87,9 @@ NEWS
 
     height:320px;
 
-    object-fit:cover;
+    object-fit:contain;
 
-    object-position:center 15%;
+    background:#0E2436;
 
 }
 
