@@ -85,7 +85,7 @@ NEWS
 
     width:100%;
 
-    height:240px;
+    height:320px;
 
     object-fit:cover;
 
@@ -95,7 +95,7 @@ NEWS
 
 .news-card-noimage {
     width: 100%;
-    height: 240px;
+    height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -202,7 +202,7 @@ NEWS
 
     .news-card img,
     .news-card-noimage {
-        height: 130px;
+        height: 175px;
     }
 
     .news-content {
@@ -250,7 +250,7 @@ NEWS
 
     .news-card img,
     .news-card-noimage {
-        height: 110px;
+        height: 150px;
     }
 
     .news-content {
