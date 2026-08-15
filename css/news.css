@@ -89,6 +89,8 @@ NEWS
 
     object-fit:cover;
 
+    object-position:center 15%;
+
 }
 
 .news-card-noimage {
