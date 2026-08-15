@@ -505,11 +505,15 @@ async function buildShareThumbnail(item, lang) {
         canvas.height = imageHeight + contentHeight;
         const ctx = canvas.getContext("2d");
 
-        // Foto recortada igual que .news-card img (object-fit: cover)
+        // Foto recortada igual que .news-card img (object-fit: cover), pero sesgada hacia
+        // arriba en vez de centrada verticalmente: en fotos de jugadores la cara suele estar
+        // en el tercio superior, y un recorte centrado dejaba fuera la cara y solo se veía
+        // torso y cuello.
         const scale = Math.max(width / img.naturalWidth, imageHeight / img.naturalHeight);
         const drawWidth = img.naturalWidth * scale;
         const drawHeight = img.naturalHeight * scale;
-        ctx.drawImage(img, (width - drawWidth) / 2, (imageHeight - drawHeight) / 2, drawWidth, drawHeight);
+        const verticalOffset = Math.min(0, (imageHeight - drawHeight) * 0.15);
+        ctx.drawImage(img, (width - drawWidth) / 2, verticalOffset, drawWidth, drawHeight);
 
         // Fondo de la tarjeta
         ctx.fillStyle = "#0E2436";
