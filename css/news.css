@@ -11,7 +11,7 @@ NEWS
 /* Necesita más especificidad que .psa-modal-card a secas para ganarle pase lo que pase el
    orden de carga de las hojas de estilo (mismo motivo que .player-modal-card). */
 .psa-modal-card.news-modal-card{
-    max-width:900px;
+    max-width:1160px;
     width:94%;
     max-height:90vh;
     overflow-y:auto;
