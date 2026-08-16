@@ -996,6 +996,28 @@ function bindAdminSectionView() {
     applyAdminViewFromHash();
 }
 
+/** Antes, si fallaba la subida a la nube, el admin no se enteraba nunca: el cambio se
+ *  quedaba guardado SOLO en su propio navegador (parecía que todo había ido bien) y jamás
+ *  llegaba a la base de datos real, así que nadie más lo veía — así se perdió una galería
+ *  entera sin ningún aviso. Este banner deja constancia visible y persistente hasta que una
+ *  subida a la nube funcione de verdad. */
+function showCloudSyncWarning(key, error) {
+    let banner = document.getElementById("cloudSyncWarningBanner");
+    if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "cloudSyncWarningBanner";
+        banner.style.cssText = "position:fixed; top:0; left:0; right:0; z-index:99999; background:#c62828; color:#fff; padding:12px 20px; font-weight:600; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.4);";
+        document.body.prepend(banner);
+    }
+    banner.textContent = `⚠️ No se pudo guardar "${key}" en la nube (${error?.message || "sin conexión"}). Solo está guardado en este navegador — revisa tu conexión y vuelve a guardar antes de cerrar la pestaña.`;
+    banner.style.display = "block";
+}
+
+function clearCloudSyncWarning() {
+    const banner = document.getElementById("cloudSyncWarningBanner");
+    if (banner) banner.style.display = "none";
+}
+
 function installCloudStorageAutosync() {
     if (storageCloudPatchInstalled) return;
 
@@ -1010,9 +1032,15 @@ function installCloudStorageAutosync() {
         originalSetItem(key, value);
 
         if (syncKeys.has(key)) {
-            cloud.saveLocalStorageKeyToCloud(key).catch(() => {
-                // No interrumpimos UX de admin si la nube falla.
-            });
+            cloud.saveLocalStorageKeyToCloud(key)
+                .then((result) => {
+                    if (result?.ok === false) {
+                        showCloudSyncWarning(key, { message: result.reason });
+                    } else {
+                        clearCloudSyncWarning();
+                    }
+                })
+                .catch((error) => showCloudSyncWarning(key, error));
         }
     };
 
@@ -1020,9 +1048,7 @@ function installCloudStorageAutosync() {
         originalRemoveItem(key);
 
         if (syncKeys.has(key)) {
-            cloud.removeLocalStorageKeyFromCloud(key).catch(() => {
-                // No interrumpimos UX de admin si la nube falla.
-            });
+            cloud.removeLocalStorageKeyFromCloud(key).catch((error) => showCloudSyncWarning(key, error));
         }
     };
 
@@ -3737,7 +3763,7 @@ async function saveNewGallery() {
 
     const localizedPhotos = await Promise.all(pendingGalleryPhotos.map(async (photo) => ({
         id: photo.id,
-        src: photo.uploadedUrl,
+        src: photo.r2Url || photo.uploadedUrl,
         storagePath: photo.objectPath,
         sourceSrc: photo.uploadedUrl,
         sourceStoragePath: photo.objectPath,
