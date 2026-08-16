@@ -319,6 +319,12 @@
             <h2>Galería</h2>
             <p class="admin-muted">Crea galerías por jornada. Las imágenes se suben directamente a Supabase Storage, nunca al repositorio.</p>
 
+            <div style="margin-bottom:20px; padding:14px; background:#081a2a; border:1px solid #1a2a3a; border-radius:8px;">
+                <p class="admin-muted" style="margin-bottom:8px;">Las fotos que ya se sirven desde R2 (Cloudflare) tienen aquí una copia sin usar del original en Supabase Storage, ocupando espacio de más. Este botón la borra — la web no cambia nada, sigue sirviendo desde R2.</p>
+                <button type="button" id="cleanupR2MigratedBtn" class="btn-secondary-admin">🧹 Limpiar originales ya copiados a R2</button>
+                <p id="cleanupR2Status" class="admin-status" aria-live="polite"></p>
+            </div>
+
             <div class="admin-lang-grid">
                 <label for="newGalleryTitle_es" class="field-label">Título galería ES</label>
                 <input id="newGalleryTitle_es" type="text" placeholder="Jornada primera ronda">
@@ -489,7 +495,7 @@
 window.ADMIN_DEFAULT_SECTION = "gallery-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260811-v15"></script>
+<script src="js/admin.js?v=20260811-v16"></script>
 
 </body>
 

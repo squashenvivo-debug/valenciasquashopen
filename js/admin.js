@@ -4219,9 +4219,71 @@ function initNewsAdmin() {
     renderNewsAdminList();
 }
 
+/** Borra de Supabase Storage los archivos originales de las fotos que ya se sirven desde R2
+ *  (Cloudflare) — quedaron ahí sin usar tras la migración, ocupando espacio de la cuota
+ *  gratuita de Supabase sin que la web los necesite para nada. Se calcula la lista al vuelo
+ *  a partir de la colección actual de galerías (nunca una lista fija), así vale también para
+ *  limpiar lo que se vaya migrando en el futuro. Usa la sesión ya autenticada del admin —
+ *  hace falta rol de administrador/fotógrafo, que un token de API sencillo no tiene. */
+async function cleanupR2MigratedOriginals() {
+    const statusEl = document.getElementById("cleanupR2Status");
+    const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
+    const button = document.getElementById("cleanupR2MigratedBtn");
+
+    const client = window.AdminSupabase?.getClient?.();
+    if (!client) {
+        setMsg("Inicia sesión en el panel admin primero.");
+        return;
+    }
+
+    const galleries = readGalleryCollection();
+    const paths = [];
+    galleries.forEach((gallery) => {
+        (gallery.photos || []).forEach((photo) => {
+            if (photo?.type === "video") return;
+            const isOnR2 = String(photo?.src || "").includes("r2.dev");
+            if (isOnR2 && photo?.storagePath) paths.push(photo.storagePath);
+        });
+    });
+
+    if (paths.length === 0) {
+        setMsg("No hay nada que limpiar: ninguna foto tiene todavía copia en R2.");
+        return;
+    }
+
+    if (button) button.disabled = true;
+    setMsg(`Borrando ${paths.length} originales ya copiados a R2…`);
+
+    let deleted = 0;
+    let failed = 0;
+    for (let i = 0; i < paths.length; i += 100) {
+        const chunk = paths.slice(i, i + 100);
+        try {
+            const { data, error } = await client.storage.from("photos").remove(chunk);
+            if (error) throw error;
+            deleted += (data || []).length;
+        } catch (error) {
+            failed += chunk.length;
+        }
+        setMsg(`Borrando… ${deleted + failed}/${paths.length}`);
+    }
+
+    if (button) button.disabled = false;
+    setMsg(failed > 0
+        ? `Borrados ${deleted} de ${paths.length}. ${failed} fallaron (revisa que tu usuario tenga rol de administrador/fotógrafo).`
+        : `Listo: ${deleted} originales borrados de Supabase Storage. La web sigue igual, sirviendo desde R2.`);
+}
+window.cleanupR2MigratedOriginals = cleanupR2MigratedOriginals;
+
 function initGalleryAdmin() {
     const panel = document.getElementById("gallery-admin-panel");
     if (!panel) return;
+
+    const cleanupBtn = document.getElementById("cleanupR2MigratedBtn");
+    if (cleanupBtn && !cleanupBtn.dataset.bound) {
+        cleanupBtn.addEventListener("click", cleanupR2MigratedOriginals);
+        cleanupBtn.dataset.bound = "1";
+    }
 
     const filesInput = document.getElementById("newGalleryFiles");
     const folderInput = document.getElementById("newGalleryFolder");
