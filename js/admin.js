@@ -2995,13 +2995,15 @@ async function uploadGalleryPhoto(photo, galleryId, progressPhotos = pendingGall
 
 /** Copia una imagen ya subida a Supabase Storage a Cloudflare R2 (redimensionada y
  *  comprimida ahí mismo, en el servidor) — R2 no cobra por egress, a diferencia de
- *  Supabase Storage. Si falla por lo que sea, devuelve "" y quien llama sigue usando
- *  la URL de Supabase de siempre; no bloquea nunca la subida. */
+ *  Supabase Storage. Si falla por lo que sea, devuelve url:"" y quien llama sigue usando
+ *  la URL de Supabase de siempre; no bloquea nunca la subida — pero antes ese fallo era
+ *  totalmente invisible (así se quedaron 389 fotos sirviéndose desde Supabase sin que
+ *  nadie lo supiera), así que ahora también se informa del motivo para poder avisar. */
 async function mirrorToR2(sourceUrl, objectKey) {
-    if (!sourceUrl || !objectKey) return "";
+    if (!sourceUrl || !objectKey) return { url: "", error: "faltan datos" };
     try {
         const base = String(window.PSA_CONFIG?.aiNewsApiBase || "").trim().replace(/\/+$/, "");
-        if (!base) return "";
+        if (!base) return { url: "", error: "falta configuración del servidor (aiNewsApiBase)" };
         const token = await window.AdminSupabase?.getAccessToken?.();
         const response = await fetch(`${base}/api/mirror-to-r2`, {
             method: "POST",
@@ -3012,20 +3014,27 @@ async function mirrorToR2(sourceUrl, objectKey) {
             body: JSON.stringify({ sourceUrl, objectKey })
         });
         const data = await response.json().catch(() => ({}));
-        return response.ok && data?.publicUrl ? data.publicUrl : "";
+        if (response.ok && data?.publicUrl) return { url: data.publicUrl, error: "" };
+        return { url: "", error: data?.error || `HTTP ${response.status}` };
     } catch (error) {
-        return "";
+        return { url: "", error: error?.message || "error de red" };
     }
 }
 
 async function uploadGalleryQueue(galleryId, photos = pendingGalleryPhotos) {
     let nextIndex = 0;
+    let r2Failures = 0;
     const workers = Array.from({ length: Math.min(GALLERY_UPLOAD_CONCURRENCY, photos.length) }, async () => {
         while (nextIndex < photos.length) {
             const photo = photos[nextIndex++];
             await uploadGalleryPhoto(photo, galleryId, photos);
-            const r2Url = await mirrorToR2(photo.uploadedUrl, photo.objectPath);
-            if (r2Url) photo.r2Url = r2Url;
+            const { url: r2Url, error: r2Error } = await mirrorToR2(photo.uploadedUrl, photo.objectPath);
+            if (r2Url) {
+                photo.r2Url = r2Url;
+            } else {
+                r2Failures++;
+                showCloudSyncWarning("copia a R2", { message: `${r2Failures} foto(s) se quedaron sirviéndose desde Supabase (${r2Error}) — sigue funcionando, pero no ahorra egress. Prueba el botón "Limpiar originales ya copiados a R2" más tarde tras reintentar la subida.` });
+            }
             if (photos === pendingGalleryPhotos) renderPendingGalleryPhotos();
         }
     });
@@ -3053,8 +3062,12 @@ async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMes
     photo.processedStoragePath = data.processedPath;
     photo.ai = { detection: data.detection || null, quality: data.quality || null, processedAt: new Date().toISOString() };
 
-    const r2Url = await mirrorToR2(data.processedUrl, data.processedPath);
-    if (r2Url) photo.processedSrc = r2Url;
+    const { url: r2Url, error: r2Error } = await mirrorToR2(data.processedUrl, data.processedPath);
+    if (r2Url) {
+        photo.processedSrc = r2Url;
+    } else {
+        showCloudSyncWarning("copia a R2", { message: `La foto procesada con IA se quedó sirviéndose desde Supabase (${r2Error}).` });
+    }
 
     if (galleriesInner && !saveGalleryCollection(galleriesInner)) {
         throw new Error("No se pudo guardar el resultado IA.");
