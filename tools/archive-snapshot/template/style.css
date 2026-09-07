@@ -223,6 +223,19 @@ section .section-sub{
 }
 .video-tile{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--navy);text-decoration:none;}
 
+.stream-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.stream-item a{
+  display:block;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 18px;
+  color:var(--ink);
+  font-weight:600;
+  text-decoration:none;
+}
+.stream-item a:hover{border-color:var(--gold);}
+
 .players-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(140px,1fr));

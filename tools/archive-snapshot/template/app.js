@@ -286,15 +286,27 @@
         });
     }
 
-    // ---------- Footer ----------
-    function renderFooter() {
-        var yt = document.getElementById("youtubeLink");
-        if (yt && DATA.youtubeUrl) {
-            yt.href = DATA.youtubeUrl;
-            yt.textContent = "Ver la retransmisión en YouTube ↗";
-        } else if (yt) {
-            yt.style.display = "none";
+    // ---------- Retransmisiones ----------
+    function renderStreams() {
+        var host = document.getElementById("streamList");
+        if (!host) return;
+        var items = (DATA.liveHistory || []).slice().sort(function (a, b) {
+            return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
+        if (items.length === 0 && DATA.youtubeUrl) {
+            items = [{ url: DATA.youtubeUrl, title: "Retransmisión" }];
         }
+        if (items.length === 0) {
+            host.innerHTML = '<p class="section-sub">No hay retransmisiones guardadas.</p>';
+            return;
+        }
+        items.forEach(function (item) {
+            if (!item.url) return;
+            var li = el("li", { class: "stream-item" });
+            var a = el("a", { href: item.url, target: "_blank", rel: "noopener" }, "▶ " + (item.title || "Retransmisión") + " ↗");
+            li.appendChild(a);
+            host.appendChild(li);
+        });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -304,7 +316,7 @@
         renderNews();
         renderGallery();
         renderPlayers();
-        renderFooter();
+        renderStreams();
         wireLightbox();
     });
 })();

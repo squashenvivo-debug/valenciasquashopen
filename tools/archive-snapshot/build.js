@@ -279,6 +279,7 @@ async function main() {
     const news = tryParse(row.qf) || [];
     const galleries = tryParse(row.sf) || [];
     const youtubeUrl = row.youtube_url || "";
+    const liveHistory = tryParse(row.live_history) || [];
 
     const urlSet = new Set();
     galleries.forEach(g => (g.photos || []).forEach(p => { if (p.type !== "video" && p.src) urlSet.add(p.src); }));
@@ -328,7 +329,7 @@ async function main() {
 
     const data = {
         snapshotDate: new Date().toISOString(),
-        headline, coverImage, intro, draw: outDraw, players: outPlayers, news: outNews, galleries: outGalleries, youtubeUrl
+        headline, coverImage, intro, draw: outDraw, players: outPlayers, news: outNews, galleries: outGalleries, youtubeUrl, liveHistory
     };
 
     let dataJson = JSON.stringify(data);
