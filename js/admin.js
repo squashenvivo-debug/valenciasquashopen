@@ -5465,7 +5465,11 @@ async function importResultsFromPsaApi() {
 
         drawState = { title: drawState?.title || "PSA Valencia Open - Main Draw", rounds: newRounds };
         normalizeBracket(drawState);
-        autoAdvanceBracket(drawState);
+        // OJO: no llamar aquí a autoAdvanceBracket() — está pensada para el flujo de entrada
+        // manual ronda a ronda y resetea a TBD/sin marcador TODAS las rondas menos la primera
+        // antes de re-derivar ganadores una por una; como aquí ya llegan las 5 rondas rellenas
+        // de golpe con datos reales de la API, esa llamada borraba los marcadores de la ronda 2
+        // en adelante y dejaba cuartos/semis/final en blanco (bug real, visto en producción).
         await saveDrawState();
         populateRoundSelect();
         populateScheduleRoundSelect();
