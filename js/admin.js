@@ -3965,8 +3965,36 @@ async function saveNewNews() {
     }
 }
 
+const NEWS_ARTICLE_LANGS = ["es", "va", "en", "fr"];
+
+function isNonR2Url(src) {
+    const value = String(src || "");
+    return !!value && !value.startsWith("data:") && !value.includes("r2.dev") && !value.includes("cloudflarestorage");
+}
+
+/** Encuentra URLs de imágenes de Supabase Storage insertadas a mano dentro del HTML del
+ *  artículo (con el botón "subir imagen" del editor) — a diferencia de la foto de portada
+ *  (imageSrc), estas viven como texto plano dentro de <img src="..."> y no las tocaba la
+ *  migración de la portada. */
+function extractEmbeddedSupabaseImageUrls(html) {
+    const matches = String(html || "").match(/https:\/\/[^"'\s>]*supabase\.co\/storage\/v1\/object\/public\/[^"'\s>]*/g) || [];
+    return [...new Set(matches)];
+}
+
+function extractNewsObjectKeyFromSupabaseUrl(url) {
+    const marker = "/object/public/news/";
+    const index = String(url || "").indexOf(marker);
+    if (index === -1) return "";
+    try {
+        return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
+    } catch (error) {
+        return url.slice(index + marker.length).split("?")[0];
+    }
+}
+
 /** Migra a R2 las imágenes de noticias que se subieron antes de que uploadNewsImageFile
- *  empezara a subir directo a R2 (backlog en Supabase Storage bucket "news"). */
+ *  empezara a subir directo a R2 (backlog en Supabase Storage bucket "news"): tanto la foto
+ *  de portada de cada noticia como las que se insertaron sueltas dentro del artículo. */
 async function migrateNewsImagesToR2() {
     const statusEl = document.getElementById("migrateNewsToR2Status");
     const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
@@ -3978,22 +4006,28 @@ async function migrateNewsImagesToR2() {
     }
 
     const collection = readNewsCollection();
-    const pending = collection.filter((item) => {
-        const src = String(item?.imageSrc || "");
-        return src && !src.startsWith("data:") && !src.includes("r2.dev") && !src.includes("cloudflarestorage");
+    const pendingCovers = collection.filter((item) => isNonR2Url(item?.imageSrc));
+
+    const embeddedUrls = new Set();
+    collection.forEach((item) => {
+        NEWS_ARTICLE_LANGS.forEach((lang) => {
+            extractEmbeddedSupabaseImageUrls(item?.article?.[lang]).forEach((url) => embeddedUrls.add(url));
+        });
     });
 
-    if (pending.length === 0) {
+    const totalWork = pendingCovers.length + embeddedUrls.size;
+    if (totalWork === 0) {
         setMsg("No hay imágenes de noticias pendientes: todas se sirven ya desde R2.");
         return;
     }
 
     if (button) button.disabled = true;
-    setMsg(`Migrando ${pending.length} imagen(es) de noticias a R2…`);
-
     let migrated = 0;
     let failed = 0;
-    for (const item of pending) {
+    const setProgress = (error) => setMsg(`Migrando… ${migrated + failed}/${totalWork}${error ? ` (último error: ${error})` : ""}`);
+    setProgress();
+
+    for (const item of pendingCovers) {
         const objectKey = item.imageStoragePath || `news/${item.id}/${Date.now()}-migrated.jpg`;
         const { url, error } = await mirrorToR2(item.imageSrc, objectKey);
         if (url) {
@@ -4003,7 +4037,33 @@ async function migrateNewsImagesToR2() {
         } else {
             failed++;
         }
-        setMsg(`Migrando… ${migrated + failed}/${pending.length}${error ? ` (último error: ${error})` : ""}`);
+        setProgress(error);
+    }
+
+    const embeddedReplacements = new Map();
+    for (const url of embeddedUrls) {
+        const objectKey = extractNewsObjectKeyFromSupabaseUrl(url) || `news/migrated/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const { url: r2Url, error } = await mirrorToR2(url, objectKey);
+        if (r2Url) {
+            embeddedReplacements.set(url, r2Url);
+            migrated++;
+        } else {
+            failed++;
+        }
+        setProgress(error);
+    }
+
+    if (embeddedReplacements.size > 0) {
+        collection.forEach((item) => {
+            NEWS_ARTICLE_LANGS.forEach((lang) => {
+                let html = item?.article?.[lang];
+                if (!html) return;
+                embeddedReplacements.forEach((newUrl, oldUrl) => {
+                    if (html.includes(oldUrl)) html = html.split(oldUrl).join(newUrl);
+                });
+                item.article[lang] = html;
+            });
+        });
     }
 
     if (migrated > 0 && !saveNewsCollection(collection)) {
@@ -4014,8 +4074,8 @@ async function migrateNewsImagesToR2() {
 
     if (button) button.disabled = false;
     setMsg(failed > 0
-        ? `Migradas ${migrated} de ${pending.length}. ${failed} siguieron fallando — vuelve a intentarlo más tarde.`
-        : `Listo: ${migrated} imagen(es) de noticias copiadas a R2.`);
+        ? `Migradas ${migrated} de ${totalWork}. ${failed} siguieron fallando — vuelve a intentarlo más tarde.`
+        : `Listo: ${migrated} imagen(es) de noticias copiadas a R2 (portadas + insertadas en el artículo).`);
 }
 window.migrateNewsImagesToR2 = migrateNewsImagesToR2;
 
