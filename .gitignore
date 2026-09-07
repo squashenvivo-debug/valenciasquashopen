@@ -20,3 +20,7 @@ supabase/.temp/
 .env*
 
 node_modules/
+
+# Salida de tools/archive-snapshot/render-bracket.js — la copia que cuenta vive dentro de
+# archivo/<año>/img/cuadro-final.png; esta carpeta es solo para descargarla al vuelo.
+tools/archive-snapshot/output/
