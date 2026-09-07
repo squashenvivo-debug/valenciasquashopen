@@ -305,6 +305,12 @@
             <p class="admin-muted">Crea galerías por jornada, añade pies de foto por imagen y gestiona edición o borrado por foto o por galería.</p>
 
             <div style="margin-bottom:20px; padding:14px; background:#081a2a; border:1px solid #1a2a3a; border-radius:8px;">
+                <p class="admin-muted" style="margin-bottom:8px;">Algunas fotos se quedaron sirviéndose desde Supabase Storage porque la copia a R2 (Cloudflare) falló al subirlas. Este botón reintenta esa copia y actualiza la galería para que empiecen a servirse desde R2.</p>
+                <button type="button" id="retryR2MirrorBtn" class="btn-secondary-admin">☁️ Reintentar copia a R2</button>
+                <p id="retryR2Status" class="admin-status" aria-live="polite"></p>
+            </div>
+
+            <div style="margin-bottom:20px; padding:14px; background:#081a2a; border:1px solid #1a2a3a; border-radius:8px;">
                 <p class="admin-muted" style="margin-bottom:8px;">Las fotos que ya se sirven desde R2 (Cloudflare) tienen aquí una copia sin usar del original en Supabase Storage, ocupando espacio de más. Este botón la borra — la web no cambia nada, sigue sirviendo desde R2.</p>
                 <button type="button" id="cleanupR2MigratedBtn" class="btn-secondary-admin">🧹 Limpiar originales ya copiados a R2</button>
                 <p id="cleanupR2Status" class="admin-status" aria-live="polite"></p>
@@ -442,7 +448,7 @@
 window.ADMIN_DEFAULT_SECTION = "draw-results-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260811-v17"></script>
+<script src="js/admin.js?v=20260907-v18"></script>
 
 </body>
 

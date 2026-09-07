@@ -1816,7 +1816,7 @@
             const title = galleryDate ? `${baseTitle} · ${formatNewsDate(galleryDate, lang)}` : baseTitle;
             const thumbHtml = cover.type === "video" || !cover.src
                 ? `<div class="gallery-home-thumb-video" aria-hidden="true">▶</div>`
-                : `<img src="${resolveOptimizedAssetUrl(cover.processedSrc || cover.src)}" alt="${title}" loading="lazy" decoding="async">`;
+                : `<img src="${resolveOptimizedAssetUrl(cover.src)}" alt="${title}" loading="lazy" decoding="async">`;
 
             card.innerHTML = `
             <div class="gallery-home-thumb">

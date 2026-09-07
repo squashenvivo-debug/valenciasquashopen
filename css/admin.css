@@ -864,21 +864,6 @@ background:#2fb772;
 color:#071826;
 }
 
-.btn-gallery-ai{
-padding:9px 12px;
-border:none;
-border-radius:8px;
-font-weight:700;
-cursor:pointer;
-background:#8570d6;
-color:#fff;
-}
-
-.btn-gallery-ai:disabled{
-opacity:.55;
-cursor:not-allowed;
-}
-
 .gallery-ai-state{
 margin:8px 0;
 font-size:.85rem;

@@ -147,9 +147,6 @@ function normalizeGalleryItem(item) {
             videoUrl: photo?.type === "video" ? String(photo?.videoUrl || "").trim() : "",
             src: photo?.src || "",
             storagePath: photo?.storagePath || "",
-            processedSrc: photo?.processedSrc || "",
-            processedStoragePath: photo?.processedStoragePath || "",
-            ai: photo?.ai || null,
             caption: normalizeLocalizedText(photo?.caption),
             meta: normalizeGalleryPhotoMeta(photo?.meta || photo, meta)
         })).filter((photo) => (photo.type === "video" ? !!photo.videoUrl : !!photo.src))
@@ -458,7 +455,7 @@ function flattenGalleryPhotos(galleries, lang) {
                 meta
             });
             const isVideo = photo.type === "video";
-            const imageSrc = isVideo ? "" : resolveOptimizedAssetUrl(photo.processedSrc || photo.src);
+            const imageSrc = isVideo ? "" : resolveOptimizedAssetUrl(photo.src);
             const searchBlob = [
                 galleryTitle,
                 caption,

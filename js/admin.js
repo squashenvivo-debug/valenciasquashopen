@@ -62,9 +62,9 @@ const CLOUD_SYNC_KEYS = [
 
 let drawState = null;
 let pendingGalleryPhotos = [];
-const GALLERY_UPLOAD_RESUME_KEY = "psa_gallery_tus_resumes";
-const GALLERY_UPLOAD_CHUNK_SIZE = 6 * 1024 * 1024;
 const GALLERY_UPLOAD_CONCURRENCY = 3;
+const GALLERY_IMAGE_MAX_WIDTH = 2000;
+const GALLERY_IMAGE_QUALITY = 0.82;
 let galleryUploadTelemetry = {
     totalBytes: 0,
     startedAt: 0,
@@ -538,8 +538,6 @@ function collectManagedMediaUrls({ galleries = [], news = [] } = {}) {
     galleries.forEach((gallery) => {
         (gallery?.photos || []).forEach((photo) => {
             if (photo?.src) urls.push(photo.src);
-            if (photo?.processedSrc) urls.push(photo.processedSrc);
-            if (photo?.sourceSrc) urls.push(photo.sourceSrc);
         });
     });
     news.forEach((item) => {
@@ -623,18 +621,14 @@ async function loadUserMetrics() {
 function computeGalleryProcessMetrics(galleries = [], news = []) {
     const photos = galleries.flatMap((gallery) => Array.isArray(gallery?.photos) ? gallery.photos : []);
     const totalPhotos = photos.length;
-    const processedPhotos = photos.filter((photo) => !!(photo?.processedSrc || photo?.processedStoragePath)).length;
-    const aiPending = photos.filter((photo) => !!photo?.storagePath && !(photo?.processedSrc || photo?.processedStoragePath)).length;
     const uploadQueue = Array.isArray(pendingGalleryPhotos) ? pendingGalleryPhotos.length : 0;
     const scheduledNews = (news || []).filter((item) => normalizeNewsStatus(item?.status) === "scheduled").length;
 
     return {
         totalPhotos,
-        processedPhotos,
-        aiPending,
         uploadQueue,
         scheduledNews,
-        inFlight: aiPending + uploadQueue
+        inFlight: uploadQueue
     };
 }
 
@@ -804,7 +798,6 @@ async function initAdminDashboard() {
     updateDashboardValue("dashboardDrawScheduled", `${scheduledDrawMatches}/${totalDrawMatches || 0}`);
     updateDashboardValue("dashboardDrawResolved", `${resolvedDrawMatches}/${totalDrawMatches || 0}`);
     updateDashboardValue("dashboardPhotosCount", processMetrics.totalPhotos);
-    updateDashboardValue("dashboardPhotosProcessed", processMetrics.processedPhotos);
     updateDashboardValue("dashboardStorageUsed", formatBytes(storageBytes));
     updateDashboardValue("dashboardUsersCount", userMetrics.total || 0);
     updateDashboardValue("dashboardProcessesCount", processMetrics.inFlight);
@@ -824,8 +817,6 @@ async function initAdminDashboard() {
     renderDashboardChipList("dashboardRolesBreakdown", roleEntries);
     const mediaEntries = [
         `Fotos: ${processMetrics.totalPhotos}`,
-        `IA: ${processMetrics.processedPhotos}`,
-        `Pendientes IA: ${processMetrics.aiPending}`,
         `Subidas en cola: ${processMetrics.uploadQueue}`,
         `Noticias programadas: ${processMetrics.scheduledNews}`
     ];
@@ -2343,11 +2334,6 @@ function normalizeGallery(gallery) {
             videoUrl: photo?.type === "video" ? String(photo?.videoUrl || "").trim() : "",
             src: photo?.src || "",
             storagePath: photo?.storagePath || "",
-            sourceSrc: photo?.sourceSrc || "",
-            sourceStoragePath: photo?.sourceStoragePath || "",
-            processedSrc: photo?.processedSrc || "",
-            processedStoragePath: photo?.processedStoragePath || "",
-            ai: photo?.ai || null,
             caption: normalizeLocalizedText(photo?.caption),
             meta: normalizeGalleryPhotoMeta(photo?.meta || photo, meta)
         })).filter((photo) => (photo.type === "video" ? !!photo.videoUrl : !!photo.src)),
@@ -2754,26 +2740,6 @@ async function uploadNewsImageFile(file, newsId) {
     };
 }
 
-function getGalleryUploadResumeMap() {
-    return parseStorageJson(GALLERY_UPLOAD_RESUME_KEY, {});
-}
-
-function saveGalleryUploadResumeMap(value) {
-    try {
-        localStorage.setItem(GALLERY_UPLOAD_RESUME_KEY, JSON.stringify(value));
-    } catch (error) {
-        // La subida sigue funcionando aunque el navegador no permita persistir la reanudación.
-    }
-}
-
-function makeGalleryUploadFingerprint(file) {
-    return [file.name, file.size, file.lastModified, file.webkitRelativePath || ""].join(":");
-}
-
-function encodeTusMetadata(value) {
-    return btoa(unescape(encodeURIComponent(String(value || ""))));
-}
-
 function sanitizeStorageFileName(fileName) {
     const extension = (String(fileName).match(/\.[a-z0-9]{1,10}$/i) || [""])[0].toLowerCase();
     const base = String(fileName).replace(/\.[^.]+$/, "").normalize("NFD")
@@ -2784,98 +2750,71 @@ function sanitizeStorageFileName(fileName) {
     return `${base}${extension}`;
 }
 
-function getGalleryPublicUrl(path) {
-    const client = window.AdminSupabase?.getClient?.();
-    return client?.storage?.from("photos").getPublicUrl(path)?.data?.publicUrl || "";
-}
+/** Redimensiona/comprime la foto en el propio navegador (canvas) antes de subirla —
+ *  así lo que viaja a R2 ya pesa poco, sin depender de ningún paso de servidor. */
+async function resizeImageForGallery(file) {
+    try {
+        const dataUrl = await fileToDataUrl(file);
+        const image = await loadImage(dataUrl);
+        const scale = image.width > GALLERY_IMAGE_MAX_WIDTH ? GALLERY_IMAGE_MAX_WIDTH / image.width : 1;
+        const targetWidth = Math.max(1, Math.round(image.width * scale));
+        const targetHeight = Math.max(1, Math.round(image.height * scale));
 
-function extractPhotosStoragePathFromUrl(value) {
-    const raw = String(value || "").trim();
-    if (!raw) return "";
-    if (raw.startsWith("gallery/") || raw.startsWith("processed/")) {
-        return raw;
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return file;
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", GALLERY_IMAGE_QUALITY));
+        return blob || file;
+    } catch (error) {
+        return file;
     }
-
-    const markers = [
-        "/storage/v1/object/public/photos/",
-        "/storage/v1/object/sign/photos/",
-        "/storage/v1/object/authenticated/photos/"
-    ];
-
-    for (const marker of markers) {
-        const index = raw.indexOf(marker);
-        if (index === -1) continue;
-        const sliced = raw.slice(index + marker.length);
-        const clean = sliced.split("?")[0].split("#")[0];
-        if (!clean) continue;
-        try {
-            return decodeURIComponent(clean);
-        } catch (_error) {
-            return clean;
-        }
-    }
-
-    return "";
 }
 
-function resolvePhotoSourcePath(photo) {
-    return String(
-        photo?.sourceStoragePath
-        || photo?.storagePath
-        || extractPhotosStoragePathFromUrl(photo?.sourceSrc)
-        || extractPhotosStoragePathFromUrl(photo?.src)
-        || ""
-    ).trim();
-}
-
-async function getTusHeaders(extra = {}) {
+/** Pide al servidor una URL firmada de un solo uso para subir directamente a Cloudflare
+ *  R2 (nunca toca Supabase Storage). El servidor solo firma la URL — el PUT con los
+ *  bytes de la foto va del navegador a R2 directamente. */
+async function requestR2UploadUrl(objectKey, contentType) {
+    const base = String(window.PSA_CONFIG?.aiNewsApiBase || "").trim().replace(/\/+$/, "");
+    if (!base) throw new Error("Falta configuración del servidor (aiNewsApiBase).");
     const token = await window.AdminSupabase?.getAccessToken?.();
-    const apiKey = String(window.PSA_CONFIG?.supabaseAnonKey || window.PSA_CONFIG?.SUPABASE_ANON_KEY || "").trim();
-    if (!token || !apiKey) throw new Error("Inicia sesión y configura Supabase antes de subir fotos.");
-    return {
-        "Tus-Resumable": "1.0.0",
-        authorization: `Bearer ${token}`,
-        apikey: apiKey,
-        ...extra
-    };
-}
+    if (!token) throw new Error("Inicia sesión en el panel admin antes de subir fotos.");
 
-async function tusRequest(url, options) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        const details = await response.text().catch(() => "");
-        const error = new Error(details || `Error de subida (${response.status}).`);
-        error.status = response.status;
-        throw error;
-    }
-    return response;
-}
-
-async function getTusOffset(uploadUrl) {
-    const response = await tusRequest(uploadUrl, { method: "HEAD", headers: await getTusHeaders() });
-    return Number(response.headers.get("Upload-Offset") || 0);
-}
-
-async function createTusUpload(file, objectPath) {
-    const baseUrl = String(window.PSA_CONFIG?.supabaseUrl || window.PSA_CONFIG?.SUPABASE_URL || "").replace(/\/$/, "");
-    if (!baseUrl) throw new Error("Configura la URL de Supabase antes de subir fotos.");
-
-    const metadata = [
-        `bucketName ${encodeTusMetadata("photos")}`,
-        `objectName ${encodeTusMetadata(objectPath)}`,
-        `contentType ${encodeTusMetadata(file.type || "application/octet-stream")}`
-    ].join(",");
-    const response = await tusRequest(`${baseUrl}/storage/v1/upload/resumable`, {
+    const response = await fetch(`${base}/api/r2-presign`, {
         method: "POST",
-        headers: await getTusHeaders({
-            "Upload-Length": String(file.size),
-            "Upload-Metadata": metadata,
-            "x-upsert": "false"
-        })
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ objectKey, contentType })
     });
-    const location = response.headers.get("Location");
-    if (!location) throw new Error("Supabase no devolvió una URL de reanudación.");
-    return new URL(location, baseUrl).toString();
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.uploadUrl) {
+        throw new Error(data?.error || `No se pudo preparar la subida a R2 (HTTP ${response.status}).`);
+    }
+    return data;
+}
+
+/** Sube el blob directamente a R2 con la URL firmada, informando el progreso por XHR
+ *  (fetch no expone eventos de progreso de subida). */
+function putToR2(uploadUrl, blob, headers, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", uploadUrl);
+        Object.entries(headers || {}).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) onProgress?.(event.loaded);
+        };
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve();
+            else reject(new Error(`Error al subir a R2 (HTTP ${xhr.status}).`));
+        };
+        xhr.onerror = () => reject(new Error("Error de red al subir a R2."));
+        xhr.send(blob);
+    });
 }
 
 function updateGalleryUploadProgress(photos = pendingGalleryPhotos) {
@@ -2935,70 +2874,47 @@ async function uploadGalleryPhoto(photo, galleryId, progressPhotos = pendingGall
     const file = photo.file;
     if (!file) throw new Error(`Vuelve a seleccionar ${photo.name || "la foto"} para reanudarla.`);
 
-    photo.status = "Subiendo…";
-    const fingerprint = makeGalleryUploadFingerprint(file);
-    const resumes = getGalleryUploadResumeMap();
-    const objectPath = resumes[fingerprint]?.objectPath || photo.objectPath || `gallery/${galleryId}/${photo.id}-${sanitizeStorageFileName(file.name)}`;
+    const objectPath = photo.objectPath || `gallery/${galleryId}/${photo.id}-${sanitizeStorageFileName(file.name)}`;
     photo.objectPath = objectPath;
-    let uploadUrl = resumes[fingerprint]?.uploadUrl || "";
-    let offset = 0;
 
-    try {
-        offset = uploadUrl ? await getTusOffset(uploadUrl) : 0;
-    } catch (error) {
-        uploadUrl = "";
-        offset = 0;
-    }
-    if (!uploadUrl) {
-        uploadUrl = await createTusUpload(file, objectPath);
-        resumes[fingerprint] = { uploadUrl, objectPath, updatedAt: new Date().toISOString() };
-        saveGalleryUploadResumeMap(resumes);
-    }
-
-    photo.uploadedBytes = offset;
+    photo.status = "Comprimiendo…";
+    photo.uploadedBytes = 0;
     updateGalleryUploadProgress(progressPhotos);
-    for (let start = offset; start < file.size;) {
-        const chunk = file.slice(start, Math.min(start + GALLERY_UPLOAD_CHUNK_SIZE, file.size));
-        let attempts = 0;
-        while (true) {
-            try {
-                const response = await tusRequest(uploadUrl, {
-                    method: "PATCH",
-                    headers: await getTusHeaders({
-                        "Upload-Offset": String(start),
-                        "Content-Type": "application/offset+octet-stream"
-                    }),
-                    body: chunk
-                });
-                start = Number(response.headers.get("Upload-Offset") || (start + chunk.size));
-                break;
-            } catch (error) {
-                attempts += 1;
-                if (attempts > 4) throw error;
-                await new Promise((resolve) => setTimeout(resolve, 500 * attempts));
-                start = await getTusOffset(uploadUrl);
-            }
+    const blob = await resizeImageForGallery(file);
+    const blobSize = Math.max(blob.size, 1);
+
+    photo.status = "Subiendo a Cloudflare R2…";
+    updateGalleryUploadProgress(progressPhotos);
+
+    let attempts = 0;
+    while (true) {
+        try {
+            const { uploadUrl, publicUrl, headers } = await requestR2UploadUrl(objectPath, blob.type || "image/jpeg");
+            await putToR2(uploadUrl, blob, headers, (loaded) => {
+                photo.uploadedBytes = Math.min(file.size, Math.round((loaded / blobSize) * file.size));
+                updateGalleryUploadProgress(progressPhotos);
+            });
+            photo.uploadedUrl = publicUrl;
+            break;
+        } catch (error) {
+            attempts += 1;
+            if (attempts > 3) throw error;
+            await new Promise((resolve) => setTimeout(resolve, 500 * attempts));
         }
-        photo.uploadedBytes = start;
-        updateGalleryUploadProgress(progressPhotos);
     }
 
-    delete resumes[fingerprint];
-    saveGalleryUploadResumeMap(resumes);
-    photo.uploadedUrl = getGalleryPublicUrl(objectPath);
-    if (!photo.uploadedUrl) throw new Error("No se pudo obtener la URL pública de la foto subida.");
     photo.status = "Subida";
     photo.uploadedBytes = file.size;
     updateGalleryUploadProgress(progressPhotos);
     return photo.uploadedUrl;
 }
 
-/** Copia una imagen ya subida a Supabase Storage a Cloudflare R2 (redimensionada y
- *  comprimida ahí mismo, en el servidor) — R2 no cobra por egress, a diferencia de
- *  Supabase Storage. Si falla por lo que sea, devuelve url:"" y quien llama sigue usando
- *  la URL de Supabase de siempre; no bloquea nunca la subida — pero antes ese fallo era
- *  totalmente invisible (así se quedaron 389 fotos sirviéndose desde Supabase sin que
- *  nadie lo supiera), así que ahora también se informa del motivo para poder avisar. */
+/** Copia a Cloudflare R2 una foto que se quedó sirviéndose desde Supabase Storage porque
+ *  falló su copia en su momento (backlog de cuando las subidas todavía pasaban por
+ *  Supabase, antes de subir directo a R2 — ver uploadGalleryPhoto). Si falla, devuelve
+ *  url:"" y quien llama sigue usando la URL de Supabase de siempre; no bloquea nada,
+ *  pero informa del motivo para poder avisar (así se quedaron 389 fotos sin que nadie
+ *  lo supiera la primera vez). */
 async function mirrorToR2(sourceUrl, objectKey) {
     if (!sourceUrl || !objectKey) return { url: "", error: "faltan datos" };
     try {
@@ -3023,66 +2939,14 @@ async function mirrorToR2(sourceUrl, objectKey) {
 
 async function uploadGalleryQueue(galleryId, photos = pendingGalleryPhotos) {
     let nextIndex = 0;
-    let r2Failures = 0;
     const workers = Array.from({ length: Math.min(GALLERY_UPLOAD_CONCURRENCY, photos.length) }, async () => {
         while (nextIndex < photos.length) {
             const photo = photos[nextIndex++];
             await uploadGalleryPhoto(photo, galleryId, photos);
-            const { url: r2Url, error: r2Error } = await mirrorToR2(photo.uploadedUrl, photo.objectPath);
-            if (r2Url) {
-                photo.r2Url = r2Url;
-            } else {
-                r2Failures++;
-                showCloudSyncWarning("copia a R2", { message: `${r2Failures} foto(s) se quedaron sirviéndose desde Supabase (${r2Error}) — sigue funcionando, pero no ahorra egress. Prueba el botón "Limpiar originales ya copiados a R2" más tarde tras reintentar la subida.` });
-            }
             if (photos === pendingGalleryPhotos) renderPendingGalleryPhotos();
         }
     });
     await Promise.all(workers);
-}
-
-async function processGalleryPhotoWithAI(photo, galleriesInner, galleryStatusMessage = "Analizando y mejorando la foto con IA…") {
-    const client = window.AdminSupabase?.getClient?.();
-    const sourcePath = resolvePhotoSourcePath(photo);
-    if (!photo || !sourcePath || !client) {
-        throw new Error("Esta foto no tiene una ruta válida en Supabase Storage.");
-    }
-
-    updateGalleryStatus(galleryStatusMessage);
-    const { data, error } = await client.functions.invoke("process-photo", { body: { sourcePath } });
-    if (error) throw error;
-    if (!data?.processedUrl || !data?.processedPath) {
-        throw new Error(data?.error || "La IA no devolvió un resultado válido.");
-    }
-
-    photo.sourceSrc = photo.sourceSrc || photo.src;
-    photo.storagePath = photo.storagePath || sourcePath;
-    photo.sourceStoragePath = sourcePath;
-    photo.processedSrc = data.processedUrl;
-    photo.processedStoragePath = data.processedPath;
-    photo.ai = { detection: data.detection || null, quality: data.quality || null, processedAt: new Date().toISOString() };
-
-    const { url: r2Url, error: r2Error } = await mirrorToR2(data.processedUrl, data.processedPath);
-    if (r2Url) {
-        photo.processedSrc = r2Url;
-    } else {
-        showCloudSyncWarning("copia a R2", { message: `La foto procesada con IA se quedó sirviéndose desde Supabase (${r2Error}).` });
-    }
-
-    if (galleriesInner && !saveGalleryCollection(galleriesInner)) {
-        throw new Error("No se pudo guardar el resultado IA.");
-    }
-
-    return photo;
-}
-
-async function processGalleryPhotosWithAI(photos, galleriesInner) {
-    for (const photo of photos) {
-        if (!photo?.uploadedUrl) continue;
-        if (photo.processedSrc && photo.processedStoragePath) continue;
-        photo.status = "Procesando con IA…";
-        await processGalleryPhotoWithAI(photo, galleriesInner, `Procesando ${photo.name || "foto"} con IA para mejorar el contraluz…`);
-    }
 }
 
 function createGalleryUploadPhoto(file) {
@@ -3218,8 +3082,7 @@ function renderGalleryAdminList() {
             }
             return `
             <div class="gallery-photo-item" data-photo-item="${photo.id}">
-                <img class="gallery-thumb" src="${photo.processedSrc || photo.src}" alt="${escapeHtml(photo.caption?.es || "Foto")}">
-                <p class="gallery-ai-state">${photo.processedSrc ? "IA procesada y validada" : "Original sin procesar"}</p>
+                <img class="gallery-thumb" src="${photo.src}" alt="${escapeHtml(photo.caption?.es || "Foto")}">
                 <label class="field-label" for="player_${photo.id}">Jugador</label>
                 <input id="player_${photo.id}" type="text" value="${escapeHtml(photo.meta?.player || "")}" placeholder="Nombre del jugador">
                 <label class="field-label" for="caption_${photo.id}_es">Pie ES</label>
@@ -3232,7 +3095,6 @@ function renderGalleryAdminList() {
                 <input id="replace_${photo.id}" type="file" accept="image/*">
                 <div class="gallery-photo-actions">
                     <button type="button" class="btn-gallery-save" data-action="save-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Guardar foto</button>
-                    <button type="button" class="btn-gallery-ai" data-action="process-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}" title="${resolvePhotoSourcePath(photo) ? "Procesar esta foto con IA" : "Primero sube esta foto a Supabase Storage para poder procesarla"}">Procesar con IA</button>
                     <button type="button" class="btn-gallery-danger" data-action="delete-photo" data-gallery-id="${gallery.id}" data-photo-id="${photo.id}">Borrar foto</button>
                 </div>
             </div>
@@ -3404,7 +3266,7 @@ function renderGalleryAdminList() {
             uploadPhotos.forEach((photo) => {
                 photo.meta = normalizeGalleryPhotoMeta(photo.meta, galleryMeta);
             });
-            updateGalleryStatus(`Subiendo ${uploadPhotos.length} fotos a Supabase Storage…`);
+            updateGalleryStatus(`Subiendo ${uploadPhotos.length} fotos a Cloudflare R2…`);
             try {
                 await uploadGalleryQueue(galleryId, uploadPhotos);
             } catch (error) {
@@ -3413,7 +3275,7 @@ function renderGalleryAdminList() {
             }
             const newPhotos = uploadPhotos.map((photo) => ({
                 id: photo.id,
-                src: photo.r2Url || photo.uploadedUrl,
+                src: photo.uploadedUrl,
                 storagePath: photo.objectPath,
                 caption: photo.caption,
                 meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta)
@@ -3425,12 +3287,6 @@ function renderGalleryAdminList() {
             }
 
             gallery.photos = gallery.photos.concat(newPhotos);
-
-            try {
-                await processGalleryPhotosWithAI(newPhotos, galleriesInner);
-            } catch (error) {
-                updateGalleryStatus(`Las fotos se subieron, pero el procesado IA falló en alguna imagen: ${error?.message || "error de IA"}`);
-            }
 
             const saved = saveGalleryCollection(galleriesInner);
             if (!saved) {
@@ -3473,7 +3329,7 @@ function renderGalleryAdminList() {
                     return;
                 }
                 const uploadPhoto = createGalleryUploadPhoto(replacement);
-                updateGalleryStatus("Subiendo la imagen de reemplazo a Supabase Storage…");
+                updateGalleryStatus("Subiendo la imagen de reemplazo a Cloudflare R2…");
                 try {
                     await uploadGalleryQueue(galleryId, [uploadPhoto]);
                 } catch (error) {
@@ -3482,11 +3338,6 @@ function renderGalleryAdminList() {
                 }
                 photo.src = uploadPhoto.uploadedUrl;
                 photo.storagePath = uploadPhoto.objectPath;
-                photo.sourceSrc = "";
-                photo.sourceStoragePath = "";
-                photo.processedSrc = "";
-                photo.processedStoragePath = "";
-                photo.ai = null;
                 URL.revokeObjectURL(uploadPhoto.previewUrl);
             }
 
@@ -3525,42 +3376,6 @@ function renderGalleryAdminList() {
             }
             updateGalleryStatus("Metadatos de galería actualizados.");
             renderGalleryAdminList();
-        });
-    });
-
-    host.querySelectorAll("[data-action='process-photo']").forEach((button) => {
-        button.addEventListener("click", async () => {
-            const galleryId = button.getAttribute("data-gallery-id");
-            const photoId = button.getAttribute("data-photo-id");
-            const galleriesInner = readGalleryCollection();
-            const gallery = getGalleryById(galleriesInner, galleryId);
-            const photo = gallery?.photos?.find((item) => item.id === photoId);
-            const sourcePath = resolvePhotoSourcePath(photo);
-
-            if (!window.AdminSupabase?.isConfigured?.() || !window.AdminSupabase?.getClient?.()) {
-                updateGalleryStatus("Configura Supabase e inicia sesión para usar IA.");
-                return;
-            }
-
-            if (!photo || !sourcePath) {
-                updateGalleryStatus("Esta foto no está en Supabase Storage. Súbela o reemplázala y vuelve a intentar IA.");
-                return;
-            }
-
-            button.disabled = true;
-            const originalText = button.textContent;
-            button.textContent = "Procesando...";
-            updateGalleryStatus("Procesando foto con IA...");
-            try {
-                await processGalleryPhotoWithAI(photo, galleriesInner);
-                updateGalleryStatus("Foto procesada y validada; resultado guardado en photos/processed.");
-                renderGalleryAdminList();
-            } catch (error) {
-                updateGalleryStatus(`No se procesó la foto: ${error?.message || "error de IA"}`);
-            } finally {
-                button.textContent = originalText || "Procesar con IA";
-                button.disabled = false;
-            }
         });
     });
 
@@ -3760,7 +3575,7 @@ async function saveNewGallery() {
     const galleryId = createId("gallery");
     if (saveButton) saveButton.disabled = true;
     try {
-        updateGalleryStatus(`Subiendo ${pendingGalleryPhotos.length} fotos a Supabase Storage…`);
+        updateGalleryStatus(`Subiendo ${pendingGalleryPhotos.length} fotos a Cloudflare R2…`);
         await uploadGalleryQueue(galleryId);
     } catch (error) {
         const message = error?.message || "No se pudieron subir todas las fotos.";
@@ -3776,22 +3591,11 @@ async function saveNewGallery() {
 
     const localizedPhotos = await Promise.all(pendingGalleryPhotos.map(async (photo) => ({
         id: photo.id,
-        src: photo.r2Url || photo.uploadedUrl,
+        src: photo.uploadedUrl,
         storagePath: photo.objectPath,
-        sourceSrc: photo.uploadedUrl,
-        sourceStoragePath: photo.objectPath,
-        processedSrc: "",
-        processedStoragePath: "",
         caption: await buildLocalizedFromSpanish(photo.caption?.es || ""),
-        meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta),
-        ai: null
+        meta: normalizeGalleryPhotoMeta(photo.meta, galleryMeta)
     })));
-
-    try {
-        await processGalleryPhotosWithAI(localizedPhotos, galleries);
-    } catch (error) {
-        updateGalleryStatus(`La galería se subió, pero el procesado IA falló en alguna imagen: ${error?.message || "error de IA"}`);
-    }
 
     galleries.push({
         id: galleryId,
@@ -4232,12 +4036,73 @@ function initNewsAdmin() {
     renderNewsAdminList();
 }
 
-/** Borra de Supabase Storage los archivos originales de las fotos que ya se sirven desde R2
- *  (Cloudflare) — quedaron ahí sin usar tras la migración, ocupando espacio de la cuota
- *  gratuita de Supabase sin que la web los necesite para nada. Se calcula la lista al vuelo
- *  a partir de la colección actual de galerías (nunca una lista fija), así vale también para
- *  limpiar lo que se vaya migrando en el futuro. Usa la sesión ya autenticada del admin —
- *  hace falta rol de administrador/fotógrafo, que un token de API sencillo no tiene. */
+/** Reintenta la copia a R2 (Cloudflare) de las fotos que se quedaron sirviéndose desde
+ *  Supabase Storage porque `mirrorToR2` falló en su momento (ver aviso "copia a R2" al
+ *  subir). Recorre la colección de galerías, detecta las que aún no tienen "r2.dev" en
+ *  su src pero sí tienen storagePath, y repite la llamada — si esta vez funciona, actualiza
+ *  el src guardado para que la web empiece a servirlas desde R2. */
+async function retryR2MirrorForPendingPhotos() {
+    const statusEl = document.getElementById("retryR2Status");
+    const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
+    const button = document.getElementById("retryR2MirrorBtn");
+
+    if (!window.AdminSupabase?.isConfigured?.() || !window.AdminSupabase?.getClient?.()) {
+        setMsg("Inicia sesión en el panel admin primero.");
+        return;
+    }
+
+    const galleries = readGalleryCollection();
+    const pending = [];
+    galleries.forEach((gallery) => {
+        (gallery.photos || []).forEach((photo) => {
+            if (photo?.type === "video") return;
+            const isOnR2 = String(photo?.src || "").includes("r2.dev");
+            if (!isOnR2 && photo?.storagePath && photo?.src) {
+                pending.push(photo);
+            }
+        });
+    });
+
+    if (pending.length === 0) {
+        setMsg("No hay fotos pendientes: todas se sirven ya desde R2.");
+        return;
+    }
+
+    if (button) button.disabled = true;
+    setMsg(`Reintentando copia a R2 de ${pending.length} foto(s)…`);
+
+    let migrated = 0;
+    let failed = 0;
+    for (const photo of pending) {
+        const { url: r2Url, error: r2Error } = await mirrorToR2(photo.src, photo.storagePath);
+        if (r2Url) {
+            photo.src = r2Url;
+            migrated++;
+        } else {
+            failed++;
+        }
+        setMsg(`Reintentando… ${migrated + failed}/${pending.length}${r2Error ? ` (último error: ${r2Error})` : ""}`);
+    }
+
+    if (migrated > 0 && !saveGalleryCollection(galleries)) {
+        setMsg("Se copiaron fotos a R2 pero no se pudo guardar el resultado. Reintenta.");
+        if (button) button.disabled = false;
+        return;
+    }
+
+    if (button) button.disabled = false;
+    setMsg(failed > 0
+        ? `Migradas ${migrated} de ${pending.length}. ${failed} siguieron fallando — vuelve a intentarlo más tarde.`
+        : `Listo: ${migrated} foto(s) copiadas a R2 y la web ya las sirve desde ahí.`);
+}
+window.retryR2MirrorForPendingPhotos = retryR2MirrorForPendingPhotos;
+
+/** Borra de Supabase Storage los originales de las fotos que ya se sirven desde R2
+ *  (Cloudflare), para liberar la cuota gratuita de Supabase — la web ya no los necesita,
+ *  sigue sirviendo desde R2. Se calcula la lista al vuelo a partir de la colección actual de
+ *  galerías (nunca una lista fija), así vale también para limpiar lo que se vaya migrando en
+ *  el futuro. Usa la sesión ya autenticada del admin — hace falta rol de administrador/
+ *  fotógrafo, que un token de API sencillo no tiene. */
 async function cleanupR2MigratedOriginals() {
     const statusEl = document.getElementById("cleanupR2Status");
     const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
@@ -4296,6 +4161,12 @@ function initGalleryAdmin() {
     if (cleanupBtn && !cleanupBtn.dataset.bound) {
         cleanupBtn.addEventListener("click", cleanupR2MigratedOriginals);
         cleanupBtn.dataset.bound = "1";
+    }
+
+    const retryR2Btn = document.getElementById("retryR2MirrorBtn");
+    if (retryR2Btn && !retryR2Btn.dataset.bound) {
+        retryR2Btn.addEventListener("click", retryR2MirrorForPendingPhotos);
+        retryR2Btn.dataset.bound = "1";
     }
 
     const filesInput = document.getElementById("newGalleryFiles");

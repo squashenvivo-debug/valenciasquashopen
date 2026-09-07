@@ -25,10 +25,6 @@ No se han implementado fases posteriores a la 2.
 
 Ejecuta también la migración `20260803000001_phase_2_photo_uploads.sql`. La página de Galería permite seleccionar fotos sueltas, múltiples fotos o una carpeta (navegadores Chromium), y las carga directamente en el bucket `photos` mediante TUS: bloques de 6 MiB, tres transferencias paralelas y reintentos automáticos. La URL de reanudación se conserva en el navegador para que una transferencia interrumpida continúe al volver a seleccionar el mismo archivo; las imágenes y sus datos binarios no se guardan en Git ni en `localStorage`.
 
-## Fase 3: procesamiento IA
-
-La función `supabase/functions/process-photo/index.ts` procesa una fotografía original bajo demanda: detecta jugador y pelota, restaura contraluz/ruido/nitidez, exige preservar marcas visibles y guarda únicamente los resultados aprobados en el bucket `processed`. La original nunca se sobrescribe. Antes de desplegarla, añade `OPENAI_API_KEY` en **Supabase Dashboard → Edge Functions → Secrets**; no la incluyas en `config.js`, `.env.example` ni Git. Despliega la función `process-photo` desde **Edge Functions → Deploy a new function → Via Editor** y usa el botón **Procesar con IA** en el editor de galerías.
-
 ## Fase 8: publicacion
 
 Esta fase deja el proyecto listo para publicacion automatica y operacion estable en produccion.
