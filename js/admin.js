@@ -5348,6 +5348,139 @@ async function saveDrawState() {
     window.PSAOptimizations?.clearFetchCache?.();
 }
 
+/** Agrupa los partidos que devuelve la API de PSA por ronda, igual que js/psa-draw.js
+ *  (duplicado a propósito: ese archivo solo se carga en páginas públicas, no en el admin). */
+function groupPsaMatchesByRound(matches) {
+    const groups = { round1: [], round2: [], quarter: [], semi: [], final: [] };
+    (Array.isArray(matches) ? matches : []).forEach((match) => {
+        const round = String(match.round || "").toLowerCase();
+        if (/\bfinal\b/.test(round) && !round.includes("semi") && !round.includes("quarter")) {
+            groups.final.push(match);
+        } else if (round.includes("semi")) {
+            groups.semi.push(match);
+        } else if (round.includes("quarter")) {
+            groups.quarter.push(match);
+        } else if (round.includes("round 2") || match.round_num === 2) {
+            groups.round2.push(match);
+        } else {
+            groups.round1.push(match);
+        }
+    });
+    // "match_num" es el hueco real dentro de la ronda (PSA no devuelve los partidos en ese
+    // orden) — sin ordenar por él, los cruces saldrían en una posición del cuadro distinta a
+    // la real.
+    Object.values(groups).forEach((list) => list.sort((a, b) => (a.match_num ?? 0) - (b.match_num ?? 0)));
+    return groups;
+}
+
+/** Fecha+hora del partido en el mismo formato que ya usa el cuadro guardado a mano
+ *  ("11 AUG 2026 • 12:00"), a partir de los campos sueltos date/time que da la API de PSA. */
+function formatPsaMatchDrawDate(match) {
+    if (!match?.date) return "";
+    const parsed = new Date(`${match.date}T${match.time || "00:00"}`);
+    if (Number.isNaN(parsed.getTime())) return match.date;
+    const datePart = parsed.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+    return match.time ? `${datePart} • ${match.time}` : datePart;
+}
+
+/** Reconstruye el cuadro entero (jugadores, cruces y resultados) directamente desde la API
+ *  oficial de PSA, sustituyendo el que hubiera guardado a mano. No intenta fusionar/emparejar
+ *  con el cuadro anterior por nombre: cuando el sorteo real cambia (bajas, entradas de última
+ *  hora), el cuadro guardado a mano deja de coincidir en jugadores y hasta en la posición de
+ *  cada cruce con el real, así que la única fuente fiable pasa a ser la propia API. */
+async function importResultsFromPsaApi() {
+    const button = document.getElementById("importPsaResults");
+    if (button) button.disabled = true;
+    updateDrawStatus("Consultando la API de PSA...");
+
+    try {
+        const tournamentId = (localStorage.getItem(PSA_TOURNAMENT_ID_KEY) || window.PSA_CONFIG?.psaTournamentId || "12711").trim();
+        const baseUrl = String(window.PSA_CONFIG?.supabaseUrl || window.PSA_CONFIG?.SUPABASE_URL || "https://texjzaanugmssmolzwgb.supabase.co").replace(/\/$/, "");
+        const url = `${baseUrl}/functions/v1/psa-proxy?tournament=${encodeURIComponent(tournamentId)}&expanded=true&include_divisions=true&show_past=true`;
+
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload?.success === false) {
+            throw new Error(payload?.error || `HTTP ${response.status}`);
+        }
+
+        const division = (Array.isArray(payload.divisions) ? payload.divisions : [])[0];
+        const matches = (Array.isArray(division?.brackets) ? division.brackets : [])
+            .flatMap((bracket) => Array.isArray(bracket.matches) ? bracket.matches : []);
+        if (matches.length === 0) {
+            updateDrawStatus("La API no devolvió partidos para este torneo.");
+            return;
+        }
+
+        const playerById = new Map();
+        (Array.isArray(division.players) ? division.players : []).forEach((p) => {
+            if (p?.id !== undefined && p?.id !== null) playerById.set(String(p.id), p);
+        });
+
+        // Fotos ya subidas a mano en "Jugadores" — se usan por encima de no tener foto, igual
+        // que ya hace el cuadro público en vivo (js/psa-draw.js).
+        const curatedPhotoMap = new Map();
+        (parseStorageJson(PLAYERS_COLLECTION_KEY, []) || []).forEach((p) => {
+            if (p?.name && p?.image) curatedPhotoMap.set(normalizeDrawPlayerName(p.name), p.image);
+        });
+
+        function toBracketPlayer(matchPlayer) {
+            if (!matchPlayer || !matchPlayer.name) return { name: "BYE" };
+            const full = matchPlayer.id !== undefined ? playerById.get(String(matchPlayer.id)) : null;
+            const seedNumber = full?.entry?.seed_number;
+            const name = seedNumber ? `${matchPlayer.name} (${seedNumber})` : matchPlayer.name;
+            const image = curatedPhotoMap.get(normalizeDrawPlayerName(matchPlayer.name));
+            return image ? { name, image } : { name };
+        }
+
+        function toBracketMatch(psaMatch) {
+            const p1 = toBracketPlayer(psaMatch.players?.[0]);
+            const p2 = toBracketPlayer(psaMatch.players?.[1]);
+            const games = Array.from({ length: 5 }, (_, i) => {
+                const g = psaMatch.games?.[i];
+                const s1 = toScore(g?.scores?.[0]);
+                const s2 = toScore(g?.scores?.[1]);
+                return { p1: s1, p2: s2 };
+            });
+            const date = formatPsaMatchDrawDate(psaMatch);
+            return date ? { p1, p2, games, date } : { p1, p2, games };
+        }
+
+        const groups = groupPsaMatchesByRound(matches);
+        const roundPlan = [
+            { title: "ROUND 1", key: "round1" },
+            { title: "ROUND 2", key: "round2" },
+            { title: "QUARTER FINAL", key: "quarter" },
+            { title: "SEMI FINAL", key: "semi" },
+            { title: "FINAL", key: "final" }
+        ];
+        const newRounds = roundPlan
+            .map(({ title, key }) => ({ title, matches: groups[key].map(toBracketMatch) }))
+            .filter((round) => round.matches.length > 0);
+
+        if (newRounds.length === 0) {
+            updateDrawStatus("La API no devolvió ninguna ronda reconocible para reconstruir el cuadro.");
+            return;
+        }
+
+        drawState = { title: drawState?.title || "PSA Valencia Open - Main Draw", rounds: newRounds };
+        normalizeBracket(drawState);
+        autoAdvanceBracket(drawState);
+        await saveDrawState();
+        populateRoundSelect();
+        populateScheduleRoundSelect();
+        fillMatchEditor();
+
+        const totalMatches = newRounds.reduce((sum, r) => sum + r.matches.length, 0);
+        const completed = newRounds.reduce((sum, r) => sum + r.matches.filter((m) => getMatchWinner(m)).length, 0);
+        updateDrawStatus(`Cuadro reconstruido desde la API de PSA: ${totalMatches} partidos (${completed} con resultado ya jugado).`);
+    } catch (error) {
+        updateDrawStatus(`No se pudo importar de la API: ${error?.message || "error de red"}`);
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
+
 async function saveMatchResult() {
     const selected = getSelectedMatch();
     if (!selected) return;
@@ -5928,6 +6061,7 @@ async function initDrawAdmin() {
     const matchSelect = document.getElementById("matchSelect");
     const saveBtn = document.getElementById("saveMatchResult");
     const resetBtn = document.getElementById("resetDrawState");
+    const importPsaBtn = document.getElementById("importPsaResults");
     const scheduleRoundSelect = document.getElementById("scheduleRoundSelect");
     const scheduleMatchSelect = document.getElementById("scheduleMatchSelect");
     const saveScheduleBtn = document.getElementById("saveMatchSchedule");
@@ -5937,6 +6071,7 @@ async function initDrawAdmin() {
     if (matchSelect) matchSelect.addEventListener("change", fillMatchEditor);
     if (saveBtn) saveBtn.addEventListener("click", saveMatchResult);
     if (resetBtn) resetBtn.addEventListener("click", resetDrawState);
+    if (importPsaBtn) importPsaBtn.addEventListener("click", importResultsFromPsaApi);
 
     if (scheduleRoundSelect) {
         scheduleRoundSelect.addEventListener("change", populateScheduleMatchSelect);
