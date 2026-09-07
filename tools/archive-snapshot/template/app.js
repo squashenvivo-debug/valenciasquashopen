@@ -40,6 +40,11 @@
         if (snap && DATA.snapshotDate) {
             snap.textContent = formatDate(DATA.snapshotDate);
         }
+        var hero = document.getElementById("heroSection");
+        if (hero && DATA.coverImage) {
+            hero.classList.add("has-cover");
+            hero.style.backgroundImage = "linear-gradient(160deg, rgba(7,26,49,.88) 0%, rgba(14,44,77,.82) 100%), url('" + DATA.coverImage + "')";
+        }
     }
 
     // ---------- Programa ----------

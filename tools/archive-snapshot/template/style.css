@@ -40,6 +40,10 @@ header.hero{
   padding:56px 20px 44px;
   text-align:center;
 }
+header.hero.has-cover{
+  background-size:cover;
+  background-position:center;
+}
 .hero .eyebrow{
   letter-spacing:3px;
   font-size:.8rem;

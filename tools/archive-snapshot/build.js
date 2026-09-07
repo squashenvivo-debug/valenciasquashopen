@@ -111,6 +111,60 @@ function rewriteInlineImgSrcs(html, manifest) {
         return `${prefix}${q}${local}${q}`;
     });
 }
+/** La portada del hero puede ser la imagen estática por defecto (assets/images/hero/banner.png)
+ *  o una que el admin haya subido ese año concreto vía el panel Hero (heroSettings.backgroundImage,
+ *  guardado bajo la columna "headline" de site_content — puede venir como data:, URL externa, o
+ *  ruta local). Cada año puede tener una portada distinta, así que se copia/descarga la que esté
+ *  vigente en el momento de archivar, nunca un enlace. */
+async function resolveCoverImage(headlineRaw) {
+    let backgroundImage = "";
+    try {
+        const parsed = typeof headlineRaw === "string" ? JSON.parse(headlineRaw) : headlineRaw;
+        if (parsed && typeof parsed === "object" && parsed.backgroundImage) {
+            backgroundImage = String(parsed.backgroundImage);
+        }
+    } catch (err) { /* headline no es un heroSettings JSON (solo texto) — se usa el banner por defecto */ }
+
+    fs.mkdirSync(IMG_DIR, { recursive: true });
+
+    if (backgroundImage.startsWith("data:")) {
+        const m = backgroundImage.match(/^data:image\/([a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)/);
+        if (m) {
+            const ext = m[1].toLowerCase().replace("jpeg", "jpg");
+            const dest = path.join(IMG_DIR, `cover.${/^[a-z0-9]{2,5}$/.test(ext) ? ext : "jpg"}`);
+            fs.writeFileSync(dest, Buffer.from(m[2], "base64"));
+            return `img/${path.basename(dest)}`;
+        }
+    }
+
+    if (/^https?:\/\//.test(backgroundImage)) {
+        try {
+            const res = await fetch(backgroundImage, { signal: AbortSignal.timeout(30000) });
+            if (res.ok) {
+                const ext = extFromUrl(backgroundImage);
+                const dest = path.join(IMG_DIR, `cover.${ext}`);
+                fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
+                return `img/${path.basename(dest)}`;
+            }
+        } catch (err) { console.error("No se pudo descargar la portada:", err.message); }
+    }
+
+    // Ruta local (subida vía "Ruta imagen fondo") o, si no hay heroSettings.backgroundImage,
+    // el banner estático por defecto que usa hoy la home.
+    const localCandidate = backgroundImage
+        ? path.join(REPO_ROOT, backgroundImage.replace(/^\/+/, ""))
+        : path.join(REPO_ROOT, "assets", "images", "hero", "banner.png");
+    if (fs.existsSync(localCandidate)) {
+        const ext = extFromUrl(localCandidate);
+        const dest = path.join(IMG_DIR, `cover.${ext}`);
+        fs.copyFileSync(localCandidate, dest);
+        return `img/${path.basename(dest)}`;
+    }
+
+    console.warn("No se encontró ninguna imagen de portada para archivar.");
+    return "";
+}
+
 function normalizePlayerImagePath(img, manifest) {
     if (!img) return "";
     if (img.startsWith("data:")) return manifest[img] || img;
@@ -128,6 +182,7 @@ async function compressImages() {
     console.log(`Comprimiendo ${files.length} imágenes...`);
     let before = 0, after = 0, idx = 0;
     const CONCURRENCY = 4;
+    const renames = new Map(); // ficheros re-codificados a JPEG cuyo nombre no llevaba .jpg
 
     async function worker() {
         while (idx < files.length) {
@@ -142,8 +197,19 @@ async function compressImages() {
                     .resize({ width: 1600, withoutEnlargement: true })
                     .jpeg({ quality: 78, mozjpeg: true })
                     .toBuffer();
-                if (out.length < origSize) { fs.writeFileSync(p, out); after += out.length; }
-                else after += origSize;
+                if (out.length < origSize) {
+                    if (!/\.jpe?g$/i.test(f)) {
+                        // El contenido pasa a ser JPEG pero el nombre no lo refleja (p.ej. cover.png
+                        // que en realidad ya era un JPEG) — se renombra para que coincidan.
+                        const newName = f.replace(/\.[a-zA-Z0-9]+$/, "") + ".jpg";
+                        fs.writeFileSync(path.join(IMG_DIR, newName), out);
+                        fs.unlinkSync(p);
+                        renames.set(`img/${f}`, `img/${newName}`);
+                    } else {
+                        fs.writeFileSync(p, out);
+                    }
+                    after += out.length;
+                } else after += origSize;
             } catch (err) {
                 after += origSize;
                 console.error("no se pudo comprimir", f, err.message);
@@ -152,6 +218,7 @@ async function compressImages() {
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     console.log(`Compresión: ${(before / 1024 / 1024).toFixed(1)} MB -> ${(after / 1024 / 1024).toFixed(1)} MB`);
+    return renames;
 }
 
 function decodeRemainingDataUris(rawJsonText) {
@@ -224,6 +291,7 @@ async function main() {
 
     console.log(`Fotos a descargar: ${urlSet.size}`);
     const manifest = await downloadAll(urlSet);
+    const coverImage = await resolveCoverImage(row.headline);
 
     const outGalleries = galleries.map(g => ({
         id: g.id, title: g.title, meta: g.meta,
@@ -259,7 +327,7 @@ async function main() {
 
     const data = {
         snapshotDate: new Date().toISOString(),
-        headline, intro, draw: outDraw, players: outPlayers, news: outNews, galleries: outGalleries, youtubeUrl
+        headline, coverImage, intro, draw: outDraw, players: outPlayers, news: outNews, galleries: outGalleries, youtubeUrl
     };
 
     let dataJson = JSON.stringify(data);
@@ -270,7 +338,8 @@ async function main() {
         dataJson = dataJson.replace(/<\/script/gi, "<\\/script");
     }
 
-    await compressImages();
+    const renames = await compressImages();
+    renames.forEach((newPath, oldPath) => { dataJson = dataJson.split(oldPath).join(newPath); });
 
     const html = fs.readFileSync(path.join(TEMPLATE_DIR, "index.html"), "utf8");
     const css = fs.readFileSync(path.join(TEMPLATE_DIR, "style.css"), "utf8");
