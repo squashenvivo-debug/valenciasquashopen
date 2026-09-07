@@ -1,7 +1,1 @@
-{
-  "functions": {
-    "api/generate-news.js": {
-      "includeFiles": "prompts/**"
-    }
-  }
-}
+{}

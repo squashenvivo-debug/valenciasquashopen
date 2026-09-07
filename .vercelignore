@@ -1,8 +1,9 @@
 # OJO: este repo tiene DOS despliegues de Vercel activos sobre el mismo código:
-# el proyecto "valenciasquashopen" (solo /api, creado para el Centro de Prensa IA)
-# y "psavalencia-dkun" (conectado por GitHub a este repo, dueño del dominio real
-# psavalenciaopen.com — sirve el sitio completo). Este .vercelignore afecta a AMBOS,
-# así que nunca puede excluir assets/, css/ ni js/, o se rompen las imágenes en producción.
+# el proyecto "valenciasquashopen" (solo /api, expone mirror-to-r2 y r2-presign para la
+# subida de fotos a Cloudflare R2) y "psavalencia-dkun" (conectado por GitHub a este repo,
+# dueño del dominio real psavalenciaopen.com — sirve el sitio completo). Este .vercelignore
+# afecta a AMBOS, así que nunca puede excluir assets/, css/ ni js/, o se rompen las imágenes
+# en producción.
 dist/
 docker/
 supabase/

@@ -19,6 +19,6 @@ window.PSA_CONFIG = Object.assign({
     psaApiKey: localStorage.getItem("psaApiKey") || "854800fc3a4b365e531b39594fd3aed7eb2f42a573887d5f",
     psaTournamentId: localStorage.getItem("psaTournamentId") || "12711",
     assetCdnBase: getLocalhostCdnFallback(),
-    // URL base del despliegue de Vercel que expone /api/generate-news (Centro de Prensa IA).
+    // URL base del despliegue de Vercel que expone las funciones /api/* (subida de fotos a R2, etc.).
     aiNewsApiBase: localStorage.getItem("aiNewsApiBase") || "https://valenciasquashopen.vercel.app"
 }, window.PSA_CONFIG || {});
