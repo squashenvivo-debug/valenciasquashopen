@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PSA Valencia Open {{YEAR}} — Archivo</title>
+<style>
+{{STYLE}}
+</style>
+</head>
+<body>
+
+<div class="archive-banner">
+  📦 Esta es una <strong>copia congelada</strong> del torneo PSA Valencia Open {{YEAR}}, guardada el <span id="snapshotDate"></span>.
+  No se conecta a ningún servicio externo: todo lo que ves está guardado en esta misma página.
+  <a href="../">Ver otros años del archivo ↗</a>
+</div>
+
+<header class="hero">
+  <div class="eyebrow">PSA Valencia Open · Archivo</div>
+  <h1 id="heroHeadline">PSA Valencia Open {{YEAR}}</h1>
+  <p>Memorial Chimo Marmaneu — Alboraya, Valencia</p>
+</header>
+
+<nav class="archive-nav">
+  <a href="#programa">Programa</a>
+  <a href="#cuadro">Cuadro</a>
+  <a href="#noticias">Noticias</a>
+  <a href="#galeria">Galería</a>
+  <a href="#jugadores">Jugadores</a>
+</nav>
+
+<main>
+  <section id="programa">
+    <h2>Programa</h2>
+    <p class="section-sub">Horario de jornadas del torneo.</p>
+    <div class="programme-grid" id="programmeGrid"></div>
+  </section>
+
+  <section id="cuadro">
+    <h2>Cuadro</h2>
+    <p class="section-sub">Estado del cuadro tal como quedó guardado. El resultado final se cuenta en las noticias.</p>
+    <div class="draw-rounds" id="drawRounds"></div>
+  </section>
+
+  <section id="noticias">
+    <h2>Noticias</h2>
+    <p class="section-sub">Crónicas publicadas durante el torneo.</p>
+    <div class="news-list" id="newsList"></div>
+    <div class="news-article" id="newsArticle"></div>
+  </section>
+
+  <section id="galeria">
+    <h2>Galería</h2>
+    <p class="section-sub">Fotos por ronda.</p>
+    <div class="gallery-tabs" id="galleryTabs"></div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </section>
+
+  <section id="jugadores">
+    <h2>Jugadores</h2>
+    <p class="section-sub">Cuadro de participantes.</p>
+    <div class="players-grid" id="playersGrid"></div>
+  </section>
+</main>
+
+<footer>
+  <p><a id="youtubeLink" href="#" target="_blank" rel="noopener"></a></p>
+  <p>Archivo estático del PSA Valencia Open {{YEAR}}. La web en vivo sigue en <a href="https://psavalenciaopen.com">psavalenciaopen.com</a>.</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <span class="lb-close">✕</span>
+  <span class="lb-nav lb-prev">‹</span>
+  <img id="lightboxImg" alt="">
+  <span class="lb-nav lb-next">›</span>
+</div>
+
+<script>
+{{SCRIPT_DATA}}
+{{SCRIPT_APP}}
+</script>
+</body>
+</html>
