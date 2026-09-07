@@ -269,6 +269,12 @@
             <h2>Noticias</h2>
             <p class="admin-muted">Escribe solo en español y el panel traducirá automáticamente a VA, EN y FR.</p>
 
+            <div style="margin-bottom:20px; padding:14px; background:#081a2a; border:1px solid #1a2a3a; border-radius:8px;">
+                <p class="admin-muted" style="margin-bottom:8px;">Las imágenes de noticias ya nuevas se suben directas a Cloudflare R2. Este botón migra las que quedaron en Supabase Storage de antes de este cambio.</p>
+                <button type="button" id="migrateNewsToR2Btn" class="btn-secondary-admin">☁️ Migrar imágenes de noticias a R2</button>
+                <p id="migrateNewsToR2Status" class="admin-status" aria-live="polite"></p>
+            </div>
+
             <label for="newNewsTitle_es" class="field-label">Título ES (opcional)</label>
             <input id="newNewsTitle_es" type="text" placeholder="Déjalo vacío si ya pusiste el titular dentro del artículo">
 
@@ -480,7 +486,7 @@
 window.ADMIN_DEFAULT_SECTION = "news-admin-panel";
 window.ADMIN_MULTI_PAGE_MODE = true;
 </script>
-<script src="js/admin.js?v=20260907-v18"></script>
+<script src="js/admin.js?v=20260907-v19"></script>
 
 </body>
 

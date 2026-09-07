@@ -2715,29 +2715,19 @@ function sanitizeFileName(name) {
 
 async function uploadNewsImageFile(file, newsId) {
     const compressedDataUrl = await readFileAsDataUrl(file);
-    const client = window.AdminSupabase?.getClient?.();
 
-    if (!client) {
+    if (!window.AdminSupabase?.isConfigured?.()) {
         return { imageSrc: compressedDataUrl, imageStoragePath: "" };
     }
 
-    const extension = String(file.name || "image.jpg").split(".").pop()?.toLowerCase() || "jpg";
-    const safeName = sanitizeFileName(String(file.name || `news-${newsId}.${extension}`));
+    const safeName = sanitizeFileName(String(file.name || `news-${newsId}.jpg`)).replace(/\.[^.]+$/, "") + ".jpg";
     const objectPath = `news/${newsId}/${Date.now()}-${safeName}`;
     const blob = dataUrlToBlob(compressedDataUrl);
-    const { error } = await client.storage.from("news").upload(objectPath, blob, {
-        contentType: blob.type || file.type || "image/jpeg",
-        upsert: false
-    });
-    if (error) {
-        throw new Error(`No se pudo subir la imagen de noticia: ${error.message || "error desconocido"}`);
-    }
 
-    const { data } = client.storage.from("news").getPublicUrl(objectPath);
-    return {
-        imageSrc: data?.publicUrl || compressedDataUrl,
-        imageStoragePath: objectPath
-    };
+    const { uploadUrl, publicUrl, headers } = await requestR2UploadUrl(objectPath, blob.type || "image/jpeg");
+    await putToR2(uploadUrl, blob, headers);
+
+    return { imageSrc: publicUrl, imageStoragePath: objectPath };
 }
 
 function sanitizeStorageFileName(fileName) {
@@ -3975,9 +3965,69 @@ async function saveNewNews() {
     }
 }
 
+/** Migra a R2 las imágenes de noticias que se subieron antes de que uploadNewsImageFile
+ *  empezara a subir directo a R2 (backlog en Supabase Storage bucket "news"). */
+async function migrateNewsImagesToR2() {
+    const statusEl = document.getElementById("migrateNewsToR2Status");
+    const setMsg = (msg) => { if (statusEl) statusEl.textContent = msg; };
+    const button = document.getElementById("migrateNewsToR2Btn");
+
+    if (!window.AdminSupabase?.isConfigured?.() || !window.AdminSupabase?.getClient?.()) {
+        setMsg("Inicia sesión en el panel admin primero.");
+        return;
+    }
+
+    const collection = readNewsCollection();
+    const pending = collection.filter((item) => {
+        const src = String(item?.imageSrc || "");
+        return src && !src.startsWith("data:") && !src.includes("r2.dev") && !src.includes("cloudflarestorage");
+    });
+
+    if (pending.length === 0) {
+        setMsg("No hay imágenes de noticias pendientes: todas se sirven ya desde R2.");
+        return;
+    }
+
+    if (button) button.disabled = true;
+    setMsg(`Migrando ${pending.length} imagen(es) de noticias a R2…`);
+
+    let migrated = 0;
+    let failed = 0;
+    for (const item of pending) {
+        const objectKey = item.imageStoragePath || `news/${item.id}/${Date.now()}-migrated.jpg`;
+        const { url, error } = await mirrorToR2(item.imageSrc, objectKey);
+        if (url) {
+            item.imageSrc = url;
+            item.imageStoragePath = objectKey;
+            migrated++;
+        } else {
+            failed++;
+        }
+        setMsg(`Migrando… ${migrated + failed}/${pending.length}${error ? ` (último error: ${error})` : ""}`);
+    }
+
+    if (migrated > 0 && !saveNewsCollection(collection)) {
+        setMsg("Se migraron imágenes a R2 pero no se pudo guardar el resultado. Reintenta.");
+        if (button) button.disabled = false;
+        return;
+    }
+
+    if (button) button.disabled = false;
+    setMsg(failed > 0
+        ? `Migradas ${migrated} de ${pending.length}. ${failed} siguieron fallando — vuelve a intentarlo más tarde.`
+        : `Listo: ${migrated} imagen(es) de noticias copiadas a R2.`);
+}
+window.migrateNewsImagesToR2 = migrateNewsImagesToR2;
+
 function initNewsAdmin() {
     const panel = document.getElementById("news-admin-panel");
     if (!panel) return;
+
+    const migrateNewsBtn = document.getElementById("migrateNewsToR2Btn");
+    if (migrateNewsBtn && !migrateNewsBtn.dataset.bound) {
+        migrateNewsBtn.addEventListener("click", migrateNewsImagesToR2);
+        migrateNewsBtn.dataset.bound = "1";
+    }
 
     const saveButton = document.getElementById("saveNewNews");
     const imageInput = document.getElementById("newNewsImage");

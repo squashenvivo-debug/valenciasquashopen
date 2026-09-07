@@ -36,7 +36,7 @@ function isValidObjectKey(value) {
     const key = String(value || "");
     if (!key || key.length > 300) return false;
     if (key.includes("..") || key.startsWith("/")) return false;
-    return /^gallery\/[A-Za-z0-9_-]+\/[A-Za-z0-9._-]+$/.test(key);
+    return /^(gallery|news)\/[A-Za-z0-9_-]+\/[A-Za-z0-9._-]+$/.test(key);
 }
 
 module.exports = async function handler(req, res) {
