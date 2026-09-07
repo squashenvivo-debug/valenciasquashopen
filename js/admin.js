@@ -4914,9 +4914,21 @@ function normalizeBracket(bracket) {
     });
 }
 
+/** ¿Ya tiene este partido un marcador propio (no derivado)? Si lo tiene, autoAdvanceBracket no
+ *  debe tocarlo — puede venir de "Guardar Resultado" o de la reconstrucción desde la API. */
+function matchHasOwnScore(match) {
+    return Array.isArray(match?.games) && match.games.some((g) => g?.p1 !== null && g?.p1 !== undefined);
+}
+
 function autoAdvanceBracket(bracket) {
     for (let roundIndex = 1; roundIndex < bracket.rounds.length; roundIndex += 1) {
         bracket.rounds[roundIndex].matches.forEach((match) => {
+            // No reseteamos partidos que ya tienen su propio marcador real (jugado de verdad,
+            // venga de donde venga) — solo limpiamos los huecos que siguen siendo un TBD a la
+            // espera de que se resuelva la ronda anterior. Antes se reseteaba SIEMPRE toda ronda
+            // salvo la primera, lo que borraba rondas enteras ya completas (p.ej. tras
+            // reconstruir el cuadro desde la API) cada vez que se guardaba un resultado a mano.
+            if (matchHasOwnScore(match)) return;
             match.p1 = { name: "TBD" };
             match.p2 = { name: "TBD" };
             if (!Array.isArray(match.games)) {
@@ -4935,8 +4947,12 @@ function autoAdvanceBracket(bracket) {
             if (!winner) return;
             const nextMatchIndex = Math.floor(matchIndex / 2);
             const slot = matchIndex % 2 === 0 ? "p1" : "p2";
-            if (!nextRound.matches[nextMatchIndex]) return;
-            nextRound.matches[nextMatchIndex][slot] = {
+            const nextMatch = nextRound.matches[nextMatchIndex];
+            if (!nextMatch) return;
+            // Ese cruce ya se jugó de verdad (tiene su propio marcador) — no lo pisamos con el
+            // nombre derivado del ganador de la ronda anterior.
+            if (matchHasOwnScore(nextMatch)) return;
+            nextMatch[slot] = {
                 name: winner.name,
                 image: winner.image || null
             };
