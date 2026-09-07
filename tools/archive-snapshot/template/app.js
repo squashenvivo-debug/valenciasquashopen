@@ -66,6 +66,21 @@
     }
 
     // ---------- Cuadro ----------
+    function countSets(games, side) {
+        var mine = side === "p1" ? "p1" : "p2", opp = side === "p1" ? "p2" : "p1";
+        return (games || []).reduce(function (sum, g) {
+            if (!g || g[mine] === null || g[mine] === undefined || g[opp] === null || g[opp] === undefined) return sum;
+            return g[mine] > g[opp] ? sum + 1 : sum;
+        }, 0);
+    }
+
+    function gameScoreLine(games) {
+        return (games || [])
+            .filter(function (g) { return g && g.p1 !== null && g.p1 !== undefined; })
+            .map(function (g) { return g.p1 + "-" + g.p2; })
+            .join(", ");
+    }
+
     function renderDraw() {
         var host = document.getElementById("drawRounds");
         if (!host) return;
@@ -79,16 +94,29 @@
             col.appendChild(el("h3", null, round.title || ""));
             (round.matches || []).forEach(function (m) {
                 var box = el("div", { class: "draw-match" });
-                [m.p1, m.p2].forEach(function (p) {
+                var p1Sets = countSets(m.games, "p1");
+                var p2Sets = countSets(m.games, "p2");
+                var hasScore = (m.games || []).some(function (g) { return g && g.p1 !== null && g.p1 !== undefined; });
+
+                [m.p1, m.p2].forEach(function (p, i) {
                     var name = p ? p.name : "BYE";
                     var isTbd = !name || name === "TBD" || name === "BYE";
-                    var row = el("div", { class: "draw-p" + (isTbd ? " tbd" : "") });
+                    var sets = i === 0 ? p1Sets : p2Sets;
+                    var otherSets = i === 0 ? p2Sets : p1Sets;
+                    var isWinner = hasScore && !isTbd && sets > otherSets;
+                    var row = el("div", { class: "draw-p" + (isTbd ? " tbd" : "") + (isWinner ? " winner" : "") });
                     if (p && p.image && !isTbd) {
                         row.appendChild(el("img", { src: p.image, alt: "", loading: "lazy" }));
                     }
                     row.appendChild(document.createTextNode(name || "BYE"));
+                    if (hasScore && !isTbd) {
+                        row.appendChild(el("span", { class: "draw-score" }, String(sets)));
+                    }
                     box.appendChild(row);
                 });
+                if (hasScore) {
+                    box.appendChild(el("div", { class: "draw-games" }, gameScoreLine(m.games)));
+                }
                 if (m.date) box.appendChild(el("div", { class: "draw-date" }, m.date));
                 col.appendChild(box);
             });

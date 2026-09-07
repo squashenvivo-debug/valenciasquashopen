@@ -145,6 +145,9 @@ section .section-sub{
 .draw-p{display:flex;align-items:center;gap:8px;padding:2px 0;}
 .draw-p img{width:24px;height:24px;border-radius:50%;object-fit:cover;background:#eee;flex:0 0 auto;}
 .draw-p.tbd{color:var(--muted);font-style:italic;}
+.draw-p.winner{font-weight:700;color:#1f9d5c;}
+.draw-p .draw-score{margin-left:auto;font-weight:700;font-size:.8rem;color:inherit;background:var(--paper);border-radius:4px;padding:0 6px;}
+.draw-games{color:var(--muted);font-size:.72rem;margin-top:2px;}
 .draw-date{color:var(--muted);font-size:.75rem;margin-top:4px;}
 
 .news-list{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}

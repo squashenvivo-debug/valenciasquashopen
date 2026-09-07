@@ -320,6 +320,7 @@ async function main() {
             matches: (r.matches || []).map(m => ({
                 p1: m.p1 ? { name: m.p1.name, image: normalizePlayerImagePath(m.p1.image, manifest) } : null,
                 p2: m.p2 ? { name: m.p2.name, image: normalizePlayerImagePath(m.p2.image, manifest) } : null,
+                games: Array.isArray(m.games) ? m.games : [],
                 date: m.date || ""
             }))
         }))
