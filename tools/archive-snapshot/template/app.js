@@ -44,6 +44,15 @@
         if (hero && DATA.coverImage) {
             hero.classList.add("has-cover");
             hero.style.backgroundImage = "linear-gradient(160deg, rgba(7,26,49,.88) 0%, rgba(14,44,77,.82) 100%), url('" + DATA.coverImage + "')";
+            hero.classList.add("is-clickable");
+            hero.setAttribute("role", "button");
+            hero.setAttribute("tabindex", "0");
+            hero.setAttribute("aria-label", "Ver la imagen de portada en grande");
+            var openHeroImage = function () { openLightbox([DATA.coverImage], 0); };
+            hero.addEventListener("click", openHeroImage);
+            hero.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openHeroImage(); }
+            });
         }
     }
 

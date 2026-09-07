@@ -44,6 +44,15 @@ header.hero.has-cover{
   background-size:cover;
   background-position:center;
 }
+header.hero.is-clickable{
+  cursor:zoom-in;
+  transition:filter .15s ease;
+}
+header.hero.is-clickable:hover,
+header.hero.is-clickable:focus-visible{
+  filter:brightness(1.08);
+  outline:none;
+}
 .hero .eyebrow{
   letter-spacing:3px;
   font-size:.8rem;
